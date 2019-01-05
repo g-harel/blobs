@@ -2,7 +2,7 @@ const rand = (a, b) => Math.min(a, b) + (Math.abs(a - b) * Math.random());
 
 const size = 600;
 const count = 5;
-const randomness = 0.6;
+const randomness = 0.2;
 const color = "grey";
 
 const angle = 2 * Math.PI/count;
@@ -11,7 +11,7 @@ const ctrlDistance = distance * 4/3 * Math.tan(angle/4);
 
 const points: {x: number, y: number}[] = [];
 for (let i = 0; i < count; i++) {
-    const randomizedDistance = rand(distance * randomness, distance);
+    const randomizedDistance = rand(distance * (1-randomness), distance);
     points.push({
         x: Math.sin(i*angle) * randomizedDistance,
         y: Math.cos(i*angle) * randomizedDistance,
@@ -54,6 +54,12 @@ console.log(`
             translate(${size / 2}, ${size / 2})
             rotate(${rand(0, 360 / count)})
         ">
+            <path
+                stroke="cyan"
+                stroke-width="1"
+                fill="${"none" || color}"
+                d="${paths.join("")}"
+            />
             ${points.map(({x, y}, i) => {
                 return `<line x1="${x}" y1="${y}" x2="${controls[i].x1}" y2="${controls[i].y1}" stroke-width="1" stroke="green" />`;
             }).join("")}
@@ -66,12 +72,6 @@ console.log(`
             ${controls.map(({x2: x, y2: y}, i) => {
                 return `<circle cx="${x}" cy="${y}" r="2" fill="${i === 0 ? "black" : "blue"}" />`;
             }).join("")}
-            <path
-                stroke="cyan"
-                stroke-width="1"
-                fill="${"none" || color}"
-                d="${paths.join("")}"
-            />
         </g>
     </svg>
 `);
