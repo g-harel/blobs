@@ -1,7 +1,8 @@
 const rand = (a, b) => Math.min(a, b) + (Math.abs(a - b) * Math.random());
 
 const size = 600;
-const count = 8;
+const count = 5;
+const randomness = 0.6;
 const color = "grey";
 
 const angle = 2 * Math.PI/count;
@@ -10,9 +11,10 @@ const ctrlDistance = distance * 4/3 * Math.tan(angle/4);
 
 const points: {x: number, y: number}[] = [];
 for (let i = 0; i < count; i++) {
+    const randomizedDistance = rand(distance * randomness, distance);
     points.push({
-        x: Math.sin(i*angle) * distance,
-        y: Math.cos(i*angle) * distance,
+        x: Math.sin(i*angle) * randomizedDistance,
+        y: Math.cos(i*angle) * randomizedDistance,
     });
 }
 
@@ -38,10 +40,11 @@ for (let i = 0; i <= count; i++) {
         continue;
     }
 
-    //
+    // Add cubic bezier coordinates using the computed control positions.
     paths.push(`C${control.x2},${control.y2},${control.x1},${control.y1},${point.x},${point.y}`);
 
 }
+
 // Close the path.
 paths.push("Z");
 
@@ -64,9 +67,9 @@ console.log(`
                 return `<circle cx="${x}" cy="${y}" r="2" fill="${i === 0 ? "black" : "blue"}" />`;
             }).join("")}
             <path
-                stroke="none"
-                stroke-width="0"
-                fill="${color}"
+                stroke="cyan"
+                stroke-width="1"
+                fill="${"none" || color}"
                 d="${paths.join("")}"
             />
         </g>
