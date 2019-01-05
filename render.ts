@@ -1,48 +1,82 @@
-/*
-
-TODO
-- points relative to (bottom-right/center)? by default
-- angles in degrees
-- angle relative to horizontal (3 o'clock + positive is counterclockwise)
-- draw path
-- convert size to x/y
-
-*/
-
-interface Point {
+export interface Point {
+    // Cartesian coordinates (starting at [0,0] in the bottom left).
     x: number;
     y: number;
+
+    // Optional cubic bezier handle configuration.
     handles?: {
+        // Direction of the outgoing path in degrees. Value is relative to the 3:00 position
+        // on a clock and the positive direction is counter-clockwise.
         angle: number;
-        in: number;
+
+        // Distance between each handle and the point.
         out: number;
+        in: number;
     };
 }
 
-interface RenderOptions {
-    size: number;
-    center?: boolean;
-    rotation?: number;
+interface InternalPoint {
+    // Coordinates of the point in the SVG viewport.
+    x: number;
+    y: number;
+
+    // Cubic bezier handle configuration.
+    handles: {
+        // Direction of the outgoing path in radians. Value is relative to the 9:00 position
+        // on a clock and the positive direction is counter-clockwise.
+        angle: number;
+
+        // Distance between each handle and the point.
+        out: number;
+        in: number;
+    };
+}
+
+export interface RenderOptions {
+    // Viewport size.
+    width: number;
+    height: number;
+
+    // Transformation applied to all drawn points.
+    transform?: string;
+
+    // Output path styling.
     fill?: string;
     stroke?: string;
     strokeWidth?: number;
-    handles?: boolean;
+
+    // Option to render guides (points, handles and viewport).
+    guides?: boolean;
 }
 
-const loop = <T>(arr: T[]) => (i: number): T => {
+// Safe array access at any index using a modulo operation that will always be positive.
+const loopAccess = <T>(arr: T[]) => (i: number): T => {
     return arr[((i%arr.length)+arr.length)%arr.length];
-}
+};
+
+// Translates a point's [x,y] cartesian coordinates into values relative to the viewport.
+// Translates the angle from degrees to radians and moves the start angle a half rotation.
+const cleanupPoint = (point: Point, opt: RenderOptions): InternalPoint => {
+    const handles = point.handles || {angle: 0, out: 0, in: 0};
+    handles.angle = Math.PI + (2*Math.PI * handles.angle/360);
+    return {
+        x: point.x,
+        y: opt.height - point.y,
+        handles,
+    };
+};
 
 // Renders a closed shape made up of the input points.
-const render = (points: Point[], opt: RenderOptions): string => {
-    const count = points.length;
+const renderClosed = (p: Point[], opt: RenderOptions): string => {
+    const points = p.map((point) => cleanupPoint(point, opt));
+
+    // Compute guides from input point data.
     const handles: {x1: number, y1: number, x2: number, y2: number}[] = [];
+    for (let i = 0; i < points.length; i++) {
+        const {x, y, handles: hands} = loopAccess(points)(i);
 
-    for (let i = 0; i < count; i++) {
-        const {x, y, handles: hands} = points[i];
-
-        const next = loop(points)(i+1);
-        const nextHandles = next.handles || {angle: 0, in: 0, out: 0};
+        const next = loopAccess(points)(i+1);
+        const nextHandles = next.handles;
 
         if (hands === undefined) {
             handles.push({x1: x, y1: y, x2: next.x, y2: next.y});
@@ -57,10 +91,12 @@ const render = (points: Point[], opt: RenderOptions): string => {
         });
     }
 
+    // Render path data attribute from points and handles. Must loop more times than the
+    // number of points in order to correctly close the path.
     let path = "";
-    for (let i = 0; i <= count; i++) {
-        const point = loop(points)(i);
-        const hands = loop(handles)(i-1);
+    for (let i = 0; i <= points.length; i++) {
+        const point = loopAccess(points)(i);
+        const hands = loopAccess(handles)(i-1);
 
         // Start at the first point's coordinates.
         if (i === 0) {
@@ -72,46 +108,62 @@ const render = (points: Point[], opt: RenderOptions): string => {
         path += `C${hands.x1},${hands.y1},${hands.x2},${hands.y2},${point.x},${point.y}`;
     }
 
-    return `
-        <svg width="${opt.size}" height="${opt.size}" viewBox="0 0 ${opt.size} ${opt.size}" xmlns="http://www.w3.org/2000/svg">
-            <g transform="
-                ${opt.center ? `translate(${opt.size / 2}, ${opt.size / 2})` : ""}
-                rotate(${opt.rotation || 0})
-            ">
+    // Render guides if configured to do so.
+    let guides = "";
+    if (opt.guides) {
+        // Bounding box.
+        guides += `
+            <rect x="0" y="0" width="${opt.width}" height="${opt.height}"
+                fill="none" stroke="black" stroke-width="1" stroke-dasharray="2" />`;
+
+        // Points and handles.
+        for (let i = 0; i < points.length; i++) {
+            const {x, y} = loopAccess(points)(i);
+            const hands = loopAccess(handles)(i);
+            const nextPoint = loopAccess(points)(i+1);
+
+            guides += `
+                <line x1="${x}" y1="${y}" x2="${hands.x1}" y2="${hands.y1}"
+                    stroke-width="1" stroke="black" />
+                <line x1="${nextPoint.x}" y1="${nextPoint.y}" x2="${hands.x2}" y2="${hands.y2}"
+                    stroke-width="1" stroke="black" stroke-dasharray="2" />
+                <circle cx="${hands.x1}" cy="${hands.y1}" r="1"
+                    fill="black" />
+                <circle cx="${hands.x2}" cy="${hands.y2}" r="1"
+                    fill="black" />
+                <circle cx="${x}" cy="${y}" r="2" fill="black" />`;
+        }
+    }
+
+    return (`
+        <svg
+            width="${opt.width}"
+            height="${opt.height}"
+            viewBox="0 0 ${opt.width} ${opt.height}"
+            xmlns="http://www.w3.org/2000/svg"
+        >
+            <g transform="${opt.transform || ""}">
                 <path
                     stroke="${opt.stroke || "none"}"
                     stroke-width="${opt.strokeWidth || 0}"
                     fill="${opt.fill || "none"}"
                     d="${path}"
                 />
-                ${!opt.handles ? "" : points.map(({x, y}, i) => {
-                    const color = i === 0 ? "red" : "grey";
-                    const handle = handles[i];
-                    const nextPoint = loop(points)(i+1);
-                    return `
-                        <g id="point-handle-${i}">
-                            <line x1="${x}" y1="${y}" x2="${handle.x1}" y2="${handle.y1}" stroke-width="1" stroke="${color}" />
-                            <line x1="${nextPoint.x}" y1="${nextPoint.y}" x2="${handle.x2}" y2="${handle.y2}" stroke-width="1" stroke="${color}" stroke-dasharray="2" />
-                            <circle cx="${handle.x1}" cy="${handle.y1}" r="1" fill="${color}" />
-                            <circle cx="${handle.x2}" cy="${handle.y2}" r="1" fill="${color}" />
-                            <circle cx="${x}" cy="${y}" r="2" fill="${color}" />
-                        </g>
-                    `;
-                }).join("")}
+                ${guides}
             </g>
         </svg>
-    `;
+    `).replace(/\s+/g, " ");
 };
 
-console.log(render([
-    {x: 200, y: 200, handles: {angle: -Math.PI* 7/4, in: 60, out: 80}},
-    {x: -200, y: 200, handles: {angle: Math.PI* 7/4, in: 60, out: 80}},
-    {x: -200, y: -200, handles: {angle: Math.PI* 5/4, in: 60, out: 80}},
-    {x: 200, y: -200, handles: {angle: -Math.PI* 5/4, in: 60, out: 80}},
+console.log(renderClosed([
+    {x: 700, y: 200, handles: {angle: -135, out: 80, in: 80}},
+    {x: 300, y: 200, handles: {angle:  135, out: 80, in: 80}},
+    {x: 300, y: 600, handles: {angle:   45, out: 80, in: 80}},
+    {x: 700, y: 600, handles: {angle:  -45, out: 80, in: 80}},
 ], {
-    size: 1000,
-    center: true,
-    handles: true,
-    stroke: "green",
+    width: 1000,
+    height: 800,
+    stroke: "blue",
     strokeWidth: 1,
+    guides: true,
 }));
