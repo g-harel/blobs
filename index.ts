@@ -1,7 +1,7 @@
 // https://www.blobmaker.app/
 // https://math.stackexchange.com/questions/873224/calculate-control-points-of-cubic-bezier-curve-approximating-a-part-of-a-circle
 
-import {rad, smooth} from "./util";
+import {rad, smooth, rand} from "./util";
 import {render} from "./render";
 import {Point, BlobOptions} from "./types";
 
@@ -9,10 +9,11 @@ export {BlobOptions} from "./types";
 
 // Generates a random rounded shape.
 export const blob = (opt: BlobOptions): string => {
-    opt = Object.assign({}, opt);
+    // Random number generator.
+    const rgen = rand(opt.seed || String(Date.now()));
 
     if (!opt.stroke && !opt.color) {
-        throw new Error("no color or stroke specified")
+        throw new Error("no color or stroke specified");
     }
 
     if (opt.complexity <= 0 || opt.complexity > 1) {
@@ -29,7 +30,7 @@ export const blob = (opt: BlobOptions): string => {
 
     const points: Point[] = [];
     for (let i = 0; i < count; i++) {
-        const rand = 1 - 0.8 * opt.contrast * Math.random();
+        const rand = 1 - 0.8 * opt.contrast * rgen();
 
         points.push({
             x: Math.sin(rad(i * angle)) * radius * rand + opt.size / 2,
@@ -39,7 +40,7 @@ export const blob = (opt: BlobOptions): string => {
 
     const smoothed = smooth(points, {
         closed: true,
-        strength: (4/3) * Math.tan(rad(angle/4)) / Math.sin(rad(angle/2)),
+        strength: ((4 / 3) * Math.tan(rad(angle / 4))) / Math.sin(rad(angle / 2)),
     });
 
     return render(smoothed, {
@@ -47,9 +48,9 @@ export const blob = (opt: BlobOptions): string => {
         width: opt.size,
         height: opt.size,
         fill: opt.color,
-        transform: `rotate(${Math.random() * angle},${opt.size / 2},${opt.size / 2})`,
-        stroke: (opt.stroke && opt.stroke.color),
-        strokeWidth: (opt.stroke && opt.stroke.width),
+        transform: `rotate(${rgen() * angle},${opt.size / 2},${opt.size / 2})`,
+        stroke: opt.stroke && opt.stroke.color,
+        strokeWidth: opt.stroke && opt.stroke.width,
         guides: opt.guides,
     });
 };
@@ -57,13 +58,14 @@ export const blob = (opt: BlobOptions): string => {
 console.log(
     blob({
         color: "pink",
-        complexity: 0.2,
-        contrast: 1,
-        size: 600,
+        complexity: 0.4,
+        seed: "16",
+        contrast: 0.4,
+        size: 400,
         guides: true,
         stroke: {
             color: "red",
-            width: 1.8,
+            width: 1,
         },
     }),
 );

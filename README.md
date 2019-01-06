@@ -1,8 +1,1 @@
 # blobs
-
-<!--
-
-TODO
-- seeded randomness
-
- -->

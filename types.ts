@@ -34,6 +34,7 @@ export interface SVGPoint {
 
 export interface BlobOptions {
     size: number;
+    seed?: string;
     color?: string;
     stroke?: {
         color: string;
