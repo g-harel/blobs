@@ -1,3 +1,5 @@
+import {loopAccess, rad} from "./util";
+
 export interface Point {
     // Cartesian coordinates (starting at [0,0] in the bottom left).
     x: number;
@@ -50,16 +52,11 @@ export interface RenderOptions {
     boundingBox?: boolean;
 }
 
-// Safe array access at any index using a modulo operation that will always be positive.
-const loopAccess = <T>(arr: T[]) => (i: number): T => {
-    return arr[((i % arr.length) + arr.length) % arr.length];
-};
-
 // Translates a point's [x,y] cartesian coordinates into values relative to the viewport.
 // Translates the angle from degrees to radians and moves the start angle a half rotation.
 const cleanupPoint = (point: Point, opt: RenderOptions): InternalPoint => {
     const handles = point.handles || {angle: 0, out: 0, in: 0};
-    handles.angle = Math.PI + (2 * Math.PI * handles.angle) / 360;
+    handles.angle = Math.PI + rad(handles.angle);
     return {
         x: point.x,
         y: opt.height - point.y,
@@ -68,7 +65,7 @@ const cleanupPoint = (point: Point, opt: RenderOptions): InternalPoint => {
 };
 
 // Renders a closed shape made up of the input points.
-const renderClosed = (p: Point[], opt: RenderOptions): string => {
+export const renderClosed = (p: Point[], opt: RenderOptions): string => {
     const points = p.map((point) => cleanupPoint(point, opt));
 
     // Compute guides from input point data.
@@ -119,7 +116,7 @@ const renderClosed = (p: Point[], opt: RenderOptions): string => {
         if (opt.boundingBox) {
             guides += `
                 <rect x="0" y="0" width="${opt.width}" height="${opt.height}" fill="none"
-                    stroke="${color}" stroke-width="${2*size}" stroke-dasharray="${2 * size}" />`;
+                    stroke="${color}" stroke-width="${2 * size}" stroke-dasharray="${2 * size}" />`;
         }
 
         // Points and handles.
@@ -132,7 +129,7 @@ const renderClosed = (p: Point[], opt: RenderOptions): string => {
                 <line x1="${x}" y1="${y}" x2="${hands.x1}" y2="${hands.y1}"
                     stroke-width="${size}" stroke="${color}" />
                 <line x1="${nextPoint.x}" y1="${nextPoint.y}" x2="${hands.x2}" y2="${hands.y2}"
-                    stroke-width="${size}" stroke="${color}" stroke-dasharray="${2* size}" />
+                    stroke-width="${size}" stroke="${color}" stroke-dasharray="${2 * size}" />
                 <circle cx="${hands.x1}" cy="${hands.y1}" r="${size}"
                     fill="${color}" />
                 <circle cx="${hands.x2}" cy="${hands.y2}" r="${size}"
@@ -142,7 +139,7 @@ const renderClosed = (p: Point[], opt: RenderOptions): string => {
     }
 
     const stroke = opt.stroke || (opt.guides ? "black" : "none");
-    const strokeWidth = opt.strokeWidth || (opt.guides ? 1 : 0 );
+    const strokeWidth = opt.strokeWidth || (opt.guides ? 1 : 0);
 
     return `
         <svg
@@ -163,22 +160,3 @@ const renderClosed = (p: Point[], opt: RenderOptions): string => {
         </svg>
     `.replace(/\s+/g, " ");
 };
-
-console.log(
-    renderClosed(
-        [
-            {x: 700, y: 200, handles: {angle: -135, out: 80, in: 80}},
-            {x: 300, y: 200, handles: {angle: 135, out: 80, in: 80}},
-            {x: 300, y: 600, handles: {angle: 45, out: 80, in: 80}},
-            {x: 700, y: 600, handles: {angle: -45, out: 80, in: 80}},
-        ],
-        {
-            width: 1000,
-            height: 800,
-            fill: "pink",
-            stroke: "red",
-            strokeWidth: 2,
-            guides: true,
-        },
-    ),
-);
