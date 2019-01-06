@@ -1,0 +1,8 @@
+# blobs
+
+<!--
+
+TODO
+- seeded randomness
+
+ -->

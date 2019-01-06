@@ -1,72 +1,9 @@
-import {loopAccess, rad} from "./util";
+import {loopAccess, interpolate} from "./util";
+import {Point, RenderOptions} from "./types";
 
-export interface Point {
-    // Cartesian coordinates (starting at [0,0] in the bottom left).
-    x: number;
-    y: number;
-
-    // Optional cubic bezier handle configuration.
-    handles?: {
-        // Direction of the outgoing path in degrees. Value is relative to the 3:00 position
-        // on a clock and the positive direction is counter-clockwise.
-        angle: number;
-
-        // Distance between each handle and the point.
-        out: number;
-        in: number;
-    };
-}
-
-interface InternalPoint {
-    // Coordinates of the point in the SVG viewport.
-    x: number;
-    y: number;
-
-    // Cubic bezier handle configuration.
-    handles: {
-        // Direction of the outgoing path in radians. Value is relative to the 9:00 position
-        // on a clock and the positive direction is counter-clockwise.
-        angle: number;
-
-        // Distance between each handle and the point.
-        out: number;
-        in: number;
-    };
-}
-
-export interface RenderOptions {
-    // Viewport size.
-    width: number;
-    height: number;
-
-    // Transformation applied to all drawn points.
-    transform?: string;
-
-    // Output path styling.
-    fill?: string;
-    stroke?: string;
-    strokeWidth?: number;
-
-    // Option to render guides (points, handles and viewport).
-    guides?: boolean;
-    boundingBox?: boolean;
-}
-
-// Translates a point's [x,y] cartesian coordinates into values relative to the viewport.
-// Translates the angle from degrees to radians and moves the start angle a half rotation.
-const cleanupPoint = (point: Point, opt: RenderOptions): InternalPoint => {
-    const handles = point.handles || {angle: 0, out: 0, in: 0};
-    handles.angle = Math.PI + rad(handles.angle);
-    return {
-        x: point.x,
-        y: opt.height - point.y,
-        handles,
-    };
-};
-
-// Renders a closed shape made up of the input points.
-export const renderClosed = (p: Point[], opt: RenderOptions): string => {
-    const points = p.map((point) => cleanupPoint(point, opt));
+// Renders a shape made up of the input points.
+export const render = (p: Point[], opt: RenderOptions): string => {
+    const points = p.map((point) => interpolate(point, opt));
 
     // Compute guides from input point data.
     const handles: {x1: number; y1: number; x2: number; y2: number}[] = [];
