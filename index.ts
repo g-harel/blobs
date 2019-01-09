@@ -8,7 +8,7 @@ import {Point, BlobOptions} from "./types";
 export {BlobOptions} from "./types";
 
 // Generates a random rounded shape.
-export const blob = (opt: BlobOptions): string => {
+const blobs = (opt: BlobOptions): string => {
     // Random number generator.
     const rgen = rand(opt.seed || String(Date.now()));
 
@@ -55,17 +55,4 @@ export const blob = (opt: BlobOptions): string => {
     });
 };
 
-console.log(
-    blob({
-        color: "pink",
-        complexity: 0.4,
-        seed: "16",
-        contrast: 0.4,
-        size: 400,
-        guides: true,
-        stroke: {
-            color: "red",
-            width: 1,
-        },
-    }),
-);
+export default blobs;
