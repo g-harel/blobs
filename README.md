@@ -1,15 +1,9 @@
-<p align="center">
-    <img src="https://svgsaur.us/?t=blobs&f=Comic_Sans_MS,cursive,sans-serif&s=100&w=260&h=90&y=85&o=b&c=222" />
-</p>
+<img src="https://svgsaur.us/?t=blobs&f=Comic_Sans_MS,cursive,sans-serif&s=42&w=160&h=50&y=40&o=biu&c=222" />
 
-<p align="center">
-    <a href="https://www.npmjs.com/package/blobs">
-        <img src="https://img.shields.io/npm/v/blobs.svg" />
-    </a>
-    <a href="https://bundlephobia.com/result?p=blobs">
-        <img src="https://img.shields.io/bundlephobia/min/blobs.svg" />
-    </a>
-</p>
+[![](https://img.shields.io/npm/v/blobs.svg)](https://www.npmjs.com/package/blobs)
+[![](https://img.shields.io/bundlephobia/minzip/blobs.svg)](hhttps://bundlephobia.com/result?p=blobs)
+
+> random svg blob generator
 
 ## Install
 

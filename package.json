@@ -1,6 +1,6 @@
 {
   "name": "blobs",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "svg blob generator",
   "author": "g-harel",
   "license": "MIT",
@@ -39,8 +39,5 @@
     "trailingComma": "all",
     "bracketSpacing": false,
     "arrowParens": "always"
-  },
-  "dependencies": {
-    "okwolo": "^3.4.3"
   }
 }
