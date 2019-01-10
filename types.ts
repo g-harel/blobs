@@ -33,16 +33,31 @@ export interface SVGPoint {
 }
 
 export interface BlobOptions {
+    // Bounding box dimensions.
     size: number;
-    seed?: string;
+
+    // Shape complexity.
+    complexity: number;
+
+    // Shape contrast.
+    contrast: number;
+
+    // Fill color.
     color?: string;
+
     stroke?: {
+        // Stroke color.
         color: string;
+
+        // Stroke width.
         width: number;
     };
+
+    // Value to seed random number generator.
+    seed?: string;
+
+    // Render points, handles and stroke.
     guides?: boolean;
-    complexity: number;
-    contrast: number;
 }
 
 export interface SmoothingOptions {
