@@ -1,7 +1,7 @@
 <img src="https://svgsaur.us/?t=blobs&f=Comic_Sans_MS,cursive,sans-serif&s=42&w=160&h=50&y=40&o=biu&c=222" />
 
 [![](https://img.shields.io/npm/v/blobs.svg)](https://www.npmjs.com/package/blobs)
-[![](https://img.shields.io/bundlephobia/minzip/blobs.svg)](hhttps://bundlephobia.com/result?p=blobs)
+[![](https://img.shields.io/bundlephobia/minzip/blobs.svg)](https://bundlephobia.com/result?p=blobs)
 
 > random svg blob generator
 
@@ -50,12 +50,14 @@ Name           | Type       | Description
 
 Name           | Type       | Default    | Description
 -------------- | ---------- | ---------- | -------------------------------------
-`color`        | `string?`  | `none`     | Fill color
+`color`        | `string?`  | `"none"`   | Fill color
 `stroke`       | `object?`  | `...`      | Stroke options
-`stroke.color` | `string`   | `none`     | Stroke color
+`stroke.color` | `string`   | `"none"`   | Stroke color
 `stroke.width` | `number`   | `0`        | Stroke width (in pixels)
 `seed`         | `string?`  | _`random`_ | Value to seed random number generator
 `guides`       | `boolean?` | `false`    | Render points, handles and stroke
+
+_Either `stroke` or `color` must be defined._
 
 _Guides will use stroke color and width if defined. Otherwise, they default to `black` stroke with width of `1`._
 

@@ -1,6 +1,6 @@
 {
   "name": "blobs",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "svg blob generator",
   "author": "g-harel",
   "license": "MIT",
@@ -17,6 +17,7 @@
     "prettier": "^1.14.2",
     "rollup": "^1.1.0",
     "rollup-plugin-typescript2": "^0.18.1",
+    "rollup-plugin-uglify": "^6.0.1",
     "trash-cli": "^1.4.0",
     "tslib": "^1.9.3",
     "typescript": "^3.1.3"
