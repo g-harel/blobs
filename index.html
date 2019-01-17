@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>blobs</title>
+    <script src="https://unpkg.com/blobs"></script>
+</head>
+<body>
+    <style>
+        body {
+            display: table;
+            height: 100%;
+            left: 0;
+            margin: 0;
+            position: absolute;
+            top: 0;
+            width: 100%;
+        }
+
+        .middle {
+            display: table-cell;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        main {
+            display: inline-block;
+            margin: 0 auto;
+        }
+
+        #blob {
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        #options {
+            display: inline-block;
+            font-size: 2em;
+            text-align: left;
+            vertical-align: middle;
+        }
+
+        #error {
+            color: red;
+            font-family: monospace;
+            font-size: 1.5em;
+            text-align: center;
+        }
+
+        @media (max-width: 320px)  {
+            #blob {
+                display: block;
+            }
+        }
+
+    </style>
+
+    <div class="middle">
+        <main>
+            <div id="blob"></div><!--
+         --><pre id="options" contenteditable oninput="changed()">
+{
+    size: 600,
+    complexity: 0.2,
+    contrast: 0.4,
+    color: "pink",
+    stroke: {
+        width: 2.3,
+        color: "red",
+    },
+    guides: true,
+    seed: "abcd",
+}</pre>
+            <div id="error">&nbsp;</div>
+        </main>
+    </div>
+
+
+    <!-- Regenerate the blob from current options. -->
+    <script>
+        var blobElem = document.getElementById("blob");
+        var optionsElem = document.getElementById("options");
+        var errorElem = document.getElementById("error");
+
+        function refresh() {
+            if (!blobElem || !optionsElem || !errorElem) return;
+
+            var options = optionsElem.innerHTML;
+
+            var parsedOptions;
+            try {
+                parsedOptions = eval("(" + options + ")");
+            } catch (e) {
+                errorElem.innerHTML = "Could not parse options: " + e.toString();
+                console.warn(e);
+                return;
+            }
+
+            try {
+                blobElem.innerHTML = blobs(parsedOptions);
+            } catch (e) {
+                errorElem.innerHTML = e.toString();
+                console.warn(e);
+            }
+        }
+
+        // Immediate update when page is loaded.
+        refresh();
+    </script>
+
+    <!-- Wait for a pause in typing to refresh. -->
+    <script>
+        var delay = 400;
+        var timeout;
+
+        function changed() {
+            // Error state is removed when new input is detected.
+            errorElem.innerHTML = "&nbsp;";
+
+            clearTimeout(timeout);
+            timeout = setTimeout(refresh, delay);
+        }
+    </script>
+</body>
+</html>
