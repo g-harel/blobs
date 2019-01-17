@@ -9,6 +9,8 @@
     <style>
         body {
             display: table;
+            font-family: monospace;
+            font-size: 1.1em;
             height: 100%;
             left: 0;
             margin: 0;
@@ -41,7 +43,7 @@
         }
 
         #error {
-            color: red;
+            color: #ec576b;
             font-family: monospace;
             font-size: 1.5em;
             text-align: center;
@@ -58,18 +60,17 @@
     <div class="middle">
         <main>
             <div id="blob"></div><!--
-         --><pre id="options" contenteditable oninput="changed()">
-{
-    size: 600,
-    complexity: 0.2,
-    contrast: 0.4,
-    color: "pink",
-    stroke: {
-        width: 2.3,
-        color: "red",
-    },
-    guides: true,
-    seed: "abcd",
+         --><pre id="options" contenteditable oninput="changed()">{
+   size: 600,
+   complexity: 0.2,
+   contrast: 0.4,
+   color: "#ec576b",
+   stroke: {
+      width: 0,
+      color: "black",
+   },
+   guides: false,
+   seed: "1234",
 }</pre>
             <div id="error">&nbsp;</div>
         </main>

@@ -1,9 +1,9 @@
-<img src="https://svgsaur.us/?t=blobs&f=Comic_Sans_MS,cursive,sans-serif&s=42&w=160&h=50&y=40&o=biu&c=222" />
+# [blobs](https://g-harel.github.io/blobs)
 
 [![](https://img.shields.io/npm/v/blobs.svg)](https://www.npmjs.com/package/blobs)
 [![](https://img.shields.io/bundlephobia/minzip/blobs.svg)](https://bundlephobia.com/result?p=blobs)
 
-> random svg blob generator
+[![](https://user-images.githubusercontent.com/9319710/51342364-b4dc5800-1a61-11e9-9452-3db013605a80.png)](https://g-harel.github.io/blobs)
 
 ## Install
 
@@ -11,28 +11,14 @@
 $ npm install blobs
 ```
 
+```html
+<script src="https://unpkg.com/blobs"></script>
+```
+
 ## Usage
 
-&nbsp;
-
-<img align="left" height="288" src="https://user-images.githubusercontent.com/9319710/50946063-b73d2180-1465-11e9-9f4e-fb80ebb31f92.png" />
-
-<img align="right" height="288" src="https://user-images.githubusercontent.com/9319710/50946064-b73d2180-1465-11e9-827d-afeab9bddbc9.png" />
-
 ```typescript
-import blobs from "blobs";
-
-const svg = blobs({
-    size: 288,
-    complexity: 0.2,
-    contrast: 0.4,
-    color: "pink",
-    stroke: {
-        color: "red",
-        width: 2,
-    },
-    guides: true,
-});
+const svg = blobs(options);
 ```
 
 ## Options
