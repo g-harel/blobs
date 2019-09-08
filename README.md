@@ -21,6 +21,10 @@ $ npm install blobs
 const svg = blobs(options);
 ```
 
+![](https://svgsaur.us?t=&w=5&h=32&b=fdcc56)![](https://svgsaur.us/?t=WARNING&w=103&h=32&s=16&y=21&x=12&b=feefcd&f=arial&o=b) ![](https://svgsaur.us?t=&w=1&h=48&)
+
+_Options are **not** [sanitized](https://en.wikipedia.org/wiki/HTML_sanitization). Never trust raw user-submitted values in the options._
+
 ## Options
 
 #### Required
@@ -46,6 +50,23 @@ Name           | Type       | Default    | Description
 _Either `stroke` or `color` must be defined._
 
 _Guides will use stroke color and width if defined. Otherwise, they default to `black` stroke with width of `1`._
+
+##### Example Options Object
+
+```typescript
+const options = {
+   size: 600,
+   complexity: 0.2,
+   contrast: 0.4,
+   color: "#ec576b",
+   stroke: {
+      width: 0,
+      color: "black",
+   },
+   guides: false,
+   seed: "1234",
+};
+```
 
 ## License
 
