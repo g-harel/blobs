@@ -7,6 +7,7 @@ export default {
         file: "index.js",
         format: "umd",
         name: "blobs",
+        sourcemap: true,
     },
     plugins: [typescript({cacheRoot: "./node_modules/.cache/rpt2"}), uglify()],
 };
