@@ -1,0 +1,7 @@
+*
+!README.md
+!LICENSE
+!package.json
+!*.js
+!*.js.map
+!*.d.ts
