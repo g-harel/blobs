@@ -1,6 +1,6 @@
 <p align="center">
     <a href="https://g-harel.github.io/blobs">
-        <img width="460" height="300" src="./logo.svg">
+        <img width="460" height="300" src="./logo/color.svg">
     </a>
     <br>
     <a href="https://www.npmjs.com/package/blobs">
@@ -9,9 +9,9 @@
     <a href="https://bundlephobia.com/result?p=blobs">
         <img src="https://img.shields.io/bundlephobia/minzip/blobs.svg">
     </a>
-    <br><br>
+    <br>
     <a href="https://g-harel.github.io/blobs">
-        <img src="https://svgsaur.us/?c=ec576b&t=PLAYGROUND&o=b&s=30&w=220&y=28&h=36" />
+        <img src="https://svgsaur.us/?c=0366d6&t=PLAYGROUND&o=b&s=23&w=170&y=38&h=46" />
     </a>
 </p>
 
@@ -81,3 +81,8 @@ const options = {
 ## License
 
 [MIT](./LICENSE)
+
+<p align="center">
+    <br><br>
+    <img width="100" src="./logo/grey.svg" />
+</p>
