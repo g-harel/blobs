@@ -1,9 +1,19 @@
-# [blobs](https://g-harel.github.io/blobs)
-
-[![](https://img.shields.io/npm/v/blobs.svg)](https://www.npmjs.com/package/blobs)
-[![](https://img.shields.io/bundlephobia/minzip/blobs.svg)](https://bundlephobia.com/result?p=blobs)
-
-[![](https://user-images.githubusercontent.com/9319710/51342364-b4dc5800-1a61-11e9-9452-3db013605a80.png)](https://g-harel.github.io/blobs)
+<p align="center">
+    <a href="https://g-harel.github.io/blobs">
+        <img width="460" height="300" src="./logo.svg">
+    </a>
+    <br>
+    <a href="https://www.npmjs.com/package/blobs">
+        <img src="https://img.shields.io/npm/v/blobs.svg">
+    </a>
+    <a href="https://bundlephobia.com/result?p=blobs">
+        <img src="https://img.shields.io/bundlephobia/minzip/blobs.svg">
+    </a>
+    <br><br>
+    <a href="https://g-harel.github.io/blobs">
+        <img src="https://svgsaur.us/?c=ec576b&t=PLAYGROUND&o=b&s=30&w=220&y=28&h=36" />
+    </a>
+</p>
 
 ## Install
 
