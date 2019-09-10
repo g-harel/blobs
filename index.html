@@ -3,15 +3,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
     <title>blobs</title>
+    <link href="https://fonts.googleapis.com/css?family=Roboto+Mono:400" rel="stylesheet">
     <script src="https://unpkg.com/blobs"></script>
 </head>
 <body>
     <style>
+        * {
+            color: #111;
+            font-family: 'Roboto Mono', monospace;
+            font-weight: 400;
+        }
+
+        html {
+            font-size: 10px;
+            overflow: hidden;
+        }
+
         body {
-            display: table;
-            font-family: monospace;
+            display: flex;
+            flex-direction: column;
             font-size: 1.1em;
             height: 100%;
+            justify-content: center;
             left: 0;
             margin: 0;
             position: absolute;
@@ -22,16 +35,12 @@
         header {
             padding: 40px 60px;
             position: fixed;
-        }
-
-        .middle {
-            display: table-cell;
-            text-align: center;
-            vertical-align: middle;
+            top: 0;
         }
 
         main {
-            display: inline-block;
+            display: flex;
+            flex-direction: row;
             margin: 0 auto;
         }
 
@@ -40,11 +49,23 @@
             vertical-align: middle;
         }
 
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding-right: 200px;
+        }
+
+        .edit-me {
+            height: 0px;
+            transform: translate(180px, -120px);
+            width: 200px;
+        }
+
         #options {
-            display: inline-block;
             font-size: 2em;
+            padding: 20px;
             text-align: left;
-            vertical-align: middle;
         }
 
         #error {
@@ -64,28 +85,20 @@
 
     <header>
         <a href="http://github.com/g-harel/blobs">
-            <img width="200" src="./logo/grey.svg" />
+            <img width="200" src="./assets/logo-grey.svg" />
         </a>
     </header>
 
-    <div class="middle">
-        <main>
-            <div id="blob"></div><!--
-         --><pre id="options" contenteditable oninput="changed()">{
-   size: 600,
-   complexity: 0.2,
-   contrast: 0.4,
-   color: "#ec576b",
-   stroke: {
-      width: 0,
-      color: "black",
-   },
-   guides: false,
-   seed: "1234",
-}</pre>
-            <div id="error">&nbsp;</div>
-        </main>
-    </div>
+    <main>
+        <div id="blob"></div>
+        <div class="options-container">
+            <div class="edit-me">
+                <img src="./assets/edit.svg" />
+            </div>
+            <pre id="options" contenteditable oninput="changed()"></pre>
+        </div>
+    </main>
+    <div id="error">&nbsp;</div>
 
 
     <!-- Regenerate the blob from current options. -->
@@ -93,6 +106,16 @@
         var blobElem = document.getElementById("blob");
         var optionsElem = document.getElementById("options");
         var errorElem = document.getElementById("error");
+
+        // Initial options.
+        if (optionsElem) {
+            optionsElem.innerHTML = "{\n" +
+                "   complexity: 0.2,\n" +
+                "   contrast: 0.4,\n" +
+                "   guides: false,\n" +
+                "   seed: \"blobs\",\n" +
+                "}";
+        }
 
         function refresh() {
             if (!blobElem || !optionsElem || !errorElem) return;
@@ -106,6 +129,11 @@
                 errorElem.innerHTML = "Could not parse options: " + e.toString();
                 console.warn(e);
                 return;
+            }
+
+            if (parsedOptions && typeof parsedOptions === "object") {
+                parsedOptions.size = 600;
+                parsedOptions.color = "#ec576b";
             }
 
             try {
