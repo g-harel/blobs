@@ -1,6 +1,6 @@
 coverage/
 node_modules/
-_*
+~*
 *.js
 *.js.map
 *.d.ts

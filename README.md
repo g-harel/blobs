@@ -1,5 +1,5 @@
 <p align="center">
-    <a href="https://g-harel.github.io/blobs">
+    <a href="https://blobs.dev">
         <img width="460" height="300" src="./logo/color.svg">
     </a>
     <br>
@@ -10,7 +10,7 @@
         <img src="https://img.shields.io/bundlephobia/minzip/blobs.svg">
     </a>
     <br>
-    <a href="https://g-harel.github.io/blobs">
+    <a href="https://blobs.dev">
         <img src="https://svgsaur.us/?c=0366d6&t=PLAYGROUND&o=b&s=23&w=170&y=38&h=46" />
     </a>
 </p>
