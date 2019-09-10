@@ -3,14 +3,14 @@ import blobs, {BlobOptions} from "..";
 // Sanity checks to ensure the output remains consistent
 // across changes to the source.
 const testCases: Record<string, BlobOptions> = {
-    "fill": {
+    fill: {
         size: 109,
         complexity: 0.1,
         contrast: 0.331,
         color: "red",
         seed: "fill",
     },
-    "stroke": {
+    stroke: {
         size: 226,
         complexity: 0.91,
         contrast: 0.6,
@@ -20,7 +20,7 @@ const testCases: Record<string, BlobOptions> = {
         },
         seed: "stroke",
     },
-    "guides": {
+    guides: {
         size: 781,
         complexity: 1,
         contrast: 0.331,
@@ -28,7 +28,6 @@ const testCases: Record<string, BlobOptions> = {
         guides: true,
         seed: "guides",
     },
-
 };
 
 for (const testCase of Object.keys(testCases)) {
