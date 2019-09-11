@@ -12,6 +12,10 @@ const blobs = (opt: BlobOptions): string => {
     // Random number generator.
     const rgen = rand(opt.seed || String(Date.now()));
 
+    if (!opt.size) {
+        throw new Error("no size specified");
+    }
+
     if (!opt.stroke && !opt.color) {
         throw new Error("no color or stroke specified");
     }
