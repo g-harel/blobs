@@ -1,3 +1,7 @@
+# 1.0.5
+
+- Fix assets in README on npmjs.com
+
 # 1.0.4
 
 - Use snapshot tests to verify consistency

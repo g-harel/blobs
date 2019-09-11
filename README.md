@@ -1,6 +1,6 @@
 <p align="center">
     <a href="https://blobs.dev">
-        <img width="460" height="300" src="./assets/logo-color.svg">
+        <img width="460" height="300" src="./assets/logo-color.svg?sanitize=true">
     </a>
     <br>
     <a href="https://www.npmjs.com/package/blobs">
@@ -84,5 +84,5 @@ const options = {
 
 <p align="center">
     <br><br>
-    <img width="100" src="./assets/logo-grey.svg" />
+    <img width="100" src="./assets/logo-grey.svg?sanitize=true" />
 </p>
