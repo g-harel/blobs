@@ -16,7 +16,9 @@
 
         html {
             font-size: 10px;
+            height: 100vh;
             overflow: hidden;
+            width: 100vw;
         }
 
         body {
@@ -25,10 +27,7 @@
             font-size: 1.1em;
             height: 100%;
             justify-content: center;
-            left: 0;
             margin: 0;
-            position: absolute;
-            top: 0;
             width: 100%;
         }
 
@@ -44,9 +43,8 @@
             margin: 0 auto;
         }
 
-        #blob {
-            display: inline-block;
-            vertical-align: middle;
+        #mobile-blob {
+            display: none;
         }
 
         .options-container {
@@ -75,9 +73,18 @@
             text-align: center;
         }
 
-        @media (max-width: 320px)  {
-            #blob {
+        @media (max-width: 1000px)  {
+            body {
+                align-items: center;
+            }
+
+            #mobile-blob {
                 display: block;
+                padding-top: 20vh;
+            }
+
+            #blob, .options-container, #error {
+                display: none;
             }
         }
 
@@ -90,6 +97,7 @@
     </header>
 
     <main>
+        <div id="mobile-blob" onclick="refreshMobile()"></div>
         <div id="blob"></div>
         <div class="options-container">
             <div class="edit-me">
@@ -100,6 +108,23 @@
     </main>
     <div id="error">&nbsp;</div>
 
+    <!-- Generate random blob for mobile users. -->
+    <script>
+        var mobileElem = document.getElementById("mobile-blob");
+
+        function refreshMobile() {
+            if (!mobileElem) return;
+
+            mobileElem.innerHTML = blobs({
+                color: "#ec576b",
+                complexity: 0.3,
+                contrast: 0.6,
+                size: 300,
+            });
+        }
+
+        refreshMobile();
+    </script>
 
     <!-- Regenerate the blob from current options. -->
     <script>
