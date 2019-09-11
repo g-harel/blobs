@@ -1,11 +1,38 @@
 // https://www.blobmaker.app/
-// https://math.stackexchange.com/questions/873224/calculate-control-points-of-cubic-bezier-curve-approximating-a-part-of-a-circle
 
-import {rad, smooth, rand} from "./util";
-import {render} from "./render";
-import {Point, BlobOptions} from "./types";
+import {rand} from "./internal/math/rand";
+import {Point} from "./internal/math/geometry";
+import {rad} from "./internal/math/unit";
+import {smooth} from "./internal/svg/smooth";
+import {render} from "./internal/svg/render";
 
-export {BlobOptions} from "./types";
+export interface BlobOptions {
+    // Bounding box dimensions.
+    size: number;
+
+    // Shape complexity.
+    complexity: number;
+
+    // Shape contrast.
+    contrast: number;
+
+    // Fill color.
+    color?: string;
+
+    stroke?: {
+        // Stroke color.
+        color: string;
+
+        // Stroke width.
+        width: number;
+    };
+
+    // Value to seed random number generator.
+    seed?: string;
+
+    // Render points, handles and stroke.
+    guides?: boolean;
+}
 
 // Generates a random rounded shape.
 const blobs = (opt: BlobOptions): string => {

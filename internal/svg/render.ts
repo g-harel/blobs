@@ -1,9 +1,31 @@
-import {loopAccess, interpolate} from "./util";
-import {Point, RenderOptions} from "./types";
+import {loopAccess} from "./util";
+import {Point, interpolate} from "./point";
+
+export interface RenderOptions {
+    // Viewport size.
+    width: number;
+    height: number;
+
+    // Transformation applied to all drawn points.
+    transform?: string;
+
+    // Declare whether the path should be closed.
+    // This option is currently always true.
+    closed: true;
+
+    // Output path styling.
+    fill?: string;
+    stroke?: string;
+    strokeWidth?: number;
+
+    // Option to render guides (points, handles and viewport).
+    guides?: boolean;
+    boundingBox?: boolean;
+}
 
 // Renders a shape made up of the input points.
 export const render = (p: Point[], opt: RenderOptions): string => {
-    const points = p.map((point) => interpolate(point, opt));
+    const points = p.map((point) => interpolate(point, opt.height));
 
     // Compute guides from input point data.
     const handles: {x1: number; y1: number; x2: number; y2: number}[] = [];
