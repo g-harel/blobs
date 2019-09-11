@@ -1,3 +1,11 @@
+# 1.0.4
+
+- Use snapshot tests to verify consistency
+- Ignore unnecessary files in npm tarball
+- Output sourcemap file
+- Add project logo
+- README content updates
+
 # 1.0.3
 
 - Add link to demo page in the README
