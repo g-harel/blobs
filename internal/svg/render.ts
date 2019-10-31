@@ -1,5 +1,6 @@
 import {loopAccess} from "./util";
 import {Point, interpolate} from "./point";
+import {Xml} from "../xml";
 
 export interface RenderOptions {
     // Viewport size.
@@ -65,17 +66,50 @@ export const render = (p: Point[], opt: RenderOptions): string => {
         path += `C${hands.x1},${hands.y1},${hands.x2},${hands.y2},${point.x},${point.y}`;
     }
 
+    const stroke = opt.stroke || (opt.guides ? "black" : "none");
+    const strokeWidth = opt.strokeWidth || (opt.guides ? 1 : 0);
+
+    const xmlRoot = new Xml("svg", {
+        width: opt.width,
+        height: opt.height,
+        viewBox: `0 0 ${opt.width} ${opt.height}`,
+        xmlns: "http://www.w3.org/2000/svg",
+    });
+
+    const xmlContent = new Xml("g", {
+        transform: opt.transform || "",
+    });
+
+    xmlRoot.children.push(xmlContent);
+
+    xmlContent.children.push(
+        new Xml("path", {
+            stroke,
+            "stroke-width": strokeWidth,
+            fill: opt.fill || "none",
+            d: path,
+        }),
+    );
+
     // Render guides if configured to do so.
-    let guides = "";
     if (opt.guides) {
         const color = opt.stroke || "black";
         const size = opt.strokeWidth || 1;
 
         // Bounding box.
         if (opt.boundingBox) {
-            guides += `
-                <rect x="0" y="0" width="${opt.width}" height="${opt.height}" fill="none"
-                    stroke="${color}" stroke-width="${2 * size}" stroke-dasharray="${2 * size}" />`;
+            xmlContent.children.push(
+                new Xml("rect", {
+                    x: 0,
+                    y: 0,
+                    width: opt.width,
+                    height: opt.height,
+                    fill: "none",
+                    stroke: color,
+                    "stroke-width": 2 * size,
+                    "stroke-dasharray": 2 * size,
+                }),
+            );
         }
 
         // Points and handles.
@@ -84,38 +118,45 @@ export const render = (p: Point[], opt: RenderOptions): string => {
             const hands = loopAccess(handles)(i);
             const nextPoint = loopAccess(points)(i + 1);
 
-            guides += `
-                <line x1="${x}" y1="${y}" x2="${hands.x1}" y2="${hands.y1}"
-                    stroke-width="${size}" stroke="${color}" />
-                <line x1="${nextPoint.x}" y1="${nextPoint.y}" x2="${hands.x2}" y2="${hands.y2}"
-                    stroke-width="${size}" stroke="${color}" stroke-dasharray="${2 * size}" />
-                <circle cx="${hands.x1}" cy="${hands.y1}" r="${size}"
-                    fill="${color}" />
-                <circle cx="${hands.x2}" cy="${hands.y2}" r="${size}"
-                    fill="${color}" />
-                <circle cx="${x}" cy="${y}" r="${2 * size}" fill="${color}" />`;
+            xmlContent.children.push(
+                new Xml("line", {
+                    x1: x,
+                    y1: y,
+                    x2: hands.x1,
+                    y2: hands.y1,
+                    "stroke-width": size,
+                    stroke: color,
+                }),
+                new Xml("line", {
+                    x1: nextPoint.x,
+                    y1: nextPoint.y,
+                    x2: hands.x2,
+                    y2: hands.y2,
+                    "stroke-width": size,
+                    stroke: color,
+                    "stroke-dasharray": 2 * size,
+                }),
+                new Xml("circle", {
+                    cx: hands.x1,
+                    cy: hands.y1,
+                    r: size,
+                    fill: color,
+                }),
+                new Xml("circle", {
+                    cx: hands.x2,
+                    cy: hands.y2,
+                    r: size,
+                    fill: color,
+                }),
+                new Xml("circle", {
+                    cx: x,
+                    cy: y,
+                    r: 2 * size,
+                    fill: color,
+                }),
+            );
         }
     }
 
-    const stroke = opt.stroke || (opt.guides ? "black" : "none");
-    const strokeWidth = opt.strokeWidth || (opt.guides ? 1 : 0);
-
-    return `
-        <svg
-            width="${opt.width}"
-            height="${opt.height}"
-            viewBox="0 0 ${opt.width} ${opt.height}"
-            xmlns="http://www.w3.org/2000/svg"
-        >
-            <g transform="${opt.transform || ""}">
-                <path
-                    stroke="${stroke}"
-                    stroke-width="${strokeWidth}"
-                    fill="${opt.fill || "none"}"
-                    d="${path}"
-                />
-                ${guides}
-            </g>
-        </svg>
-    `.replace(/\s+/g, " ");
+    return xmlRoot.render();
 };
