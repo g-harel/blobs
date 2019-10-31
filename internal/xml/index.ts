@@ -1,41 +1,26 @@
-// Generic XML element. None of the implementations' output is sanitized.
-export interface IElement {
+// Generic XML element.
+export interface IXml {
     render(): string;
 }
 
-// Unstructured element that will render as the provided string.
-export class RawElement implements IElement {
-    public text: string;
-
-    public constructor(text: string) {
-        this.text = text;
-    }
-
-    public render(): string {
-        return this.text;
-    }
-}
-
 // Structured element with tag, attributes and children.
-export class Element implements IElement {
+export class Xml implements IXml {
     public tag: string;
     public attributes: Record<string, string | number>;
-    public children: IElement[];
+    public children: IXml[];
 
-    public constructor(tag: string, attributes?: Element["attributes"]) {
+    public constructor(tag: string, attributes?: Xml["attributes"]) {
         this.tag = tag;
         this.attributes = attributes || {};
         this.children = [];
     }
 
-    public add(child: IElement): Element {
-        this.children.push(child);
-        return this;
-    }
-
     public render(): string {
         const attributes = this.renderAttributes();
         const content = this.renderChildren();
+        if (content === "") {
+            return `<${this.tag}${attributes}/>`;
+        }
         return `<${this.tag}${attributes}>${content}</${this.tag}>`;
     }
 
