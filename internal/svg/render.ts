@@ -1,6 +1,6 @@
 import {loopAccess} from "./util";
 import {Point, interpolate} from "./point";
-import {Xml} from "../xml";
+import {xml} from "../xml";
 
 export interface RenderOptions {
     // Viewport size.
@@ -69,27 +69,23 @@ export const render = (p: Point[], opt: RenderOptions): string => {
     const stroke = opt.stroke || (opt.guides ? "black" : "none");
     const strokeWidth = opt.strokeWidth || (opt.guides ? 1 : 0);
 
-    const xmlRoot = new Xml("svg", {
-        width: opt.width,
-        height: opt.height,
-        viewBox: `0 0 ${opt.width} ${opt.height}`,
-        xmlns: "http://www.w3.org/2000/svg",
-    });
+    const xmlRoot = xml("svg");
+    xmlRoot.attributes.width = opt.width;
+    xmlRoot.attributes.height = opt.height;
+    xmlRoot.attributes.viewBox = `0 0 ${opt.width} ${opt.height}`;
+    xmlRoot.attributes.xmlns = "http://www.w3.org/2000/svg";
 
-    const xmlContent = new Xml("g", {
-        transform: opt.transform || "",
-    });
+    const xmlContentGroup = xml("g");
+    xmlContentGroup.attributes.transform = opt.transform || "";
 
-    xmlRoot.children.push(xmlContent);
+    const xmlBlobPath = xml("path");
+    xmlBlobPath.attributes.stroke = stroke;
+    xmlBlobPath.attributes["stroke-width"] = strokeWidth;
+    xmlBlobPath.attributes.fill = opt.fill || "none";
+    xmlBlobPath.attributes.d = path;
 
-    xmlContent.children.push(
-        new Xml("path", {
-            stroke,
-            "stroke-width": strokeWidth,
-            fill: opt.fill || "none",
-            d: path,
-        }),
-    );
+    xmlContentGroup.children.push(xmlBlobPath);
+    xmlRoot.children.push(xmlContentGroup);
 
     // Render guides if configured to do so.
     if (opt.guides) {
@@ -98,18 +94,16 @@ export const render = (p: Point[], opt: RenderOptions): string => {
 
         // Bounding box.
         if (opt.boundingBox) {
-            xmlContent.children.push(
-                new Xml("rect", {
-                    x: 0,
-                    y: 0,
-                    width: opt.width,
-                    height: opt.height,
-                    fill: "none",
-                    stroke: color,
-                    "stroke-width": 2 * size,
-                    "stroke-dasharray": 2 * size,
-                }),
-            );
+            const xmlBoundingRect = xml("rect");
+            xmlBoundingRect.attributes.x = 0;
+            xmlBoundingRect.attributes.y = 0;
+            xmlBoundingRect.attributes.width = opt.width;
+            xmlBoundingRect.attributes.height = opt.height;
+            xmlBoundingRect.attributes.fill = "none";
+            xmlBoundingRect.attributes.stroke = color;
+            xmlBoundingRect.attributes["stroke-width"] = 2 * size;
+            xmlBoundingRect.attributes["stroke-dasharray"] = 2 * size;
+            xmlContentGroup.children.push(xmlBoundingRect);
         }
 
         // Points and handles.
@@ -118,43 +112,46 @@ export const render = (p: Point[], opt: RenderOptions): string => {
             const hands = loopAccess(handles)(i);
             const nextPoint = loopAccess(points)(i + 1);
 
-            xmlContent.children.push(
-                new Xml("line", {
-                    x1: x,
-                    y1: y,
-                    x2: hands.x1,
-                    y2: hands.y1,
-                    "stroke-width": size,
-                    stroke: color,
-                }),
-                new Xml("line", {
-                    x1: nextPoint.x,
-                    y1: nextPoint.y,
-                    x2: hands.x2,
-                    y2: hands.y2,
-                    "stroke-width": size,
-                    stroke: color,
-                    "stroke-dasharray": 2 * size,
-                }),
-                new Xml("circle", {
-                    cx: hands.x1,
-                    cy: hands.y1,
-                    r: size,
-                    fill: color,
-                }),
-                new Xml("circle", {
-                    cx: hands.x2,
-                    cy: hands.y2,
-                    r: size,
-                    fill: color,
-                }),
-                new Xml("circle", {
-                    cx: x,
-                    cy: y,
-                    r: 2 * size,
-                    fill: color,
-                }),
-            );
+            const xmlIncomingHandleLine = xml("line");
+            xmlIncomingHandleLine.attributes.x1 = x;
+            xmlIncomingHandleLine.attributes.y1 = y;
+            xmlIncomingHandleLine.attributes.x2 = hands.x1;
+            xmlIncomingHandleLine.attributes.y2 = hands.y1;
+            xmlIncomingHandleLine.attributes["stroke-width"] = size;
+            xmlIncomingHandleLine.attributes.stroke = color;
+
+            const xmlOutgoingHandleLine = xml("line");
+            xmlOutgoingHandleLine.attributes.x1 = nextPoint.x;
+            xmlOutgoingHandleLine.attributes.y1 = nextPoint.y;
+            xmlOutgoingHandleLine.attributes.x2 = hands.x2;
+            xmlOutgoingHandleLine.attributes.y2 = hands.y2;
+            xmlOutgoingHandleLine.attributes["stroke-width"] = size;
+            xmlOutgoingHandleLine.attributes.stroke = color;
+            xmlOutgoingHandleLine.attributes["stroke-dasharray"] = 2 * size;
+
+            const xmlIncomingHandleCircle = xml("circle");
+            xmlIncomingHandleCircle.attributes.cx = hands.x1;
+            xmlIncomingHandleCircle.attributes.cy = hands.y1;
+            xmlIncomingHandleCircle.attributes.r = size;
+            xmlIncomingHandleCircle.attributes.fill = color;
+
+            const xmlOutgoingHandleCircle = xml("circle");
+            xmlOutgoingHandleCircle.attributes.cx = hands.x2;
+            xmlOutgoingHandleCircle.attributes.cy = hands.y2;
+            xmlOutgoingHandleCircle.attributes.r = size;
+            xmlOutgoingHandleCircle.attributes.fill = color;
+
+            const xmlPointCircle = xml("circle");
+            xmlPointCircle.attributes.cx = x;
+            xmlPointCircle.attributes.cy = y;
+            xmlPointCircle.attributes.r = 2 * size;
+            xmlPointCircle.attributes.fill = color;
+
+            xmlContentGroup.children.push(xmlIncomingHandleLine);
+            xmlContentGroup.children.push(xmlOutgoingHandleLine);
+            xmlContentGroup.children.push(xmlIncomingHandleCircle);
+            xmlContentGroup.children.push(xmlOutgoingHandleCircle);
+            xmlContentGroup.children.push(xmlPointCircle);
         }
     }
 

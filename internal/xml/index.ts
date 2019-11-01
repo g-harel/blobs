@@ -3,17 +3,15 @@ export interface IXml {
     render(): string;
 }
 
-// Structured element with tag, attributes and children.
-export class Xml implements IXml {
-    public tag: string;
-    public attributes: Record<string, string | number>;
-    public children: IXml[];
+// Shortcut to create an XmlElement without "new";
+export const xml = (tag: string) => new XmlElement(tag);
 
-    public constructor(tag: string, attributes?: Xml["attributes"]) {
-        this.tag = tag;
-        this.attributes = attributes || {};
-        this.children = [];
-    }
+// Structured element with tag, attributes and children.
+export class XmlElement implements IXml {
+    public attributes: Record<string, string | number> = {};
+    public children: IXml[] = [];
+
+    public constructor(public tag: string) {}
 
     public render(): string {
         const attributes = this.renderAttributes();
