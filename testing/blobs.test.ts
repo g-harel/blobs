@@ -1,4 +1,4 @@
-import blobs, {BlobOptions} from "..";
+import blobs, {BlobOptions, editable} from "..";
 
 const genMinimalOptions = (): BlobOptions => ({
     size: 1000 * Math.random(),
@@ -61,5 +61,18 @@ describe("blobs", () => {
         delete options.color;
         expect(() => blobs(options)).toThrow("stroke");
         expect(() => blobs(options)).toThrow("color");
+    });
+});
+
+describe("editable", () => {
+    it("should reflect changes when edited", () => {
+        const options = genMinimalOptions();
+
+        const out = editable(options);
+        const initial = out.render();
+        out.attributes.id = "test";
+        const modified = out.render();
+
+        expect(modified).not.toBe(initial);
     });
 });

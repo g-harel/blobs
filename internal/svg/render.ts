@@ -1,6 +1,6 @@
 import {loopAccess} from "./util";
 import {Point, interpolate} from "./point";
-import {xml} from "../xml";
+import {xml, XmlElement} from "../xml";
 
 export interface RenderOptions {
     // Viewport size.
@@ -24,8 +24,9 @@ export interface RenderOptions {
     boundingBox?: boolean;
 }
 
-// Renders a shape made up of the input points.
-export const render = (p: Point[], opt: RenderOptions): string => {
+// Renders a shape made up of the input points to an editable data structure
+// which can be rendered to svg.
+export const renderEditable = (p: Point[], opt: RenderOptions): XmlElement => {
     const points = p.map((point) => interpolate(point, opt.height));
 
     // Compute guides from input point data.
@@ -49,8 +50,8 @@ export const render = (p: Point[], opt: RenderOptions): string => {
         });
     }
 
-    // Render path data attribute from points and handles. Must loop more times than the
-    // number of points in order to correctly close the path.
+    // Render path data attribute from points and handles. Must loop more times
+    // than the number of points in order to correctly close the path.
     let path = "";
     for (let i = 0; i <= points.length; i++) {
         const point = loopAccess(points)(i);
@@ -155,5 +156,5 @@ export const render = (p: Point[], opt: RenderOptions): string => {
         }
     }
 
-    return xmlRoot.render();
+    return xmlRoot;
 };
