@@ -78,6 +78,23 @@ const options = {
 };
 ```
 
+## Advanced
+
+If you need to edit the output svg for your use case, blobs also allows for _editable_ output.
+
+```typescript
+import * as blobs from "blobs";
+
+const editableSvg = blobs.editable(options);
+```
+
+The output of this function is a data structure that represents a nested svg document. This structure can be changed and rendered to a string using its `render` function.
+
+```typescript
+editableSvg.attributes.width = 1000;
+const svg = editableSvg.render();
+```
+
 ## License
 
 [MIT](./LICENSE)
