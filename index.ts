@@ -5,7 +5,7 @@ import {Point} from "./internal/math/geometry";
 import {rad} from "./internal/math/unit";
 import {smooth} from "./internal/svg/smooth";
 import {renderEditable} from "./internal/svg/render";
-import {XmlElement} from "./internal/xml";
+import {XmlElement} from "./editable";
 
 export interface BlobOptions {
     // Bounding box dimensions.
@@ -37,12 +37,16 @@ export interface BlobOptions {
 
 // Generates an svg document string containing a randomized rounded shape.
 const blobs = (opt: BlobOptions): string => {
-    return editable(opt).render();
+    return blobs.editable(opt).render();
 };
 
 // Generates an editable data structure which can be rendered to an svg document
 // containing a randomized rounded shape.
-export const editable = (opt: BlobOptions): XmlElement => {
+blobs.editable = (opt: BlobOptions): XmlElement => {
+    if (!opt) {
+        throw new Error("no options specified");
+    }
+
     // Random number generator.
     const rgen = rand(opt.seed || String(Date.now()));
 
@@ -94,4 +98,3 @@ export const editable = (opt: BlobOptions): XmlElement => {
 };
 
 export default blobs;
-export {IXml, XmlElement} from "./internal/xml";

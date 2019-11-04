@@ -1,6 +1,6 @@
 import {loopAccess} from "./util";
 import {Point, interpolate} from "./point";
-import {xml, XmlElement} from "../xml";
+import {xml, XmlElement} from "../../editable";
 
 export interface RenderOptions {
     // Viewport size.

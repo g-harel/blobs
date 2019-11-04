@@ -1,4 +1,4 @@
-import blobs, {BlobOptions, editable} from "..";
+import blobs, {BlobOptions} from "..";
 
 const genMinimalOptions = (): BlobOptions => ({
     size: 1000 * Math.random(),
@@ -25,6 +25,10 @@ describe("blobs", () => {
         const b = blobs(options);
 
         expect(a).toEqual(b);
+    });
+
+    it("should require options be provided", () => {
+        expect(() => (blobs as any)()).toThrow("options");
     });
 
     it("should require a size be provided", () => {
@@ -68,7 +72,7 @@ describe("editable", () => {
     it("should reflect changes when edited", () => {
         const options = genMinimalOptions();
 
-        const out = editable(options);
+        const out = blobs.editable(options);
         const initial = out.render();
         out.attributes.id = "test";
         const modified = out.render();

@@ -83,8 +83,6 @@ const options = {
 If you need to edit the output svg for your use case, blobs also allows for _editable_ output.
 
 ```typescript
-import * as blobs from "blobs";
-
 const editableSvg = blobs.editable(options);
 ```
 
@@ -93,6 +91,17 @@ The output of this function is a data structure that represents a nested svg doc
 ```typescript
 editableSvg.attributes.width = 1000;
 const svg = editableSvg.render();
+```
+
+Utilities to create nodes in the editable output can be imported from `blobs/editable`.
+
+```typescript
+import {xml} from "blobs/editable";
+
+const xmlChild = xml("path");
+xmlChild.attributes.stroke = "red";
+// ...
+editableSvg.children.push(xmlChild);
 ```
 
 ## License
