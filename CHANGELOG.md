@@ -1,3 +1,7 @@
+# 1.1.0
+
+- Add support for editable output
+
 # 1.0.5
 
 - Fix assets in README on npmjs.com
