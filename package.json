@@ -12,11 +12,13 @@
     "build": "npm run clean && rollup -c rollup.config.ts",
     "clean": "trash '**/*.js' '**/*.js.map' '**/*.d.ts' '!**/node_modules/**/*'",
     "fmt": "prettier --list-different --write --ignore-path .gitignore '**/*.{js,ts}'",
+    "dev:animate": "parcel animate/index.html",
     "test": "jest"
   },
   "devDependencies": {
     "@types/jest": "^24.0.18",
     "jest": "^24.9.0",
+    "parcel": "^1.12.4",
     "prettier": "^1.14.2",
     "rollup": "^1.1.0",
     "rollup-plugin-typescript2": "^0.18.1",
