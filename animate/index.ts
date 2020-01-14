@@ -2,14 +2,12 @@
 // https://medium.com/@adrian_cooney/bezier-interpolation-13b68563313a
 // http://www.iscriptdesign.com/?sketch=tutorial/splitbezier
 
-import {loopAccess} from "../internal/svg/util";
-import {rad} from "../internal/math/unit";
-
 let ctx: CanvasRenderingContext2D;
 
 const speed: number = 2;
+const start: number = 0.3;
 const debugHandles = true;
-const debugBezier = false;
+const debugBezier = true;
 
 interface Coordinates {
     // Horizontal distance towards the right from the left edge of the canvas.
@@ -57,6 +55,14 @@ const interpolate = (...keyframes: Keyframe[]) => {
     //   - Output using generator?
 };
 
+export const rad = (deg: number) => {
+    return (deg / 360) * 2 * Math.PI;
+};
+
+export const distance = (a: Coordinates, b: Coordinates): number => {
+    return Math.sqrt((a.x - b.x) ** 2 + (a.y - b.y) ** 2);
+};
+
 const expandHandle = (origin: Coordinates, handle: Handle): Coordinates => {
     return {
         x: origin.x + handle.length * Math.cos(handle.angle),
@@ -93,11 +99,31 @@ const drawPoint = (p: Coordinates, style: string = "#8bb") => {
     ctx.fillStyle = backupFillStyle;
 };
 
+const drawInfo = (() => {
+    let count = 1;
+    const positions: Record<string, any> = {};
+    return (label: string, value: any) => {
+        if (!positions[label]) {
+            positions[label] = count;
+            count++;
+        }
+        ctx.fillText(`${label}: ${value}`, 14, positions[label] * 20);
+    };
+})();
+
 const splitLine = (percentage: number, a: Coordinates, b: Coordinates): Coordinates => {
     return {
         x: a.x + percentage * (b.x - a.x),
         y: a.y + percentage * (b.y - a.y),
     };
+};
+
+const approxCurveLength = (a: Point, b: Point): number => {
+    const aHandle = expandHandle(a, a.handleOut);
+    const bHandle = expandHandle(b, b.handleIn);
+    const ab = distance(a, b);
+    const abHandle = distance(aHandle, bHandle);
+    return (ab + abHandle + a.handleOut.length + b.handleIn.length) / 2;
 };
 
 // Add a control point to the curve between a and b.
@@ -174,8 +200,8 @@ const render = (points: Point[]) => {
     // Draw points.
     for (let i = 0; i < points.length; i++) {
         // Compute coordinates of handles.
-        const curr = loopAccess(points)(i);
-        const next = loopAccess(points)(i + 1);
+        const curr = points[i];
+        const next = points[(i + 1) % points.length];
         const currHandle = expandHandle(curr, curr.handleOut);
         const nextHandle = expandHandle(next, next.handleIn);
 
@@ -254,6 +280,14 @@ const renderTestShape = (percentage: number) => {
     }
     points.splice(0, 1);
 
+    let length = 0;
+    for (let i = 0; i < points.length; i++) {
+        const curr = points[i];
+        const next = points[(i + 1) % points.length];
+        length += approxCurveLength(curr, next);
+    }
+    drawInfo("shape path lengths sum", length);
+
     render(points);
 };
 
@@ -287,9 +321,10 @@ const renderTestCurve = (percentage: number) => {
     if (temp === null) throw new Error("context is null");
     ctx = temp;
 
-    let percentage = 0;
+    let percentage = start;
     const renderFrame = () => {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawInfo("percentage", percentage);
         renderTestCurve(percentage);
         renderTestShape(percentage);
         percentage += speed / 1000;
