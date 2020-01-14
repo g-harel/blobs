@@ -4,10 +4,16 @@
 
 let ctx: CanvasRenderingContext2D;
 
-const speed: number = 2;
-const start: number = 0.3;
-const debugHandles = true;
+const animationSpeed = 2;
+const animationStart = 0.3;
 const debugBezier = true;
+const debugBezierColor = "#8bb";
+const debugHandles = true;
+const debugHandlesInColor = "#ccc";
+const debugHandlesOutColor = "#b6b";
+const infoSpacing = 20;
+const pointSize = 2;
+const size = 1000;
 
 interface Coordinates {
     // Horizontal distance towards the right from the left edge of the canvas.
@@ -80,7 +86,7 @@ const collapseHandle = (origin: Coordinates, handle: Coordinates): Handle => {
     };
 };
 
-const drawLine = (a: Coordinates, b: Coordinates, style: string = "#8bb") => {
+const drawLine = (a: Coordinates, b: Coordinates, style: string) => {
     const backupStrokeStyle = ctx.strokeStyle;
     ctx.beginPath();
     ctx.moveTo(a.x, a.y);
@@ -90,10 +96,10 @@ const drawLine = (a: Coordinates, b: Coordinates, style: string = "#8bb") => {
     ctx.strokeStyle = backupStrokeStyle;
 };
 
-const drawPoint = (p: Coordinates, style: string = "#8bb") => {
+const drawPoint = (p: Coordinates, style: string) => {
     const backupFillStyle = ctx.fillStyle;
     ctx.beginPath();
-    ctx.arc(p.x, p.y, 2, 0, 2 * Math.PI);
+    ctx.arc(p.x, p.y, pointSize, 0, 2 * Math.PI);
     ctx.fillStyle = style;
     ctx.fill();
     ctx.fillStyle = backupFillStyle;
@@ -107,7 +113,7 @@ const drawInfo = (() => {
             positions[label] = count;
             count++;
         }
-        ctx.fillText(`${label}: ${value}`, 14, positions[label] * 20);
+        ctx.fillText(`${label}: ${value}`, infoSpacing, positions[label] * infoSpacing);
     };
 })();
 
@@ -172,16 +178,16 @@ const splitCurve = (percentage: number, a: Point, b: Point): [Point, Point, Poin
     const dCoordinates = splitLine(percentage, g, h);
 
     if (debugBezier) {
-        drawLine(b, bHandle);
-        drawLine(a, aHandle);
-        drawLine(aHandle, bHandle);
-        drawLine(cHandle, f);
-        drawLine(eHandle, f);
-        drawLine(g, h);
+        drawLine(b, bHandle, debugBezierColor);
+        drawLine(a, aHandle, debugBezierColor);
+        drawLine(aHandle, bHandle, debugBezierColor);
+        drawLine(cHandle, f, debugBezierColor);
+        drawLine(eHandle, f, debugBezierColor);
+        drawLine(g, h, debugBezierColor);
         if (!debugHandles) {
-            drawPoint(dCoordinates);
-            drawLine(dCoordinates, g);
-            drawLine(dCoordinates, h);
+            drawPoint(dCoordinates, debugBezierColor);
+            drawLine(dCoordinates, g, debugBezierColor);
+            drawLine(dCoordinates, h, debugBezierColor);
         }
     }
 
@@ -206,9 +212,9 @@ const render = (points: Point[]) => {
         const nextHandle = expandHandle(next, next.handleIn);
 
         if (debugHandles) {
-            drawPoint(curr, "#000");
-            drawLine(curr, currHandle, "#6bb");
-            drawLine(next, nextHandle, "#b6b");
+            drawPoint(curr, "");
+            drawLine(curr, currHandle, debugHandlesOutColor);
+            drawLine(next, nextHandle, debugHandlesInColor);
         }
 
         // Draw curve between curr and next points.
@@ -222,51 +228,51 @@ const render = (points: Point[]) => {
 const renderTestShape = (percentage: number) => {
     let points: Point[] = [
         {
-            x: 200,
-            y: 200,
+            x: 0.2 * size,
+            y: 0.2 * size,
             handleIn: {
                 angle: rad(135),
-                length: 100,
+                length: 0.1 * size,
             },
             handleOut: {
                 angle: rad(315),
-                length: 200,
+                length: 0.2 * size,
             },
         },
         {
-            x: 800,
-            y: 200,
+            x: 0.8 * size,
+            y: 0.2 * size,
             handleIn: {
                 angle: rad(225),
-                length: 100,
+                length: 0.1 * size,
             },
             handleOut: {
                 angle: rad(45),
-                length: 200,
+                length: 0.2 * size,
             },
         },
         {
-            x: 800,
-            y: 800,
+            x: 0.8 * size,
+            y: 0.8 * size,
             handleIn: {
                 angle: rad(315),
-                length: 100,
+                length: 0.1 * size,
             },
             handleOut: {
                 angle: rad(135),
-                length: 200,
+                length: 0.2 * size,
             },
         },
         {
-            x: 200,
-            y: 800,
+            x: 0.2 * size,
+            y: 0.8 * size,
             handleIn: {
                 angle: rad(45),
-                length: 100,
+                length: 0.1 * size,
             },
             handleOut: {
                 angle: rad(225),
-                length: 200,
+                length: 0.2 * size,
             },
         },
     ];
@@ -296,15 +302,15 @@ const renderTestCurve = (percentage: number) => {
         splitCurve(
             percentage,
             {
-                x: 300,
-                y: 300,
+                x: 0.3 * size,
+                y: 0.3 * size,
                 handleIn: {angle: 0, length: 0},
-                handleOut: {angle: 0, length: 400},
+                handleOut: {angle: 0, length: 0.4 * size},
             },
             {
-                x: 700,
-                y: 700,
-                handleIn: {angle: Math.PI, length: 400},
+                x: 0.7 * size,
+                y: 0.7 * size,
+                handleIn: {angle: Math.PI, length: 0.4 * size},
                 handleOut: {angle: 0, length: 0},
             },
         ),
@@ -313,23 +319,23 @@ const renderTestCurve = (percentage: number) => {
 
 (() => {
     const canvas = document.createElement("canvas");
-    canvas.width = 1000;
-    canvas.height = 1000;
+    canvas.width = size;
+    canvas.height = size;
     document.body.appendChild(canvas);
 
     const temp = canvas.getContext("2d");
     if (temp === null) throw new Error("context is null");
     ctx = temp;
 
-    let percentage = start;
+    let percentage = animationStart;
     const renderFrame = () => {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         drawInfo("percentage", percentage);
         renderTestCurve(percentage);
         renderTestShape(percentage);
-        percentage += speed / 1000;
+        percentage += animationSpeed / 1000;
         percentage %= 1;
-        if (speed > 0) requestAnimationFrame(renderFrame);
+        if (animationSpeed > 0) requestAnimationFrame(renderFrame);
     };
     renderFrame();
 })();
