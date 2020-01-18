@@ -69,6 +69,22 @@ export const distance = (a: Coordinates, b: Coordinates): number => {
     return Math.sqrt((a.x - b.x) ** 2 + (a.y - b.y) ** 2);
 };
 
+const point = (x: number, y: number, ia: number, il: number, oa: number, ol: number): Point => {
+    return {
+        x: x * size,
+        y: y * size,
+        handleIn: {angle: rad(ia), length: il * size},
+        handleOut: {angle: rad(oa), length: ol * size},
+    };
+};
+
+const copyPoint = (p: Point): Point => ({
+    x: p.x,
+    y: p.y,
+    handleIn: {...p.handleIn},
+    handleOut: {...p.handleOut},
+});
+
 const expandHandle = (origin: Coordinates, handle: Handle): Coordinates => {
     return {
         x: origin.x + handle.length * Math.cos(handle.angle),
@@ -132,6 +148,60 @@ const approxCurveLength = (a: Point, b: Point): number => {
     return (ab + abHandle + a.handleOut.length + b.handleIn.length) / 2;
 };
 
+const divideShape = (count: number, points: Point[]): Point[] => {
+    if (points.length < 3) throw new Error("not enough points");
+    if (count < points.length) throw new Error("cannot remove points");
+    if (count === points.length) return points.slice();
+
+    const lengths = [];
+    for (let i = 0; i < points.length; i++) {
+        lengths.push(approxCurveLength(points[i], points[(i + 1) % points.length]));
+    }
+
+    const divisors = divideLengths(lengths, count - points.length);
+    const out: Point[] = [];
+    for (let i = 0; i < points.length; i++) {
+        const curr: Point = out[out.length - 1] || points[i];
+        const next = points[(i + 1) % points.length];
+        out.pop();
+        out.push(...splitCurveBy(divisors[i], curr, next));
+    }
+    const last = out.pop();
+    out[0].handleIn = last!.handleIn;
+
+    return out;
+};
+
+const divideLengths = (lengths: number[], add: number): number[] => {
+    const divisors = lengths.map(() => 1);
+    const sizes = lengths.slice();
+    for (let i = 0; i < add; i++) {
+        let maxSizeIndex = 0;
+        for (let j = 1; j < sizes.length; j++) {
+            if (sizes[j] > sizes[maxSizeIndex]) {
+                maxSizeIndex = j;
+                continue;
+            }
+            if (sizes[j] === sizes[maxSizeIndex]) {
+                if (lengths[j] > lengths[maxSizeIndex]) {
+                    maxSizeIndex = j;
+                }
+            }
+        }
+        divisors[maxSizeIndex]++;
+        sizes[maxSizeIndex] = lengths[maxSizeIndex] / divisors[maxSizeIndex];
+    }
+    return divisors;
+};
+
+const splitCurveBy = (count: number, a: Point, b: Point): Point[] => {
+    if (count < 2) return [a, b];
+    const percentage = 1 / count;
+    const [c, d, e] = splitCurveAt(percentage, a, b);
+    if (count === 2) return [c, d, e];
+    return [c, ...splitCurveBy(count - 1, d, e)];
+};
+
 // Add a control point to the curve between a and b.
 // Percentage [0, 1] from a to b.
 // a: original first point.
@@ -142,31 +212,12 @@ const approxCurveLength = (a: Point, b: Point): number => {
 // f: split point between a and b's handles.
 // g: split point between c's handle and f.
 // h: split point between e's handle and f.
-const splitCurve = (percentage: number, a: Point, b: Point): [Point, Point, Point] => {
-    const c: Point = {
-        x: a.x,
-        y: a.y,
-        handleIn: {
-            angle: a.handleIn.angle,
-            length: a.handleIn.length,
-        },
-        handleOut: {
-            angle: a.handleOut.angle,
-            length: a.handleOut.length * percentage,
-        },
-    };
-    const e: Point = {
-        x: b.x,
-        y: b.y,
-        handleIn: {
-            angle: b.handleIn.angle,
-            length: b.handleIn.length * (1 - percentage),
-        },
-        handleOut: {
-            angle: b.handleOut.angle,
-            length: b.handleOut.length,
-        },
-    };
+const splitCurveAt = (percentage: number, a: Point, b: Point): [Point, Point, Point] => {
+    const c = copyPoint(a);
+    c.handleOut.length *= percentage;
+
+    const e = copyPoint(b);
+    e.handleIn.length *= 1 - percentage;
 
     const aHandle = expandHandle(a, a.handleOut);
     const bHandle = expandHandle(b, b.handleIn);
@@ -200,8 +251,8 @@ const splitCurve = (percentage: number, a: Point, b: Point): [Point, Point, Poin
     return [c, d, e];
 };
 
-const render = (points: Point[]) => {
-    if (points.length < 3) throw new Error("not enough points");
+const renderShape = (points: Point[]) => {
+    if (points.length < 2) throw new Error("not enough points");
 
     // Draw points.
     for (let i = 0; i < points.length; i++) {
@@ -225,56 +276,12 @@ const render = (points: Point[]) => {
     }
 };
 
-const renderTestShape = (percentage: number) => {
+const testSplitAt = (percentage: number) => {
     let points: Point[] = [
-        {
-            x: 0.2 * size,
-            y: 0.2 * size,
-            handleIn: {
-                angle: rad(135),
-                length: 0.1 * size,
-            },
-            handleOut: {
-                angle: rad(315),
-                length: 0.2 * size,
-            },
-        },
-        {
-            x: 0.8 * size,
-            y: 0.2 * size,
-            handleIn: {
-                angle: rad(225),
-                length: 0.1 * size,
-            },
-            handleOut: {
-                angle: rad(45),
-                length: 0.2 * size,
-            },
-        },
-        {
-            x: 0.8 * size,
-            y: 0.8 * size,
-            handleIn: {
-                angle: rad(315),
-                length: 0.1 * size,
-            },
-            handleOut: {
-                angle: rad(135),
-                length: 0.2 * size,
-            },
-        },
-        {
-            x: 0.2 * size,
-            y: 0.8 * size,
-            handleIn: {
-                angle: rad(45),
-                length: 0.1 * size,
-            },
-            handleOut: {
-                angle: rad(225),
-                length: 0.2 * size,
-            },
-        },
+        point(0.15, 0.15, 135, 0.1, 315, 0.2),
+        point(0.85, 0.15, 225, 0.1, 45, 0.2),
+        point(0.85, 0.85, 315, 0.1, 135, 0.2),
+        point(0.15, 0.85, 45, 0.1, 225, 0.2),
     ];
 
     const count = points.length;
@@ -282,7 +289,7 @@ const renderTestShape = (percentage: number) => {
     for (let i = 0; i < count; i++) {
         const double = i * 2;
         const next = (double + 1) % stop;
-        points.splice(double, 2, ...splitCurve(percentage, points[double], points[next]));
+        points.splice(double, 2, ...splitCurveAt(percentage, points[double], points[next]));
     }
     points.splice(0, 1);
 
@@ -292,29 +299,35 @@ const renderTestShape = (percentage: number) => {
         const next = points[(i + 1) % points.length];
         length += approxCurveLength(curr, next);
     }
-    drawInfo("shape path lengths sum", length);
+    drawInfo("split at lengths sum", length);
 
-    render(points);
+    renderShape(points);
 };
 
-const renderTestCurve = (percentage: number) => {
-    render(
-        splitCurve(
-            percentage,
-            {
-                x: 0.3 * size,
-                y: 0.3 * size,
-                handleIn: {angle: 0, length: 0},
-                handleOut: {angle: 0, length: 0.4 * size},
-            },
-            {
-                x: 0.7 * size,
-                y: 0.7 * size,
-                handleIn: {angle: Math.PI, length: 0.4 * size},
-                handleOut: {angle: 0, length: 0},
-            },
-        ),
-    );
+const testSplitBy = () => {
+    const count = 10;
+    for (let i = 0; i < count; i++) {
+        renderShape(
+            splitCurveBy(
+                i + 1,
+                point(0.15, 0.2 + i * 0.06, 30, 0.1, -30, 0.1),
+                point(0.45, 0.2 + i * 0.06, 135, 0.1, 225, 0.1),
+            ),
+        );
+    }
+};
+
+const testDivideShape = () => {
+    const count = 10;
+    for (let i = 0; i < count; i++) {
+        renderShape(
+            divideShape(i + 3, [
+                point(0.6, 0.2 + i * 0.05, -10, 0.1, -45, 0.03),
+                point(0.7, 0.2 + i * 0.05 - 0.03, 180, 0.03, 0, 0.03),
+                point(0.8, 0.2 + i * 0.05, -135, 0.03, 170, 0.1),
+            ]),
+        );
+    }
 };
 
 (() => {
@@ -331,8 +344,9 @@ const renderTestCurve = (percentage: number) => {
     const renderFrame = () => {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         drawInfo("percentage", percentage);
-        renderTestCurve(percentage);
-        renderTestShape(percentage);
+        testSplitAt(percentage);
+        testSplitBy();
+        testDivideShape();
         percentage += animationSpeed / 1000;
         percentage %= 1;
         if (animationSpeed > 0) requestAnimationFrame(renderFrame);
