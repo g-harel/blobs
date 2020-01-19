@@ -1,6 +1,7 @@
 // http://www.cad.zju.edu.cn/home/zhx/papers/PoissonMorphing.pdf
 // https://medium.com/@adrian_cooney/bezier-interpolation-13b68563313a
 // http://www.iscriptdesign.com/?sketch=tutorial/splitbezier
+// http://www.wikiwand.com/en/Hungarian_algorithm
 
 let ctx: CanvasRenderingContext2D;
 
@@ -15,7 +16,7 @@ const infoSpacing = 20;
 const pointSize = 2;
 const size = 1000;
 
-interface Coordinates {
+interface Coord {
     // Horizontal distance towards the right from the left edge of the canvas.
     x: number;
     // Vertical distance downwards from the top of the canvas.
@@ -61,11 +62,11 @@ const interpolate = (...keyframes: Keyframe[]) => {
     //   - Output using generator?
 };
 
-export const rad = (deg: number) => {
+const rad = (deg: number) => {
     return (deg / 360) * 2 * Math.PI;
 };
 
-export const distance = (a: Coordinates, b: Coordinates): number => {
+const distance = (a: Coord, b: Coord): number => {
     return Math.sqrt((a.x - b.x) ** 2 + (a.y - b.y) ** 2);
 };
 
@@ -85,14 +86,14 @@ const copyPoint = (p: Point): Point => ({
     handleOut: {...p.handleOut},
 });
 
-const expandHandle = (origin: Coordinates, handle: Handle): Coordinates => {
+const expandHandle = (origin: Coord, handle: Handle): Coord => {
     return {
         x: origin.x + handle.length * Math.cos(handle.angle),
         y: origin.y + handle.length * Math.sin(handle.angle),
     };
 };
 
-const collapseHandle = (origin: Coordinates, handle: Coordinates): Handle => {
+const collapseHandle = (origin: Coord, handle: Coord): Handle => {
     const dx = handle.x - origin.x;
     const dy = -handle.y + origin.y;
     let angle = Math.atan2(dy, dx);
@@ -102,7 +103,7 @@ const collapseHandle = (origin: Coordinates, handle: Coordinates): Handle => {
     };
 };
 
-const drawLine = (a: Coordinates, b: Coordinates, style: string) => {
+const drawLine = (a: Coord, b: Coord, style: string) => {
     const backupStrokeStyle = ctx.strokeStyle;
     ctx.beginPath();
     ctx.moveTo(a.x, a.y);
@@ -112,7 +113,7 @@ const drawLine = (a: Coordinates, b: Coordinates, style: string) => {
     ctx.strokeStyle = backupStrokeStyle;
 };
 
-const drawPoint = (p: Coordinates, style: string) => {
+const drawPoint = (p: Coord, style: string) => {
     const backupFillStyle = ctx.fillStyle;
     ctx.beginPath();
     ctx.arc(p.x, p.y, pointSize, 0, 2 * Math.PI);
@@ -133,10 +134,28 @@ const drawInfo = (() => {
     };
 })();
 
-const splitLine = (percentage: number, a: Coordinates, b: Coordinates): Coordinates => {
+const split = (percentage: number, a: number, b: number): number => {
+    return a + percentage * (b - a);
+};
+
+const splitAngle = (percentage: number, a: number, b: number): number => {
+    const tau = Math.PI * 2;
+    let aNorm = ((a % tau) + tau) % tau;
+    let bNorm = ((b % tau) + tau) % tau;
+    if (Math.abs(aNorm - bNorm) > Math.PI) {
+        if (aNorm < bNorm) {
+            aNorm += tau;
+        } else {
+            bNorm += tau;
+        }
+    }
+    return split(percentage, aNorm, bNorm);
+};
+
+const splitLine = (percentage: number, a: Coord, b: Coord): Coord => {
     return {
-        x: a.x + percentage * (b.x - a.x),
-        y: a.y + percentage * (b.y - a.y),
+        x: split(percentage, a.x, b.x),
+        y: split(percentage, a.y, b.y),
     };
 };
 
@@ -226,7 +245,7 @@ const splitCurveAt = (percentage: number, a: Point, b: Point): [Point, Point, Po
     const f = splitLine(percentage, aHandle, bHandle);
     const g = splitLine(percentage, cHandle, f);
     const h = splitLine(1 - percentage, eHandle, f);
-    const dCoordinates = splitLine(percentage, g, h);
+    const dCoord = splitLine(percentage, g, h);
 
     if (debugBezier) {
         drawLine(b, bHandle, debugBezierColor);
@@ -236,17 +255,17 @@ const splitCurveAt = (percentage: number, a: Point, b: Point): [Point, Point, Po
         drawLine(eHandle, f, debugBezierColor);
         drawLine(g, h, debugBezierColor);
         if (!debugHandles) {
-            drawPoint(dCoordinates, debugBezierColor);
-            drawLine(dCoordinates, g, debugBezierColor);
-            drawLine(dCoordinates, h, debugBezierColor);
+            drawPoint(dCoord, debugBezierColor);
+            drawLine(dCoord, g, debugBezierColor);
+            drawLine(dCoord, h, debugBezierColor);
         }
     }
 
     const d: Point = {
-        x: dCoordinates.x,
-        y: dCoordinates.y,
-        handleIn: collapseHandle(dCoordinates, g),
-        handleOut: collapseHandle(dCoordinates, h),
+        x: dCoord.x,
+        y: dCoord.y,
+        handleIn: collapseHandle(dCoord, g),
+        handleOut: collapseHandle(dCoord, h),
     };
     return [c, d, e];
 };
@@ -274,6 +293,25 @@ const renderShape = (points: Point[]) => {
         ctx.bezierCurveTo(currHandle.x, currHandle.y, nextHandle.x, nextHandle.y, next.x, next.y);
         ctx.stroke();
     }
+};
+
+const interpolateBetween = (percentage: number, a: Point[], b: Point[]): Point[] => {
+    if (a.length !== b.length) throw new Error("shapes have different number of points");
+    const points: Point[] = [];
+    for (let i = 0; i < a.length; i++) {
+        points.push({
+            ...splitLine(percentage, a[i], b[i]),
+            handleIn: {
+                angle: splitAngle(percentage, a[i].handleIn.angle, b[i].handleIn.angle),
+                length: split(percentage, a[i].handleIn.length, b[i].handleIn.length),
+            },
+            handleOut: {
+                angle: splitAngle(percentage, a[i].handleOut.angle, b[i].handleOut.angle),
+                length: split(percentage, a[i].handleOut.length, b[i].handleOut.length),
+            },
+        });
+    }
+    return points;
 };
 
 const testSplitAt = (percentage: number) => {
@@ -330,6 +368,26 @@ const testDivideShape = () => {
     }
 };
 
+const testInterpolateBetween = (percentage: number) => {
+    const a = [
+        point(0.65, 0.72, 135, 0.05, -45, 0.05),
+        point(0.75, 0.72, -135, 0.05, 45, 0.05),
+        point(0.75, 0.82, -45, 0.05, 135, 0.05),
+        point(0.65, 0.82, 45, 0.05, 225, 0.05),
+    ];
+    const b = [
+        point(0.7, 0.72, 180, 0, 0, 0),
+        point(0.75, 0.77, -90, 0, 90, 0),
+        point(0.7, 0.82, 360 * 10, 0, 180, 0),
+        point(0.65, 0.77, 90, 0, -90, 0),
+    ];
+    if (percentage < 0.5) {
+        renderShape(interpolateBetween(2 * percentage, a, b));
+    } else {
+        renderShape(interpolateBetween(2 * percentage - 1, b, a));
+    }
+};
+
 (() => {
     const canvas = document.createElement("canvas");
     canvas.width = size;
@@ -347,6 +405,7 @@ const testDivideShape = () => {
         testSplitAt(percentage);
         testSplitBy();
         testDivideShape();
+        testInterpolateBetween(percentage);
         percentage += animationSpeed / 1000;
         percentage %= 1;
         if (animationSpeed > 0) requestAnimationFrame(renderFrame);
