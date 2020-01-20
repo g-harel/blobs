@@ -167,6 +167,24 @@ const approxCurveLength = (a: Point, b: Point): number => {
     return (ab + abHandle + a.handleOut.length + b.handleIn.length) / 2;
 };
 
+const calcOptimalOffset = (a: Coord[], b: Coord[]): number => {
+    const count = a.length;
+    let min = Infinity;
+    let minIndex = 0;
+    for (let i = 0; i < count; i++) {
+        let sum = 0;
+        for (let j = 0; j < count; j++) {
+            sum += distance(a[j], b[(j + i) % count]);
+            if (sum > min) break;
+        }
+        if (sum < min) {
+            min = sum;
+            minIndex = i;
+        }
+    }
+    return minIndex;
+};
+
 const divideShape = (count: number, points: Point[]): Point[] => {
     if (points.length < 3) throw new Error("not enough points");
     if (count < points.length) throw new Error("cannot remove points");
