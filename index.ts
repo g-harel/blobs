@@ -7,7 +7,7 @@ import {smooth} from "./internal/svg/smooth";
 import {renderEditable} from "./internal/svg/render";
 import {XmlElement} from "./editable";
 
-export interface BlobOptions {
+export interface PathOptions {
     // Bounding box dimensions.
     size: number;
 
@@ -17,6 +17,11 @@ export interface BlobOptions {
     // Shape contrast.
     contrast: number;
 
+    // Value to seed random number generator.
+    seed?: string;
+}
+
+export interface BlobOptions extends PathOptions {
     // Fill color.
     color?: string;
 
@@ -27,9 +32,6 @@ export interface BlobOptions {
         // Stroke width.
         width: number;
     };
-
-    // Value to seed random number generator.
-    seed?: string;
 
     // Render points, handles and stroke.
     guides?: boolean;
@@ -95,6 +97,48 @@ blobs.editable = (opt: BlobOptions): XmlElement => {
         strokeWidth: opt.stroke && opt.stroke.width,
         guides: opt.guides,
     });
+};
+
+blobs.path = (opt: PathOptions) => {
+    if (!opt) {
+        throw new Error("no options specified");
+    }
+
+    // Random number generator.
+    const rgen = rand(opt.seed || String(Date.now()));
+
+    if (!opt.size) {
+        throw new Error("no size specified");
+    }
+
+    if (opt.complexity <= 0 || opt.complexity > 1) {
+        throw new Error("complexity out of range ]0,1]");
+    }
+
+    if (opt.contrast < 0 || opt.contrast > 1) {
+        throw new Error("contrast out of range [0,1]");
+    }
+
+    const count = 3 + Math.floor(14 * opt.complexity);
+    const angle = 360 / count;
+    const radius = opt.size / Math.E;
+
+    const points: Point[] = [];
+    for (let i = 0; i < count; i++) {
+        const rand = 1 - 0.8 * opt.contrast * rgen();
+
+        points.push({
+            x: Math.sin(rad(i * angle)) * radius * rand + opt.size / 2,
+            y: Math.cos(rad(i * angle)) * radius * rand + opt.size / 2,
+        });
+    }
+
+    const smoothed = smooth(points, {
+        closed: true,
+        strength: ((4 / 3) * Math.tan(rad(angle / 4))) / Math.sin(rad(angle / 2)),
+    });
+
+    return smoothed;
 };
 
 export default blobs;

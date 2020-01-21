@@ -3,6 +3,8 @@
 // http://www.iscriptdesign.com/?sketch=tutorial/splitbezier
 // http://www.wikiwand.com/en/Hungarian_algorithm
 
+import blobs from "..";
+
 let ctx: CanvasRenderingContext2D;
 
 const animationSpeed = 2;
@@ -168,6 +170,7 @@ const approxCurveLength = (a: Point, b: Point): number => {
 };
 
 const calcOptimalOffset = (a: Coord[], b: Coord[]): number => {
+    // TODO also reverse
     const count = a.length;
     let min = Infinity;
     let minIndex = 0;
@@ -183,6 +186,15 @@ const calcOptimalOffset = (a: Coord[], b: Coord[]): number => {
         }
     }
     return minIndex;
+};
+
+const offsetShape = (offset: number, shape: Point[]): Point[] => {
+    if (offset === 0) return shape;
+    const out: Point[] = [];
+    for (let i = 0; i < shape.length; i++) {
+        out.push(shape[(i + offset) % shape.length]);
+    }
+    return out;
 };
 
 const divideShape = (count: number, points: Point[]): Point[] => {
@@ -314,6 +326,7 @@ const renderShape = (points: Point[]) => {
 };
 
 const interpolateBetween = (percentage: number, a: Point[], b: Point[]): Point[] => {
+    // TODO when handle length === 0, ignore/modify angle to look nice
     if (a.length !== b.length) throw new Error("shapes have different number of points");
     const points: Point[] = [];
     for (let i = 0; i < a.length; i++) {
@@ -330,6 +343,14 @@ const interpolateBetween = (percentage: number, a: Point[], b: Point[]): Point[]
         });
     }
     return points;
+};
+
+const interpolateBetweenLoop = (percentage: number, a: Point[], b: Point[]): Point[] => {
+    if (percentage < 0.5) {
+        return interpolateBetween(2 * percentage, a, b);
+    } else {
+        return interpolateBetween(2 * percentage - 1, b, a);
+    }
 };
 
 const testSplitAt = (percentage: number) => {
@@ -366,8 +387,8 @@ const testSplitBy = () => {
         renderShape(
             splitCurveBy(
                 i + 1,
-                point(0.15, 0.2 + i * 0.06, 30, 0.1, -30, 0.1),
-                point(0.45, 0.2 + i * 0.06, 135, 0.1, 225, 0.1),
+                point(0.15, 0.2 + i * 0.06, 30, 0.04, -30, 0.04),
+                point(0.25, 0.2 + i * 0.06, 135, 0.04, 225, 0.04),
             ),
         );
     }
@@ -378,9 +399,9 @@ const testDivideShape = () => {
     for (let i = 0; i < count; i++) {
         renderShape(
             divideShape(i + 3, [
-                point(0.6, 0.2 + i * 0.05, -10, 0.1, -45, 0.03),
-                point(0.7, 0.2 + i * 0.05 - 0.03, 180, 0.03, 0, 0.03),
-                point(0.8, 0.2 + i * 0.05, -135, 0.03, 170, 0.1),
+                point(0.3, 0.2 + i * 0.05, -10, 0.04, -45, 0.02),
+                point(0.35, 0.2 + i * 0.05 - 0.02, 180, 0.02, 0, 0.02),
+                point(0.4, 0.2 + i * 0.05, -135, 0.02, 170, 0.04),
             ]),
         );
     }
@@ -388,22 +409,83 @@ const testDivideShape = () => {
 
 const testInterpolateBetween = (percentage: number) => {
     const a = [
-        point(0.65, 0.72, 135, 0.05, -45, 0.05),
-        point(0.75, 0.72, -135, 0.05, 45, 0.05),
-        point(0.75, 0.82, -45, 0.05, 135, 0.05),
-        point(0.65, 0.82, 45, 0.05, 225, 0.05),
+        point(0.3, 0.72, 135, 0.05, -45, 0.05),
+        point(0.4, 0.72, -135, 0.05, 45, 0.05),
+        point(0.4, 0.82, -45, 0.05, 135, 0.05),
+        point(0.3, 0.82, 45, 0.05, 225, 0.05),
     ];
     const b = [
-        point(0.7, 0.72, 180, 0, 0, 0),
-        point(0.75, 0.77, -90, 0, 90, 0),
-        point(0.7, 0.82, 360 * 10, 0, 180, 0),
-        point(0.65, 0.77, 90, 0, -90, 0),
+        point(0.35, 0.72, 180, 0, 0, 0),
+        point(0.4, 0.77, -90, 0, 90, 0),
+        point(0.35, 0.82, 360 * 10, 0, 180, 0),
+        point(0.3, 0.77, 90, 0, -90, 0),
     ];
-    if (percentage < 0.5) {
-        renderShape(interpolateBetween(2 * percentage, a, b));
-    } else {
-        renderShape(interpolateBetween(2 * percentage - 1, b, a));
+    renderShape(interpolateBetweenLoop(percentage, a, b));
+};
+
+const testBlobMorph = (percentage: number) => {
+    const a = genBlob("a", 0.6, 0.6, 0.3, {x: 0.5, y: 0.2});
+    const b = genBlob("b", 1, 0.6, 0.3, {x: 0.5, y: 0.2});
+
+    const points = Math.max(a.length, b.length);
+    const aNorm = divideShape(points, a);
+    const bNorm = divideShape(points, b);
+    const offset = calcOptimalOffset(aNorm, bNorm);
+    const bOffset = offsetShape(offset, bNorm);
+
+    renderShape(interpolateBetweenLoop(percentage, aNorm, bOffset));
+};
+
+const testShapeMorph = (percentage: number) => {
+    const a = genBlob("a", 0.6, 0.6, 0.3, {x: 0.5, y: 0.5});
+    const b: Point[] = [
+        point(0.55, 0.5, 0, 0, 0, 0),
+        point(0.55, 0.7, 0, 0, 0, 0),
+        point(0.75, 0.7, 0, 0, 0, 0),
+        point(0.75, 0.5, 0, 0, 0, 0),
+    ];
+
+    const points = Math.max(a.length, b.length);
+    const aNorm = divideShape(points, a);
+    const bNorm = divideShape(points, b);
+    const offset = calcOptimalOffset(aNorm, bNorm);
+    const bOffset = offsetShape(offset, bNorm);
+    drawInfo("offset", offset)
+
+    // renderShape(a);
+    // renderShape(b);
+    renderShape(interpolateBetweenLoop(percentage, aNorm, bOffset));
+};
+
+const genBlob = (
+    seed: string,
+    complexity: number,
+    contrast: number,
+    s: number,
+    offset: Coord,
+): Point[] => {
+    const original = blobs.path({
+        complexity,
+        contrast,
+        size: s * size,
+        seed,
+    });
+    const out: Point[] = [];
+    for (let i = 0; i < original.length; i++) {
+        const p = original[i];
+        if (!p.handles) continue;
+        out.push(
+            point(
+                p.x / size + offset.x,
+                p.y / size + offset.y,
+                p.handles.angle + 180,
+                p.handles.in / size,
+                p.handles.angle,
+                p.handles.out / size,
+            ),
+        );
     }
+    return out;
 };
 
 (() => {
@@ -419,11 +501,15 @@ const testInterpolateBetween = (percentage: number) => {
     let percentage = animationStart;
     const renderFrame = () => {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+
         drawInfo("percentage", percentage);
         testSplitAt(percentage);
         testSplitBy();
         testDivideShape();
         testInterpolateBetween(percentage);
+        testBlobMorph(percentage);
+        testShapeMorph(percentage);
+
         percentage += animationSpeed / 1000;
         percentage %= 1;
         if (animationSpeed > 0) requestAnimationFrame(renderFrame);
