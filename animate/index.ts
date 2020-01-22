@@ -169,23 +169,43 @@ const approxCurveLength = (a: Point, b: Point): number => {
     return (ab + abHandle + a.handleOut.length + b.handleIn.length) / 2;
 };
 
-const calcOptimalOffset = (a: Coord[], b: Coord[]): number => {
-    // TODO also reverse
-    const count = a.length;
-    let min = Infinity;
-    let minIndex = 0;
-    for (let i = 0; i < count; i++) {
-        let sum = 0;
-        for (let j = 0; j < count; j++) {
-            sum += distance(a[j], b[(j + i) % count]);
-            if (sum > min) break;
-        }
-        if (sum < min) {
-            min = sum;
-            minIndex = i;
-        }
+const invertShape = (shape: Point[]): Point[] => {
+    const inverted: Point[] = [];
+    for (let i = 0; i < shape.length; i++) {
+        const j = shape.length - i - 1;
+        const p = copyPoint(shape[j]);
+        p.handleIn.angle += Math.PI;
+        p.handleOut.angle += Math.PI;
+        inverted.push(p);
     }
-    return minIndex;
+    return inverted;
+};
+
+const optimizeOrder = (a: Point[], b: Point[]): Point[] => {
+    const count = a.length;
+
+    let minSum = Infinity;
+    let minOffset = 0;
+    let minShape: Point[] = [];
+
+    const setMinOffset = (shape: Point[]) => {
+        for (let i = 0; i < count; i++) {
+            let sum = 0;
+            for (let j = 0; j < count; j++) {
+                sum += distance(a[j], shape[(j + i) % count]);
+                if (sum > minSum) break;
+            }
+            if (sum <= minSum) {
+                minSum = sum;
+                minOffset = i;
+                minShape = shape;
+            }
+        }
+    };
+    setMinOffset(b);
+    setMinOffset(invertShape(b));
+
+    return offsetShape(minOffset, minShape);
 };
 
 const offsetShape = (offset: number, shape: Point[]): Point[] => {
@@ -430,31 +450,26 @@ const testBlobMorph = (percentage: number) => {
     const points = Math.max(a.length, b.length);
     const aNorm = divideShape(points, a);
     const bNorm = divideShape(points, b);
-    const offset = calcOptimalOffset(aNorm, bNorm);
-    const bOffset = offsetShape(offset, bNorm);
+    const bOpt = optimizeOrder(aNorm, bNorm);
 
-    renderShape(interpolateBetweenLoop(percentage, aNorm, bOffset));
+    renderShape(interpolateBetweenLoop(percentage, aNorm, bOpt));
 };
 
 const testShapeMorph = (percentage: number) => {
     const a = genBlob("a", 0.6, 0.6, 0.3, {x: 0.5, y: 0.5});
     const b: Point[] = [
         point(0.55, 0.5, 0, 0, 0, 0),
-        point(0.55, 0.7, 0, 0, 0, 0),
-        point(0.75, 0.7, 0, 0, 0, 0),
         point(0.75, 0.5, 0, 0, 0, 0),
+        point(0.75, 0.7, 0, 0, 0, 0),
+        point(0.55, 0.7, 0, 0, 0, 0),
     ];
 
     const points = Math.max(a.length, b.length);
     const aNorm = divideShape(points, a);
     const bNorm = divideShape(points, b);
-    const offset = calcOptimalOffset(aNorm, bNorm);
-    const bOffset = offsetShape(offset, bNorm);
-    drawInfo("offset", offset)
+    const bOpt = optimizeOrder(aNorm, bNorm);
 
-    // renderShape(a);
-    // renderShape(b);
-    renderShape(interpolateBetweenLoop(percentage, aNorm, bOffset));
+    renderShape(interpolateBetweenLoop(percentage, aNorm, bOpt));
 };
 
 const genBlob = (
