@@ -1,8 +1,3 @@
-// http://www.cad.zju.edu.cn/home/zhx/papers/PoissonMorphing.pdf
-// https://medium.com/@adrian_cooney/bezier-interpolation-13b68563313a
-// http://www.iscriptdesign.com/?sketch=tutorial/splitbezier
-// http://www.wikiwand.com/en/Hungarian_algorithm
-
 import blobs from "..";
 
 let ctx: CanvasRenderingContext2D;
@@ -241,6 +236,21 @@ const divideShape = (count: number, points: Point[]): Point[] => {
     return out;
 };
 
+const fixAngles = (a: Point[], b: Point[]): Point[] => {
+    const out: Point[] = [];
+    for (let i = 0; i < a.length; i++) {
+        const point = copyPoint(b[i]);
+        if (point.handleIn.length === 0) {
+            point.handleIn.angle = a[i].handleIn.angle;
+        }
+        if (point.handleOut.length === 0) {
+            point.handleOut.angle = a[i].handleOut.angle;
+        }
+        out.push(point);
+    }
+    return out;
+};
+
 const divideLengths = (lengths: number[], add: number): number[] => {
     const divisors = lengths.map(() => 1);
     const sizes = lengths.slice();
@@ -346,7 +356,6 @@ const renderShape = (points: Point[]) => {
 };
 
 const interpolateBetween = (percentage: number, a: Point[], b: Point[]): Point[] => {
-    // TODO when handle length === 0, ignore/modify angle to look nice
     if (a.length !== b.length) throw new Error("shapes have different number of points");
     const points: Point[] = [];
     for (let i = 0; i < a.length; i++) {
@@ -451,8 +460,9 @@ const testBlobMorph = (percentage: number) => {
     const aNorm = divideShape(points, a);
     const bNorm = divideShape(points, b);
     const bOpt = optimizeOrder(aNorm, bNorm);
+    const bFix = fixAngles(aNorm, bOpt);
 
-    renderShape(interpolateBetweenLoop(percentage, aNorm, bOpt));
+    renderShape(interpolateBetweenLoop(percentage, aNorm, bFix));
 };
 
 const testShapeMorph = (percentage: number) => {
@@ -468,8 +478,9 @@ const testShapeMorph = (percentage: number) => {
     const aNorm = divideShape(points, a);
     const bNorm = divideShape(points, b);
     const bOpt = optimizeOrder(aNorm, bNorm);
+    const bFix = fixAngles(aNorm, bOpt);
 
-    renderShape(interpolateBetweenLoop(percentage, aNorm, bOpt));
+    renderShape(interpolateBetweenLoop(percentage, aNorm, bFix));
 };
 
 const genBlob = (
