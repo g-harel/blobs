@@ -382,6 +382,15 @@ const interpolateBetweenLoop = (percentage: number, a: Point[], b: Point[]): Poi
     }
 };
 
+const prepShapes = (a: Point[], b: Point[]): [Point[], Point[]] => {
+    const points = Math.max(a.length, b.length);
+    const aNorm = divideShape(points, a);
+    const bNorm = divideShape(points, b);
+    const bOpt = optimizeOrder(aNorm, bNorm);
+    const bFix = fixAngles(aNorm, bOpt);
+    return [aNorm, bFix];
+};
+
 const testSplitAt = (percentage: number) => {
     let points: Point[] = [
         point(0.15, 0.15, 135, 0.1, 315, 0.2),
@@ -452,20 +461,13 @@ const testInterpolateBetween = (percentage: number) => {
     renderShape(interpolateBetweenLoop(percentage, a, b));
 };
 
-const testBlobMorph = (percentage: number) => {
+const testPrepShapesA = (percentage: number) => {
     const a = genBlob("a", 0.6, 0.6, 0.3, {x: 0.5, y: 0.2});
     const b = genBlob("b", 1, 0.6, 0.3, {x: 0.5, y: 0.2});
-
-    const points = Math.max(a.length, b.length);
-    const aNorm = divideShape(points, a);
-    const bNorm = divideShape(points, b);
-    const bOpt = optimizeOrder(aNorm, bNorm);
-    const bFix = fixAngles(aNorm, bOpt);
-
-    renderShape(interpolateBetweenLoop(percentage, aNorm, bFix));
+    renderShape(interpolateBetweenLoop(percentage, ...prepShapes(a, b)));
 };
 
-const testShapeMorph = (percentage: number) => {
+const testPrepShapesB = (percentage: number) => {
     const a = genBlob("a", 0.6, 0.6, 0.3, {x: 0.5, y: 0.5});
     const b: Point[] = [
         point(0.55, 0.5, 0, 0, 0, 0),
@@ -473,14 +475,7 @@ const testShapeMorph = (percentage: number) => {
         point(0.75, 0.7, 0, 0, 0, 0),
         point(0.55, 0.7, 0, 0, 0, 0),
     ];
-
-    const points = Math.max(a.length, b.length);
-    const aNorm = divideShape(points, a);
-    const bNorm = divideShape(points, b);
-    const bOpt = optimizeOrder(aNorm, bNorm);
-    const bFix = fixAngles(aNorm, bOpt);
-
-    renderShape(interpolateBetweenLoop(percentage, aNorm, bFix));
+    renderShape(interpolateBetweenLoop(percentage, ...prepShapes(a, b)));
 };
 
 const genBlob = (
@@ -533,8 +528,8 @@ const genBlob = (
         testSplitBy();
         testDivideShape();
         testInterpolateBetween(percentage);
-        testBlobMorph(percentage);
-        testShapeMorph(percentage);
+        testPrepShapesA(percentage);
+        testPrepShapesB(percentage);
 
         percentage += animationSpeed / 1000;
         percentage %= 1;
