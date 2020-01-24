@@ -1,18 +1,18 @@
-import {Coord, Point} from "../types";
-import {expandHandle} from "../util";
+import {Coord, Point, Shape} from "../bezier/types";
+import {expandHandle} from "../bezier/util";
 
 const pointSize = 2;
 const infoSpacing = 20;
 
-export function clear(ctx: CanvasRenderingContext2D) {
+export const clear = (ctx: CanvasRenderingContext2D) => {
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-}
+};
 
-export function drawInfo(ctx: CanvasRenderingContext2D, pos: number, label: string, value: any) {
+export const drawInfo = (ctx: CanvasRenderingContext2D, pos: number, label: string, value: any) => {
     ctx.fillText(`${label}: ${value}`, infoSpacing, (pos + 1) * infoSpacing);
-}
+};
 
-function drawLine(ctx: CanvasRenderingContext2D, a: Coord, b: Coord, style: string) {
+const drawLine = (ctx: CanvasRenderingContext2D, a: Coord, b: Coord, style: string) => {
     const backupStrokeStyle = ctx.strokeStyle;
     ctx.beginPath();
     ctx.moveTo(a.x, a.y);
@@ -20,24 +20,24 @@ function drawLine(ctx: CanvasRenderingContext2D, a: Coord, b: Coord, style: stri
     ctx.strokeStyle = style;
     ctx.stroke();
     ctx.strokeStyle = backupStrokeStyle;
-}
+};
 
-function drawPoint(ctx: CanvasRenderingContext2D, p: Coord, style: string) {
+const drawPoint = (ctx: CanvasRenderingContext2D, p: Coord, style: string) => {
     const backupFillStyle = ctx.fillStyle;
     ctx.beginPath();
     ctx.arc(p.x, p.y, pointSize, 0, 2 * Math.PI);
     ctx.fillStyle = style;
     ctx.fill();
     ctx.fillStyle = backupFillStyle;
-}
+};
 
-export function drawShape(ctx: CanvasRenderingContext2D, debug: boolean, points: Point[]) {
-    if (points.length < 2) throw new Error("not enough points");
+export const drawShape = (ctx: CanvasRenderingContext2D, debug: boolean, shape: Shape) => {
+    if (shape.length < 2) throw new Error("not enough points");
 
-    for (let i = 0; i < points.length; i++) {
+    for (let i = 0; i < shape.length; i++) {
         // Compute coordinates of handles.
-        const curr = points[i];
-        const next = points[(i + 1) % points.length];
+        const curr = shape[i];
+        const next = shape[(i + 1) % shape.length];
         const currHandle = expandHandle(curr, curr.handleOut);
         const nextHandle = expandHandle(next, next.handleIn);
 
@@ -53,4 +53,4 @@ export function drawShape(ctx: CanvasRenderingContext2D, debug: boolean, points:
         ctx.bezierCurveTo(currHandle.x, currHandle.y, nextHandle.x, nextHandle.y, next.x, next.y);
         ctx.stroke();
     }
-}
+};

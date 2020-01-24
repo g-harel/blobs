@@ -1,9 +1,10 @@
 import blobs from "..";
 
+import {interpolateBetweenLoop} from "./bezier/interpolate";
+import {divideShape, prepShapes, splitCurveBy} from "./bezier/prepare";
+import {Coord, Point, Shape} from "./bezier/types";
+import {length, split} from "./bezier/util";
 import {clear, drawInfo, drawShape} from "./canvas/draw";
-import {interpolateBetweenLoop} from "./interpolate";
-import {approxCurveLength, divideShape, prepShapes, splitCurveAt, splitCurveBy} from "./prep";
-import {Coord, Point} from "./types";
 
 const animationSpeed = 2;
 const animationStart = 0.3;
@@ -32,7 +33,7 @@ const point = (x: number, y: number, ia: number, il: number, oa: number, ol: num
 };
 
 const testSplitAt = (percentage: number) => {
-    let points: Point[] = [
+    let points: Shape = [
         point(0.15, 0.15, 135, 0.1, 315, 0.2),
         point(0.85, 0.15, 225, 0.1, 45, 0.2),
         point(0.85, 0.85, 315, 0.1, 135, 0.2),
@@ -44,17 +45,17 @@ const testSplitAt = (percentage: number) => {
     for (let i = 0; i < count; i++) {
         const double = i * 2;
         const next = (double + 1) % stop;
-        points.splice(double, 2, ...splitCurveAt(percentage, points[double], points[next]));
+        points.splice(double, 2, ...split(percentage, points[double], points[next]));
     }
     points.splice(0, 1);
 
-    let length = 0;
+    let sum = 0;
     for (let i = 0; i < points.length; i++) {
         const curr = points[i];
         const next = points[(i + 1) % points.length];
-        length += approxCurveLength(curr, next);
+        sum += length(curr, next);
     }
-    drawInfo(ctx, 1, "split at lengths sum", length);
+    drawInfo(ctx, 1, "split at lengths sum", sum);
 
     drawShape(ctx, debug, points);
 };
@@ -113,7 +114,7 @@ const testPrepShapesA = (percentage: number) => {
 
 const testPrepShapesB = (percentage: number) => {
     const a = genBlob("a", 0.6, 0.6, 0.3, {x: 0.5, y: 0.5});
-    const b: Point[] = [
+    const b: Shape = [
         point(0.55, 0.5, 0, 0, 0, 0),
         point(0.75, 0.5, 0, 0, 0, 0),
         point(0.75, 0.7, 0, 0, 0, 0),
@@ -128,14 +129,14 @@ const genBlob = (
     contrast: number,
     s: number,
     offset: Coord,
-): Point[] => {
+): Shape => {
     const original = blobs.path({
         complexity,
         contrast,
         size: s * size,
         seed,
     });
-    const out: Point[] = [];
+    const out: Shape = [];
     for (let i = 0; i < original.length; i++) {
         const p = original[i];
         if (!p.handles) continue;

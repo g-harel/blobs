@@ -18,12 +18,4 @@ export interface Point extends Coord {
     handleOut: Handle;
 }
 
-export interface EasingFunc {
-    (progress: number): number;
-}
-
-export interface Keyframe {
-    points: Point[];
-    easeIn: EasingFunc;
-    easeOut: EasingFunc;
-}
+export type Shape = Point[];
