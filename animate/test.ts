@@ -1,6 +1,6 @@
 import blobs from "..";
 
-import {canvasClear, canvasSize, drawInfo, drawShape} from "./draw";
+import {clear, drawInfo, drawShape} from "./canvas/draw";
 import {interpolateBetweenLoop} from "./interpolate";
 import {approxCurveLength, divideShape, prepShapes, splitCurveAt, splitCurveBy} from "./prep";
 import {Coord, Point} from "./types";
@@ -9,6 +9,14 @@ const animationSpeed = 2;
 const animationStart = 0.3;
 const debug = true;
 const size = 1000;
+
+const canvas = document.createElement("canvas");
+document.body.appendChild(canvas);
+canvas.height = size;
+canvas.width = size;
+const temp = canvas.getContext("2d");
+if (temp === null) throw new Error("context is null");
+const ctx = temp;
 
 const rad = (deg: number) => {
     return (deg / 360) * 2 * Math.PI;
@@ -46,15 +54,16 @@ const testSplitAt = (percentage: number) => {
         const next = points[(i + 1) % points.length];
         length += approxCurveLength(curr, next);
     }
-    drawInfo("split at lengths sum", length);
+    drawInfo(ctx, 1, "split at lengths sum", length);
 
-    drawShape(debug, points);
+    drawShape(ctx, debug, points);
 };
 
 const testSplitBy = () => {
     const count = 10;
     for (let i = 0; i < count; i++) {
         drawShape(
+            ctx,
             debug,
             splitCurveBy(
                 i + 1,
@@ -69,6 +78,7 @@ const testDivideShape = () => {
     const count = 10;
     for (let i = 0; i < count; i++) {
         drawShape(
+            ctx,
             debug,
             divideShape(i + 3, [
                 point(0.3, 0.2 + i * 0.05, -10, 0.04, -45, 0.02),
@@ -92,13 +102,13 @@ const testInterpolateBetween = (percentage: number) => {
         point(0.35, 0.82, 360 * 10, 0, 180, 0),
         point(0.3, 0.77, 90, 0, -90, 0),
     ];
-    drawShape(debug, interpolateBetweenLoop(percentage, a, b));
+    drawShape(ctx, debug, interpolateBetweenLoop(percentage, a, b));
 };
 
 const testPrepShapesA = (percentage: number) => {
     const a = genBlob("a", 0.6, 0.6, 0.3, {x: 0.5, y: 0.2});
     const b = genBlob("b", 1, 0.6, 0.3, {x: 0.5, y: 0.2});
-    drawShape(debug, interpolateBetweenLoop(percentage, ...prepShapes(a, b)));
+    drawShape(ctx, debug, interpolateBetweenLoop(percentage, ...prepShapes(a, b)));
 };
 
 const testPrepShapesB = (percentage: number) => {
@@ -109,7 +119,7 @@ const testPrepShapesB = (percentage: number) => {
         point(0.75, 0.7, 0, 0, 0, 0),
         point(0.55, 0.7, 0, 0, 0, 0),
     ];
-    drawShape(debug, interpolateBetweenLoop(percentage, ...prepShapes(a, b)));
+    drawShape(ctx, debug, interpolateBetweenLoop(percentage, ...prepShapes(a, b)));
 };
 
 const genBlob = (
@@ -147,10 +157,9 @@ const genBlob = (
     let percentage = animationStart;
 
     const renderFrame = () => {
-        canvasClear();
-        canvasSize(size, size);
+        clear(ctx);
 
-        drawInfo("percentage", percentage);
+        drawInfo(ctx, 0, "percentage", percentage);
         testSplitAt(percentage);
         testSplitBy();
         testDivideShape();
