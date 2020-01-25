@@ -1,6 +1,7 @@
 import {loopAccess} from "./util";
-import {Point, interpolate} from "./point";
 import {xml, XmlElement} from "../../editable";
+import {Shape} from "../types";
+import {expandHandle} from "../shape/util";
 
 export interface RenderOptions {
     // Viewport size.
@@ -26,45 +27,15 @@ export interface RenderOptions {
 
 // Renders a shape made up of the input points to an editable data structure
 // which can be rendered to svg.
-export const renderEditable = (p: Point[], opt: RenderOptions): XmlElement => {
-    const points = p.map((point) => interpolate(point, opt.height));
-
-    // Compute guides from input point data.
-    const handles: {x1: number; y1: number; x2: number; y2: number}[] = [];
+export const renderEditable = (points: Shape, opt: RenderOptions): XmlElement => {
+    // Render path data attribute from points and handles.
+    let path = `M${points[0].x},${points[0].y}`;
     for (let i = 0; i < points.length; i++) {
-        const {x, y, handles: hands} = loopAccess(points)(i);
-
+        const curr = loopAccess(points)(i);
         const next = loopAccess(points)(i + 1);
-        const nextHandles = next.handles;
-
-        if (hands === undefined) {
-            handles.push({x1: x, y1: y, x2: next.x, y2: next.y});
-            continue;
-        }
-
-        handles.push({
-            x1: x - Math.cos(hands.angle) * hands.out,
-            y1: y + Math.sin(hands.angle) * hands.out,
-            x2: next.x + Math.cos(nextHandles.angle) * nextHandles.in,
-            y2: next.y - Math.sin(nextHandles.angle) * nextHandles.in,
-        });
-    }
-
-    // Render path data attribute from points and handles. Must loop more times
-    // than the number of points in order to correctly close the path.
-    let path = "";
-    for (let i = 0; i <= points.length; i++) {
-        const point = loopAccess(points)(i);
-        const hands = loopAccess(handles)(i - 1);
-
-        // Start at the first point's coordinates.
-        if (i === 0) {
-            path += `M${point.x},${point.y}`;
-            continue;
-        }
-
-        // Add cubic bezier coordinates using the computed handle positions.
-        path += `C${hands.x1},${hands.y1},${hands.x2},${hands.y2},${point.x},${point.y}`;
+        const currControl = expandHandle(curr, curr.handleOut);
+        const nextControl = expandHandle(next, next.handleIn);
+        path += `C${currControl.x},${currControl.y},${nextControl.x},${nextControl.y},${next.x},${next.y}`;
     }
 
     const stroke = opt.stroke || (opt.guides ? "black" : "none");
@@ -109,49 +80,50 @@ export const renderEditable = (p: Point[], opt: RenderOptions): XmlElement => {
 
         // Points and handles.
         for (let i = 0; i < points.length; i++) {
-            const {x, y} = loopAccess(points)(i);
-            const hands = loopAccess(handles)(i);
-            const nextPoint = loopAccess(points)(i + 1);
-
-            const xmlIncomingHandleLine = xml("line");
-            xmlIncomingHandleLine.attributes.x1 = x;
-            xmlIncomingHandleLine.attributes.y1 = y;
-            xmlIncomingHandleLine.attributes.x2 = hands.x1;
-            xmlIncomingHandleLine.attributes.y2 = hands.y1;
-            xmlIncomingHandleLine.attributes["stroke-width"] = size;
-            xmlIncomingHandleLine.attributes.stroke = color;
+            const curr = loopAccess(points)(i);
+            const next = loopAccess(points)(i + 1);
+            const currControl = expandHandle(curr, curr.handleOut);
+            const nextControl = expandHandle(next, next.handleIn);
 
             const xmlOutgoingHandleLine = xml("line");
-            xmlOutgoingHandleLine.attributes.x1 = nextPoint.x;
-            xmlOutgoingHandleLine.attributes.y1 = nextPoint.y;
-            xmlOutgoingHandleLine.attributes.x2 = hands.x2;
-            xmlOutgoingHandleLine.attributes.y2 = hands.y2;
+            xmlOutgoingHandleLine.attributes.x1 = curr.x;
+            xmlOutgoingHandleLine.attributes.y1 = curr.y;
+            xmlOutgoingHandleLine.attributes.x2 = currControl.x;
+            xmlOutgoingHandleLine.attributes.y2 = currControl.y;
             xmlOutgoingHandleLine.attributes["stroke-width"] = size;
             xmlOutgoingHandleLine.attributes.stroke = color;
-            xmlOutgoingHandleLine.attributes["stroke-dasharray"] = 2 * size;
 
-            const xmlIncomingHandleCircle = xml("circle");
-            xmlIncomingHandleCircle.attributes.cx = hands.x1;
-            xmlIncomingHandleCircle.attributes.cy = hands.y1;
-            xmlIncomingHandleCircle.attributes.r = size;
-            xmlIncomingHandleCircle.attributes.fill = color;
+            const xmlIncomingHandleLine = xml("line");
+            xmlIncomingHandleLine.attributes.x1 = next.x;
+            xmlIncomingHandleLine.attributes.y1 = next.y;
+            xmlIncomingHandleLine.attributes.x2 = nextControl.x;
+            xmlIncomingHandleLine.attributes.y2 = nextControl.y;
+            xmlIncomingHandleLine.attributes["stroke-width"] = size;
+            xmlIncomingHandleLine.attributes.stroke = color;
+            xmlIncomingHandleLine.attributes["stroke-dasharray"] = 2 * size;
 
             const xmlOutgoingHandleCircle = xml("circle");
-            xmlOutgoingHandleCircle.attributes.cx = hands.x2;
-            xmlOutgoingHandleCircle.attributes.cy = hands.y2;
+            xmlOutgoingHandleCircle.attributes.cx = currControl.x;
+            xmlOutgoingHandleCircle.attributes.cy = currControl.y;
             xmlOutgoingHandleCircle.attributes.r = size;
             xmlOutgoingHandleCircle.attributes.fill = color;
 
+            const xmlIncomingHandleCircle = xml("circle");
+            xmlIncomingHandleCircle.attributes.cx = nextControl.x;
+            xmlIncomingHandleCircle.attributes.cy = nextControl.y;
+            xmlIncomingHandleCircle.attributes.r = size;
+            xmlIncomingHandleCircle.attributes.fill = color;
+
             const xmlPointCircle = xml("circle");
-            xmlPointCircle.attributes.cx = x;
-            xmlPointCircle.attributes.cy = y;
+            xmlPointCircle.attributes.cx = curr.x;
+            xmlPointCircle.attributes.cy = curr.y;
             xmlPointCircle.attributes.r = 2 * size;
             xmlPointCircle.attributes.fill = color;
 
-            xmlContentGroup.children.push(xmlIncomingHandleLine);
             xmlContentGroup.children.push(xmlOutgoingHandleLine);
-            xmlContentGroup.children.push(xmlIncomingHandleCircle);
+            xmlContentGroup.children.push(xmlIncomingHandleLine);
             xmlContentGroup.children.push(xmlOutgoingHandleCircle);
+            xmlContentGroup.children.push(xmlIncomingHandleCircle);
             xmlContentGroup.children.push(xmlPointCircle);
         }
     }

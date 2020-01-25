@@ -1,7 +1,7 @@
 // https://www.blobmaker.app/
 
 import {rand} from "./internal/math/rand";
-import {Coord} from "./internal/types";
+import {Shape} from "./internal/types";
 import {rad} from "./internal/math/unit";
 import {smooth} from "./internal/svg/smooth";
 import {renderEditable} from "./internal/svg/render";
@@ -72,22 +72,20 @@ blobs.editable = (opt: BlobOptions): XmlElement => {
     const angle = 360 / count;
     const radius = opt.size / Math.E;
 
-    const points: Coord[] = [];
+    const points: Shape = [];
     for (let i = 0; i < count; i++) {
         const rand = 1 - 0.8 * opt.contrast * rgen();
-
         points.push({
             x: Math.sin(rad(i * angle)) * radius * rand + opt.size / 2,
-            y: Math.cos(rad(i * angle)) * radius * rand + opt.size / 2,
+            y: opt.size - (Math.cos(rad(i * angle)) * radius * rand + opt.size / 2),
+            handleIn: {angle: 0, length: 0},
+            handleOut: {angle: 0, length: 0},
         });
     }
 
     // https://math.stackexchange.com/a/873589/235756
     const smoothingStrength = ((4 / 3) * Math.tan(rad(angle / 4))) / Math.sin(rad(angle / 2));
-    const smoothed = smooth(points, {
-        closed: true,
-        strength: smoothingStrength,
-    });
+    const smoothed = smooth(points, smoothingStrength);
 
     return renderEditable(smoothed, {
         closed: true,
@@ -101,6 +99,7 @@ blobs.editable = (opt: BlobOptions): XmlElement => {
     });
 };
 
+// TODO remove
 blobs.path = (opt: PathOptions) => {
     if (!opt) {
         throw new Error("no options specified");
@@ -125,20 +124,20 @@ blobs.path = (opt: PathOptions) => {
     const angle = 360 / count;
     const radius = opt.size / Math.E;
 
-    const points: Coord[] = [];
+    const points: Shape = [];
     for (let i = 0; i < count; i++) {
         const rand = 1 - 0.8 * opt.contrast * rgen();
-
         points.push({
             x: Math.sin(rad(i * angle)) * radius * rand + opt.size / 2,
             y: Math.cos(rad(i * angle)) * radius * rand + opt.size / 2,
+            handleIn: {angle: 0, length: 0},
+            handleOut: {angle: 0, length: 0},
         });
     }
 
-    const smoothed = smooth(points, {
-        closed: true,
-        strength: ((4 / 3) * Math.tan(rad(angle / 4))) / Math.sin(rad(angle / 2)),
-    });
+    // https://math.stackexchange.com/a/873589/235756
+    const smoothingStrength = ((4 / 3) * Math.tan(rad(angle / 4))) / Math.sin(rad(angle / 2));
+    const smoothed = smooth(points, smoothingStrength);
 
     return smoothed;
 };

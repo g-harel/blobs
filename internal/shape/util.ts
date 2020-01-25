@@ -8,22 +8,26 @@ export const copyPoint = (p: Point): Point => ({
     handleOut: {...p.handleOut},
 });
 
-export const expandHandle = (point: Coord, handle: Handle): Coord => {
-    return {
-        x: point.x + handle.length * Math.cos(handle.angle),
-        y: point.y + handle.length * Math.sin(handle.angle),
-    };
+export const angleBetween = (a: Coord, b: Coord): number => {
+    const dx = b.x - a.x;
+    const dy = -b.y + a.y;
+    const angle = Math.atan2(dy, dx);
+    if (angle < 0) {
+        return Math.abs(angle);
+    } else {
+        return 2 * Math.PI - angle;
+    }
 };
 
-const collapseHandle = (point: Coord, handle: Coord): Handle => {
-    const dx = handle.x - point.x;
-    const dy = -handle.y + point.y;
-    let angle = Math.atan2(dy, dx);
-    return {
-        angle: angle < 0 ? Math.abs(angle) : 2 * Math.PI - angle,
-        length: Math.sqrt(dx ** 2 + dy ** 2),
-    };
-};
+export const expandHandle = (point: Coord, handle: Handle): Coord => ({
+    x: point.x + handle.length * Math.cos(handle.angle),
+    y: point.y + handle.length * Math.sin(handle.angle),
+});
+
+const collapseHandle = (point: Coord, handle: Coord): Handle => ({
+    angle: angleBetween(point, handle),
+    length: Math.sqrt((handle.x - point.x) ** 2 + (handle.y - point.y) ** 2),
+});
 
 export const length = (a: Point, b: Point): number => {
     const aHandle = expandHandle(a, a.handleOut);

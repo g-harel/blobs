@@ -54,6 +54,7 @@ export const divideShape = (count: number, points: Shape): Shape => {
 };
 
 const fixAngles = (a: Shape, b: Shape): Shape => {
+    // TODO fix in first shape too
     const out: Shape = [];
     for (let i = 0; i < a.length; i++) {
         const point = copyPoint(b[i]);

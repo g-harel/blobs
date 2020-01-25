@@ -130,28 +130,17 @@ const genBlob = (
     s: number,
     offset: Coord,
 ): Shape => {
-    const original = blobs.path({
+    const shape = blobs.path({
         complexity,
         contrast,
         size: s * size,
         seed,
     });
-    const out: Shape = [];
-    for (let i = 0; i < original.length; i++) {
-        const p = original[i];
-        if (!p.handles) continue;
-        out.push(
-            point(
-                p.x / size + offset.x,
-                p.y / size + offset.y,
-                p.handles.angle + 180,
-                p.handles.in / size,
-                p.handles.angle,
-                p.handles.out / size,
-            ),
-        );
+    for (let i = 0; i < shape.length; i++) {
+        shape[i].x += offset.x * size;
+        shape[i].y += offset.y * size;
     }
-    return out;
+    return shape;
 };
 
 (() => {
