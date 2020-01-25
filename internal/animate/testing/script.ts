@@ -1,10 +1,10 @@
-import blobs from "..";
+import blobs from "../../../legacy/blobs";
 
-import {interpolateBetweenLoop} from "../internal/animate/interpolate";
-import {divideShape, prepShapes} from "../internal/animate/prepare";
-import {Coord, Point, Shape} from "../internal/types";
-import {length, insertAt, insertCount, rad, mod} from "../internal/util";
-import {clear, drawInfo, drawShape} from "../internal/render/canvas";
+import {interpolateBetweenLoop} from "../interpolate";
+import {divideShape, prepShapes} from "../prepare";
+import {Coord, Point, Shape} from "../../types";
+import {length, insertAt, insertCount, rad, mod} from "../../util";
+import {clear, drawInfo, drawShape} from "../../render/canvas";
 
 const animationSpeed = 2;
 const animationStart = 0.3;

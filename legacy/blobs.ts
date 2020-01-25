@@ -1,10 +1,10 @@
 // https://www.blobmaker.app/
 
-import {rand} from "./internal/rand";
-import {Shape} from "./internal/types";
-import {smooth, rad} from "./internal/util";
-import {renderEditable} from "./internal/render/svg";
-import {XmlElement} from "./editable";
+import {rand} from "../internal/rand";
+import {Shape} from "../internal/types";
+import {smooth, rad} from "../internal/util";
+import {renderEditable} from "../internal/render/svg";
+import {XmlElement} from "../editable";
 
 export interface PathOptions {
     // Bounding box dimensions.
