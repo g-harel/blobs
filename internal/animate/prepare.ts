@@ -1,4 +1,4 @@
-import {copyPoint, length, reverse, shift, insertCount, distance} from "../util";
+import {copyPoint, length, reverse, shift, insertCount, distance, mod} from "../util";
 import {Point, Shape} from "../types";
 
 const optimizeOrder = (a: Shape, b: Shape): Shape => {
@@ -12,7 +12,7 @@ const optimizeOrder = (a: Shape, b: Shape): Shape => {
         for (let i = 0; i < count; i++) {
             let sum = 0;
             for (let j = 0; j < count; j++) {
-                sum += distance(a[j], shape[(j + i) % count]);
+                sum += distance(a[j], shape[mod(j + i, count)]);
                 if (sum > minSum) break;
             }
             if (sum <= minSum) {
@@ -35,14 +35,14 @@ export const divideShape = (count: number, points: Shape): Shape => {
 
     const lengths = [];
     for (let i = 0; i < points.length; i++) {
-        lengths.push(length(points[i], points[(i + 1) % points.length]));
+        lengths.push(length(points[i], points[mod(i + 1, points.length)]));
     }
 
     const divisors = divideLengths(lengths, count - points.length);
     const out: Shape = [];
     for (let i = 0; i < points.length; i++) {
         const curr: Point = out[out.length - 1] || points[i];
-        const next = points[(i + 1) % points.length];
+        const next = points[mod(i + 1, points.length)];
         out.pop();
         out.push(...insertCount(divisors[i], curr, next));
     }

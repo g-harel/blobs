@@ -1,6 +1,6 @@
 import {xml, XmlElement} from "../../editable";
 import {Shape} from "../types";
-import {expandHandle} from "../util";
+import {expandHandle, mod} from "../util";
 
 export interface RenderOptions {
     // Viewport size.
@@ -31,7 +31,7 @@ export const renderEditable = (points: Shape, opt: RenderOptions): XmlElement =>
     let path = `M${points[0].x},${points[0].y}`;
     for (let i = 0; i < points.length; i++) {
         const curr = points[i];
-        const next = points[(i + 1) % points.length];
+        const next = points[mod(i + 1, points.length)];
         const currControl = expandHandle(curr, curr.handleOut);
         const nextControl = expandHandle(next, next.handleIn);
         path += `C${currControl.x},${currControl.y},${nextControl.x},${nextControl.y},${next.x},${next.y}`;
@@ -80,7 +80,7 @@ export const renderEditable = (points: Shape, opt: RenderOptions): XmlElement =>
         // Points and handles.
         for (let i = 0; i < points.length; i++) {
             const curr = points[i];
-            const next = points[(i + 1) % points.length];
+            const next = points[mod(i + 1, points.length)];
             const currControl = expandHandle(curr, curr.handleOut);
             const nextControl = expandHandle(next, next.handleIn);
 

@@ -1,5 +1,5 @@
 import {Coord, Shape} from "../types";
-import {expandHandle} from "../util";
+import {expandHandle, mod} from "../util";
 
 const pointSize = 2;
 const infoSpacing = 20;
@@ -37,7 +37,7 @@ export const drawShape = (ctx: CanvasRenderingContext2D, debug: boolean, shape: 
     for (let i = 0; i < shape.length; i++) {
         // Compute coordinates of handles.
         const curr = shape[i];
-        const next = shape[(i + 1) % shape.length];
+        const next = shape[mod(i + 1, shape.length)];
         const currHandle = expandHandle(curr, curr.handleOut);
         const nextHandle = expandHandle(next, next.handleIn);
 

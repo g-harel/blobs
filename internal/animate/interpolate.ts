@@ -1,10 +1,10 @@
 import {Shape} from "../types";
-import {split, splitLine} from "../util";
+import {split, splitLine, mod} from "../util";
 
 const interpolateAngle = (percentage: number, a: number, b: number): number => {
     const tau = Math.PI * 2;
-    let aNorm = ((a % tau) + tau) % tau;
-    let bNorm = ((b % tau) + tau) % tau;
+    let aNorm = mod(a, tau);
+    let bNorm = mod(b, tau);
     if (Math.abs(aNorm - bNorm) > Math.PI) {
         if (aNorm < bNorm) {
             aNorm += tau;

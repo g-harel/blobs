@@ -3,7 +3,7 @@ import blobs from "..";
 import {interpolateBetweenLoop} from "../internal/animate/interpolate";
 import {divideShape, prepShapes} from "../internal/animate/prepare";
 import {Coord, Point, Shape} from "../internal/types";
-import {length, insertAt, insertCount, rad} from "../internal/util";
+import {length, insertAt, insertCount, rad, mod} from "../internal/util";
 import {clear, drawInfo, drawShape} from "../internal/render/canvas";
 
 const animationSpeed = 2;
@@ -40,7 +40,7 @@ const testSplitAt = (percentage: number) => {
     const stop = 2 * count - 1;
     for (let i = 0; i < count; i++) {
         const double = i * 2;
-        const next = (double + 1) % stop;
+        const next = mod(double + 1, stop);
         points.splice(double, 2, ...insertAt(percentage, points[double], points[next]));
     }
     points.splice(0, 1);
@@ -48,7 +48,7 @@ const testSplitAt = (percentage: number) => {
     let sum = 0;
     for (let i = 0; i < points.length; i++) {
         const curr = points[i];
-        const next = points[(i + 1) % points.length];
+        const next = points[mod(i + 1, points.length)];
         sum += length(curr, next);
     }
     drawInfo(ctx, 1, "split at lengths sum", sum);
@@ -154,7 +154,7 @@ const genBlob = (
         testPrepShapesB(percentage);
 
         percentage += animationSpeed / 1000;
-        percentage %= 1;
+        percentage = mod(percentage, 1);
         if (animationSpeed > 0) requestAnimationFrame(renderFrame);
     };
     renderFrame();

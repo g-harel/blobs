@@ -52,7 +52,7 @@ export const shift = (offset: number, shape: Shape): Shape => {
     if (offset === 0) return shape;
     const out: Shape = [];
     for (let i = 0; i < shape.length; i++) {
-        out.push(shape[(i + offset) % shape.length]);
+        out.push(shape[mod(i + offset, shape.length)]);
     }
     return out;
 };
@@ -110,7 +110,7 @@ export const smooth = (shape: Shape, strength: number): Shape => {
     for (let i = 0; i < shape.length; i++) {
         const curr = shape[i];
         const before = shape[mod(i - 1, shape.length)];
-        const after = shape[(i + 1) % shape.length];
+        const after = shape[mod(i + 1, shape.length)];
         const angle = angleOf(before, after);
 
         out.push({
@@ -130,6 +130,8 @@ export const smooth = (shape: Shape, strength: number): Shape => {
     return out;
 };
 
+// Modulo operation that always produces a positive result.
+// https://stackoverflow.com/q/4467539/3053361
 export const mod = (a: number, n: number): number => {
     return ((a % n) + n) % n;
 };
