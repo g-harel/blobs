@@ -1,10 +1,10 @@
 import blobs from "..";
 
-import {interpolateBetweenLoop} from "../internal/shape/interpolate";
-import {divideShape, prepShapes, splitCurveBy} from "../internal/shape/prepare";
+import {interpolateBetweenLoop} from "../internal/animate/interpolate";
+import {divideShape, prepShapes} from "../internal/animate/prepare";
 import {Coord, Point, Shape} from "../internal/types";
-import {length, split} from "../internal/shape/util";
-import {clear, drawInfo, drawShape} from "../internal/canvas/draw";
+import {length, insertAt, insertCount, rad} from "../internal/util";
+import {clear, drawInfo, drawShape} from "../internal/render/canvas";
 
 const animationSpeed = 2;
 const animationStart = 0.3;
@@ -18,10 +18,6 @@ canvas.width = size;
 const temp = canvas.getContext("2d");
 if (temp === null) throw new Error("context is null");
 const ctx = temp;
-
-const rad = (deg: number) => {
-    return (deg / 360) * 2 * Math.PI;
-};
 
 const point = (x: number, y: number, ia: number, il: number, oa: number, ol: number): Point => {
     return {
@@ -45,7 +41,7 @@ const testSplitAt = (percentage: number) => {
     for (let i = 0; i < count; i++) {
         const double = i * 2;
         const next = (double + 1) % stop;
-        points.splice(double, 2, ...split(percentage, points[double], points[next]));
+        points.splice(double, 2, ...insertAt(percentage, points[double], points[next]));
     }
     points.splice(0, 1);
 
@@ -66,7 +62,7 @@ const testSplitBy = () => {
         drawShape(
             ctx,
             debug,
-            splitCurveBy(
+            insertCount(
                 i + 1,
                 point(0.15, 0.2 + i * 0.06, 30, 0.04, -30, 0.04),
                 point(0.25, 0.2 + i * 0.06, 135, 0.04, 225, 0.04),

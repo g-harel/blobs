@@ -1,5 +1,5 @@
 import {Coord, Shape} from "../types";
-import {expandHandle} from "../shape/util";
+import {expandHandle} from "../util";
 
 const pointSize = 2;
 const infoSpacing = 20;

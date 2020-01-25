@@ -1,5 +1,4 @@
-import {Coord, Handle, Point, Shape} from "../types";
-import {distance, splitLine} from "../math/geometry";
+import {Coord, Handle, Point, Shape} from "./types";
 
 export const copyPoint = (p: Point): Point => ({
     x: p.x,
@@ -8,7 +7,7 @@ export const copyPoint = (p: Point): Point => ({
     handleOut: {...p.handleOut},
 });
 
-export const angleBetween = (a: Coord, b: Coord): number => {
+export const angleOf = (a: Coord, b: Coord): number => {
     const dx = b.x - a.x;
     const dy = -b.y + a.y;
     const angle = Math.atan2(dy, dx);
@@ -25,7 +24,7 @@ export const expandHandle = (point: Coord, handle: Handle): Coord => ({
 });
 
 const collapseHandle = (point: Coord, handle: Coord): Handle => ({
-    angle: angleBetween(point, handle),
+    angle: angleOf(point, handle),
     length: Math.sqrt((handle.x - point.x) ** 2 + (handle.y - point.y) ** 2),
 });
 
@@ -68,7 +67,7 @@ export const shift = (offset: number, shape: Shape): Shape => {
 // f: split point between a and b's handles.
 // g: split point between c's handle and f.
 // h: split point between e's handle and f.
-export const split = (percentage: number, a: Point, b: Point): [Point, Point, Point] => {
+export const insertAt = (percentage: number, a: Point, b: Point): [Point, Point, Point] => {
     const c = copyPoint(a);
     c.handleOut.length *= percentage;
 
@@ -91,4 +90,77 @@ export const split = (percentage: number, a: Point, b: Point): [Point, Point, Po
         handleOut: collapseHandle(dCoord, h),
     };
     return [c, d, e];
+};
+
+export const insertCount = (count: number, a: Point, b: Point): Shape => {
+    if (count < 2) return [a, b];
+    const percentage = 1 / count;
+    const [c, d, e] = insertAt(percentage, a, b);
+    if (count === 2) return [c, d, e];
+    return [c, ...insertCount(count - 1, d, e)];
+};
+
+// Smooths out the path made up of the given points.
+// Existing handles are ignored.
+export const smooth = (shape: Shape, strength: number): Shape => {
+    if (shape.length < 3) throw new Error("not enough points to smooth shape");
+
+    const out: Shape = [];
+
+    for (let i = 0; i < shape.length; i++) {
+        const curr = shape[i];
+        const before = shape[mod(i - 1, shape.length)];
+        const after = shape[(i + 1) % shape.length];
+        const angle = angleOf(before, after);
+
+        out.push({
+            x: curr.x,
+            y: curr.y,
+            handleIn: {
+                angle: angle + Math.PI,
+                length: strength * (1 / 2) * distance(curr, before),
+            },
+            handleOut: {
+                angle,
+                length: strength * (1 / 2) * distance(curr, after),
+            },
+        });
+    }
+
+    return out;
+};
+
+export const mod = (a: number, n: number): number => {
+    return ((a % n) + n) % n;
+};
+
+// Converts degrees to radians.
+export const rad = (deg: number) => {
+    return (deg / 360) * 2 * Math.PI;
+};
+
+// Converts radians to degrees.
+export const deg = (rad: number) => {
+    return (((rad / Math.PI) * 1) / 2) * 360;
+};
+
+// Calculates distance between two points.
+export const distance = (a: Coord, b: Coord): number => {
+    return Math.sqrt((a.x - b.x) ** 2 + (a.y - b.y) ** 2);
+};
+
+// Calculates the angle of the line from a to b in degrees.
+export const angle = (a: Coord, b: Coord): number => {
+    return deg(Math.atan2(b.y - a.y, b.x - a.x));
+};
+
+export const split = (percentage: number, a: number, b: number): number => {
+    return a + percentage * (b - a);
+};
+
+export const splitLine = (percentage: number, a: Coord, b: Coord): Coord => {
+    return {
+        x: split(percentage, a.x, b.x),
+        y: split(percentage, a.y, b.y),
+    };
 };

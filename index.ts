@@ -1,10 +1,9 @@
 // https://www.blobmaker.app/
 
-import {rand} from "./internal/math/rand";
+import {rand} from "./internal/rand";
 import {Shape} from "./internal/types";
-import {rad} from "./internal/math/unit";
-import {smooth} from "./internal/svg/smooth";
-import {renderEditable} from "./internal/svg/render";
+import {smooth, rad} from "./internal/util";
+import {renderEditable} from "./internal/render/svg";
 import {XmlElement} from "./editable";
 
 export interface PathOptions {

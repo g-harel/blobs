@@ -1,6 +1,5 @@
-import {copyPoint, length, reverse, shift, split} from "./util";
+import {copyPoint, length, reverse, shift, insertCount, distance} from "../util";
 import {Point, Shape} from "../types";
-import {distance} from "../math/geometry";
 
 const optimizeOrder = (a: Shape, b: Shape): Shape => {
     const count = a.length;
@@ -45,7 +44,7 @@ export const divideShape = (count: number, points: Shape): Shape => {
         const curr: Point = out[out.length - 1] || points[i];
         const next = points[(i + 1) % points.length];
         out.pop();
-        out.push(...splitCurveBy(divisors[i], curr, next));
+        out.push(...insertCount(divisors[i], curr, next));
     }
     const last = out.pop();
     out[0].handleIn = last!.handleIn;
@@ -89,14 +88,6 @@ const divideLengths = (lengths: number[], add: number): number[] => {
         sizes[maxSizeIndex] = lengths[maxSizeIndex] / divisors[maxSizeIndex];
     }
     return divisors;
-};
-
-export const splitCurveBy = (count: number, a: Point, b: Point): Shape => {
-    if (count < 2) return [a, b];
-    const percentage = 1 / count;
-    const [c, d, e] = split(percentage, a, b);
-    if (count === 2) return [c, d, e];
-    return [c, ...splitCurveBy(count - 1, d, e)];
 };
 
 export const prepShapes = (a: Shape, b: Shape): [Shape, Shape] => {

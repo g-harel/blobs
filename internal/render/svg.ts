@@ -1,7 +1,6 @@
-import {loopAccess} from "./util";
 import {xml, XmlElement} from "../../editable";
 import {Shape} from "../types";
-import {expandHandle} from "../shape/util";
+import {expandHandle} from "../util";
 
 export interface RenderOptions {
     // Viewport size.
@@ -31,8 +30,8 @@ export const renderEditable = (points: Shape, opt: RenderOptions): XmlElement =>
     // Render path data attribute from points and handles.
     let path = `M${points[0].x},${points[0].y}`;
     for (let i = 0; i < points.length; i++) {
-        const curr = loopAccess(points)(i);
-        const next = loopAccess(points)(i + 1);
+        const curr = points[i];
+        const next = points[(i + 1) % points.length];
         const currControl = expandHandle(curr, curr.handleOut);
         const nextControl = expandHandle(next, next.handleIn);
         path += `C${currControl.x},${currControl.y},${nextControl.x},${nextControl.y},${next.x},${next.y}`;
@@ -80,8 +79,8 @@ export const renderEditable = (points: Shape, opt: RenderOptions): XmlElement =>
 
         // Points and handles.
         for (let i = 0; i < points.length; i++) {
-            const curr = loopAccess(points)(i);
-            const next = loopAccess(points)(i + 1);
+            const curr = points[i];
+            const next = points[(i + 1) % points.length];
             const currControl = expandHandle(curr, curr.handleOut);
             const nextControl = expandHandle(next, next.handleIn);
 
