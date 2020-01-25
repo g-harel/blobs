@@ -1,4 +1,4 @@
-import {Shape} from "../shape/types";
+import {Shape} from "../types";
 
 export interface EasingFunc {
     (progress: number): number;

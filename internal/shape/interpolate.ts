@@ -1,4 +1,4 @@
-import {Shape} from "./types";
+import {Shape} from "../types";
 import {split, splitLine} from "../math/geometry";
 
 const interpolateAngle = (percentage: number, a: number, b: number): number => {

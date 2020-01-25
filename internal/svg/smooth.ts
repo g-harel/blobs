@@ -7,29 +7,29 @@ export interface SmoothingOptions {
     // This option is currently always true.
     closed: true;
 
-    // Smoothing strength as ration [0,1].
+    // Smoothing strength as ratio [0,1].
     strength: number;
 }
 
-// Smooths out the path made up of the given points. This will override the existing handles.
-// https://math.stackexchange.com/questions/873224/calculate-control-points-of-cubic-bezier-curve-approximating-a-part-of-a-circle
+// Smooths out the path made up of the given points.
+// Existing handles are ignored.
 export const smooth = (points: Point[], opt: SmoothingOptions): Point[] => {
-    if (points.length === 2) return points;
+    if (points.length < 3) throw new Error("not enough points to smooth shape");
 
     const out: Point[] = [];
 
     for (let i = 0; i < points.length; i++) {
-        const point = loopAccess(points)(i);
+        const curr = loopAccess(points)(i);
         const before = loopAccess(points)(i - 1);
         const after = loopAccess(points)(i + 1);
 
         out.push({
-            x: point.x,
-            y: point.y,
+            x: curr.x,
+            y: curr.y,
             handles: {
                 angle: angle(before, after),
-                in: opt.strength * (1 / 2) * distance(point, before),
-                out: opt.strength * (1 / 2) * distance(point, after),
+                in: opt.strength * (1 / 2) * distance(curr, before),
+                out: opt.strength * (1 / 2) * distance(curr, after),
             },
         });
     }

@@ -1,5 +1,5 @@
 import {copyPoint, length, reverse, shift, split} from "./util";
-import {Point, Shape} from "./types";
+import {Point, Shape} from "../types";
 import {distance} from "../math/geometry";
 
 const optimizeOrder = (a: Shape, b: Shape): Shape => {

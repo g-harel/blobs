@@ -1,18 +1,13 @@
 import {deg} from "./unit";
-import {Coord} from "../shape/types";
-
-export interface Point {
-    x: number;
-    y: number;
-}
+import {Coord} from "../types";
 
 // Calculates distance between two points.
-export const distance = (a: Point, b: Point): number => {
+export const distance = (a: Coord, b: Coord): number => {
     return Math.sqrt((a.x - b.x) ** 2 + (a.y - b.y) ** 2);
 };
 
 // Calculates the angle of the line from a to b in degrees.
-export const angle = (a: Point, b: Point): number => {
+export const angle = (a: Coord, b: Coord): number => {
     return deg(Math.atan2(b.y - a.y, b.x - a.x));
 };
 

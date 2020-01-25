@@ -1,7 +1,7 @@
 // https://www.blobmaker.app/
 
 import {rand} from "./internal/math/rand";
-import {Point} from "./internal/math/geometry";
+import {Coord} from "./internal/types";
 import {rad} from "./internal/math/unit";
 import {smooth} from "./internal/svg/smooth";
 import {renderEditable} from "./internal/svg/render";
@@ -72,7 +72,7 @@ blobs.editable = (opt: BlobOptions): XmlElement => {
     const angle = 360 / count;
     const radius = opt.size / Math.E;
 
-    const points: Point[] = [];
+    const points: Coord[] = [];
     for (let i = 0; i < count; i++) {
         const rand = 1 - 0.8 * opt.contrast * rgen();
 
@@ -82,9 +82,11 @@ blobs.editable = (opt: BlobOptions): XmlElement => {
         });
     }
 
+    // https://math.stackexchange.com/a/873589/235756
+    const smoothingStrength = ((4 / 3) * Math.tan(rad(angle / 4))) / Math.sin(rad(angle / 2));
     const smoothed = smooth(points, {
         closed: true,
-        strength: ((4 / 3) * Math.tan(rad(angle / 4))) / Math.sin(rad(angle / 2)),
+        strength: smoothingStrength,
     });
 
     return renderEditable(smoothed, {
@@ -123,7 +125,7 @@ blobs.path = (opt: PathOptions) => {
     const angle = 360 / count;
     const radius = opt.size / Math.E;
 
-    const points: Point[] = [];
+    const points: Coord[] = [];
     for (let i = 0; i < count; i++) {
         const rand = 1 - 0.8 * opt.contrast * rgen();
 

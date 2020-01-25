@@ -1,7 +1,6 @@
+// Position in a coordinate system with an origin in the top left corner.
 export interface Coord {
-    // Horizontal distance towards the right from the left edge of the canvas.
     x: number;
-    // Vertical distance downwards from the top of the canvas.
     y: number;
 }
 

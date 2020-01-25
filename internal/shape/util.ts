@@ -1,4 +1,4 @@
-import {Coord, Handle, Point, Shape} from "./types";
+import {Coord, Handle, Point, Shape} from "../types";
 import {distance, splitLine} from "../math/geometry";
 
 export const copyPoint = (p: Point): Point => ({

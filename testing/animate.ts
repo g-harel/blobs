@@ -2,7 +2,7 @@ import blobs from "..";
 
 import {interpolateBetweenLoop} from "../internal/shape/interpolate";
 import {divideShape, prepShapes, splitCurveBy} from "../internal/shape/prepare";
-import {Coord, Point, Shape} from "../internal/shape/types";
+import {Coord, Point, Shape} from "../internal/types";
 import {length, split} from "../internal/shape/util";
 import {clear, drawInfo, drawShape} from "../internal/canvas/draw";
 

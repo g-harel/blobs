@@ -1,4 +1,4 @@
-import {Coord, Shape} from "../shape/types";
+import {Coord, Shape} from "../types";
 import {expandHandle} from "../shape/util";
 
 const pointSize = 2;
