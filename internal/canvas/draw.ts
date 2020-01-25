@@ -1,5 +1,5 @@
-import {Coord, Point, Shape} from "../bezier/types";
-import {expandHandle} from "../bezier/util";
+import {Coord, Shape} from "../shape/types";
+import {expandHandle} from "../shape/util";
 
 const pointSize = 2;
 const infoSpacing = 20;

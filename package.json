@@ -12,7 +12,7 @@
     "build": "npm run clean && rollup -c rollup.config.ts",
     "clean": "trash '**/*.js' '**/*.js.map' '**/*.d.ts' '!**/node_modules/**/*'",
     "fmt": "prettier --list-different --write --ignore-path .gitignore '**/*.{js,ts}'",
-    "dev:animate": "parcel animate/index.html --open",
+    "anim": "parcel testing/animate.html --open",
     "test": "jest"
   },
   "devDependencies": {

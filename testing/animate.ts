@@ -1,10 +1,10 @@
 import blobs from "..";
 
-import {interpolateBetweenLoop} from "./bezier/interpolate";
-import {divideShape, prepShapes, splitCurveBy} from "./bezier/prepare";
-import {Coord, Point, Shape} from "./bezier/types";
-import {length, split} from "./bezier/util";
-import {clear, drawInfo, drawShape} from "./canvas/draw";
+import {interpolateBetweenLoop} from "../internal/shape/interpolate";
+import {divideShape, prepShapes, splitCurveBy} from "../internal/shape/prepare";
+import {Coord, Point, Shape} from "../internal/shape/types";
+import {length, split} from "../internal/shape/util";
+import {clear, drawInfo, drawShape} from "../internal/canvas/draw";
 
 const animationSpeed = 2;
 const animationStart = 0.3;

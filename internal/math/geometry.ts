@@ -1,4 +1,5 @@
 import {deg} from "./unit";
+import {Coord} from "../shape/types";
 
 export interface Point {
     x: number;
@@ -6,11 +7,22 @@ export interface Point {
 }
 
 // Calculates distance between two points.
-export const distance = (p1: Point, p2: Point): number => {
-    return Math.sqrt((p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2);
+export const distance = (a: Point, b: Point): number => {
+    return Math.sqrt((a.x - b.x) ** 2 + (a.y - b.y) ** 2);
 };
 
-// Calculates the angle of the line from p1 to p2 in degrees.
-export const angle = (p1: Point, p2: Point): number => {
-    return deg(Math.atan2(p2.y - p1.y, p2.x - p1.x));
+// Calculates the angle of the line from a to b in degrees.
+export const angle = (a: Point, b: Point): number => {
+    return deg(Math.atan2(b.y - a.y, b.x - a.x));
+};
+
+export const split = (percentage: number, a: number, b: number): number => {
+    return a + percentage * (b - a);
+};
+
+export const splitLine = (percentage: number, a: Coord, b: Coord): Coord => {
+    return {
+        x: split(percentage, a.x, b.x),
+        y: split(percentage, a.y, b.y),
+    };
 };

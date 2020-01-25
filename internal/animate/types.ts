@@ -1,4 +1,4 @@
-import {Shape} from "../bezier/types";
+import {Shape} from "../shape/types";
 
 export interface EasingFunc {
     (progress: number): number;

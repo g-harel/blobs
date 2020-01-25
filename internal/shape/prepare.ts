@@ -1,6 +1,6 @@
 import {copyPoint, length, reverse, shift, split} from "./util";
 import {Point, Shape} from "./types";
-import {distance} from "../util";
+import {distance} from "../math/geometry";
 
 const optimizeOrder = (a: Shape, b: Shape): Shape => {
     const count = a.length;
