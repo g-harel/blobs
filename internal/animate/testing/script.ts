@@ -1,10 +1,10 @@
-import blobs from "../../../legacy/blobs";
-
 import {interpolateBetweenLoop} from "../interpolate";
 import {divideShape, prepShapes} from "../prepare";
 import {Coord, Point, Shape} from "../../types";
 import {length, insertAt, insertCount, rad, mod} from "../../util";
 import {clear, drawInfo, drawShape} from "../../render/canvas";
+import {genBlob} from "../../blobs";
+import {rand} from "../../rand";
 
 const animationSpeed = 2;
 const animationStart = 0.3;
@@ -103,38 +103,32 @@ const testInterpolateBetween = (percentage: number) => {
 };
 
 const testPrepShapesA = (percentage: number) => {
-    const a = genBlob("a", 0.6, 0.6, 0.3, {x: 0.5, y: 0.2});
-    const b = genBlob("b", 1, 0.6, 0.3, {x: 0.5, y: 0.2});
+    const a = blob("a", 6, 0.2, {x: 0.5, y: 0.2});
+    const b = blob("b", 10, 0.2, {x: 0.5, y: 0.2});
     drawShape(ctx, debug, interpolateBetweenLoop(percentage, ...prepShapes(a, b)));
 };
 
 const testPrepShapesB = (percentage: number) => {
-    const a = genBlob("a", 0.6, 0.6, 0.3, {x: 0.5, y: 0.5});
+    const a = blob("a", 8, 0.2, {x: 0.5, y: 0.5});
     const b: Shape = [
-        point(0.55, 0.5, 0, 0, 0, 0),
-        point(0.75, 0.5, 0, 0, 0, 0),
-        point(0.75, 0.7, 0, 0, 0, 0),
-        point(0.55, 0.7, 0, 0, 0, 0),
+        point(0.5, 0.5, 0, 0, 0, 0),
+        point(0.7, 0.5, 0, 0, 0, 0),
+        point(0.7, 0.7, 0, 0, 0, 0),
+        point(0.5, 0.7, 0, 0, 0, 0),
     ];
     drawShape(ctx, debug, interpolateBetweenLoop(percentage, ...prepShapes(a, b)));
 };
 
-const genBlob = (
-    seed: string,
-    complexity: number,
-    contrast: number,
-    s: number,
-    offset: Coord,
-): Shape => {
-    const shape = blobs.path({
-        complexity,
-        contrast,
-        size: s * size,
-        seed,
-    });
+const blob = (seed: string, count: number, scale: number, offset: Coord): Shape => {
+    const rgen = rand(seed);
+    const shape = genBlob(count, () => 0.3 + 0.2 * rgen());
     for (let i = 0; i < shape.length; i++) {
+        shape[i].x *= scale * size;
+        shape[i].y *= scale * size;
         shape[i].x += offset.x * size;
         shape[i].y += offset.y * size;
+        shape[i].handleIn.length *= scale * size;
+        shape[i].handleOut.length *= scale * size;
     }
     return shape;
 };
