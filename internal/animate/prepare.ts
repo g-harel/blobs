@@ -1,4 +1,4 @@
-import {copyPoint, length, reverse, shift, insertCount, distance, mod} from "../util";
+import {copyPoint, length, reverse, shift, insertCount, distance, mod, angleOf} from "../util";
 import {Point, Shape} from "../types";
 
 const optimizeOrder = (a: Shape, b: Shape): Shape => {
@@ -52,16 +52,18 @@ export const divideShape = (count: number, points: Shape): Shape => {
     return out;
 };
 
-const fixAngles = (a: Shape, b: Shape): Shape => {
-    // TODO fix in first shape too
+const fixAngles = (shape: Shape): Shape => {
     const out: Shape = [];
-    for (let i = 0; i < a.length; i++) {
-        const point = copyPoint(b[i]);
+    for (let i = 0; i < shape.length; i++) {
+        const before = shape[mod(i - 1, shape.length)];
+        const after = shape[mod(i + 1, shape.length)];
+        const angle = angleOf(before, after);
+        const point = copyPoint(shape[i]);
         if (point.handleIn.length === 0) {
-            point.handleIn.angle = a[i].handleIn.angle;
+            point.handleIn.angle = angle + Math.PI;
         }
         if (point.handleOut.length === 0) {
-            point.handleOut.angle = a[i].handleOut.angle;
+            point.handleOut.angle = angle;
         }
         out.push(point);
     }
@@ -95,6 +97,5 @@ export const prepShapes = (a: Shape, b: Shape): [Shape, Shape] => {
     const aNorm = divideShape(points, a);
     const bNorm = divideShape(points, b);
     const bOpt = optimizeOrder(aNorm, bNorm);
-    const bFix = fixAngles(aNorm, bOpt);
-    return [aNorm, bFix];
+    return [fixAngles(aNorm), fixAngles(bOpt)];
 };
