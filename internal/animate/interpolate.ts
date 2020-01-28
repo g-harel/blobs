@@ -2,7 +2,6 @@ import {Shape} from "../types";
 import {split, splitLine, mod} from "../util";
 
 // TODO percentage > 1
-// TODO interpolation function (ex. easing)
 
 const interpolateAngle = (percentage: number, a: number, b: number): number => {
     const tau = Math.PI * 2;

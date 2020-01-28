@@ -1,11 +1,3 @@
-import {Shape} from "../types";
-
-export interface EasingFunc {
+export interface InterpolationFunc {
     (progress: number): number;
-}
-
-export interface Keyframe {
-    shape: Shape;
-    easeIn: EasingFunc;
-    easeOut: EasingFunc;
 }
