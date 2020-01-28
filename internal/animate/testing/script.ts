@@ -6,10 +6,10 @@ import {clear, drawInfo, drawShape} from "../../render/canvas";
 import {genBlob} from "../../blobs";
 import {rand} from "../../rand";
 
-const animationSpeed = 2;
-const animationStart = 0.3;
-const debug = true;
-const size = 1000;
+let animationSpeed = 2;
+let animationStart = 0.3;
+let debug = true;
+let size = 1000;
 
 const canvas = document.createElement("canvas");
 document.body.appendChild(canvas);
@@ -18,6 +18,10 @@ canvas.width = size;
 const temp = canvas.getContext("2d");
 if (temp === null) throw new Error("context is null");
 const ctx = temp;
+
+const toggle = document.getElementById("toggle");
+if (toggle === null) throw new Error("no toggle");
+toggle.onclick = () => debug = !debug;
 
 const point = (x: number, y: number, ia: number, il: number, oa: number, ol: number): Point => {
     return {
@@ -103,18 +107,37 @@ const testInterpolateBetween = (percentage: number) => {
 };
 
 const testPrepShapesA = (percentage: number) => {
-    const a = blob("a", 6, 0.2, {x: 0.5, y: 0.2});
-    const b = blob("b", 10, 0.2, {x: 0.5, y: 0.2});
+    const a = blob("a", 6, 0.15, {x: 0.45, y: 0.1});
+    const b = blob("b", 10, 0.15, {x: 0.45, y: 0.1});
     drawShape(ctx, debug, interpolateBetweenLoop(percentage, ...prepShapes(a, b)));
 };
 
 const testPrepShapesB = (percentage: number) => {
-    const a = blob("a", 8, 0.2, {x: 0.5, y: 0.5});
+    const a = blob("a", 8, 0.15, {x: 0.45, y: 0.25});
     const b: Shape = [
+        point(0.45, 0.25, 0, 0, 0, 0),
+        point(0.6, 0.25, 0, 0, 0, 0),
+        point(0.6, 0.4, 0, 0, 0, 0),
+        point(0.45, 0.4, 0, 0, 0, 0),
+    ];
+    drawShape(ctx, debug, interpolateBetweenLoop(percentage, ...prepShapes(a, b)));
+};
+
+const testPrepShapesC = (percentage: number) => {
+    const a = blob("c", 8, 0.15, {x: 0.45, y: 0.45});
+    const b: Shape = [
+        point(0.5, 0.45, 0, 0, 0, 0),
+        point(0.55, 0.45, 0, 0, 0, 0),
+        point(0.55, 0.5, 0, 0, 0, 0),
+        point(0.6, 0.5, 0, 0, 0, 0),
+        point(0.6, 0.55, 0, 0, 0, 0),
+        point(0.55, 0.55, 0, 0, 0, 0),
+        point(0.55, 0.6, 0, 0, 0, 0),
+        point(0.5, 0.6, 0, 0, 0, 0),
+        point(0.5, 0.55, 0, 0, 0, 0),
+        point(0.45, 0.55, 0, 0, 0, 0),
+        point(0.45, 0.5, 0, 0, 0, 0),
         point(0.5, 0.5, 0, 0, 0, 0),
-        point(0.7, 0.5, 0, 0, 0, 0),
-        point(0.7, 0.7, 0, 0, 0, 0),
-        point(0.5, 0.7, 0, 0, 0, 0),
     ];
     drawShape(ctx, debug, interpolateBetweenLoop(percentage, ...prepShapes(a, b)));
 };
@@ -146,6 +169,7 @@ const blob = (seed: string, count: number, scale: number, offset: Coord): Shape 
         testInterpolateBetween(percentage);
         testPrepShapesA(percentage);
         testPrepShapesB(percentage);
+        testPrepShapesC(percentage);
 
         percentage += animationSpeed / 1000;
         percentage = mod(percentage, 1);
