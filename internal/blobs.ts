@@ -20,7 +20,7 @@ export const genBlob = (points: number, offset: () => number): Shape => {
     }
 
     // https://math.stackexchange.com/a/873589/235756
-    const smoothingStrength = ((4 / 3) * Math.tan(angle / 4)) / Math.sin(angle / 2);
+    const smoothingStrength = ((4 / 3) * Math.tan(angle / 4)) / Math.sin(angle / 2) / 2;
 
     return smooth(shape, smoothingStrength);
 };
