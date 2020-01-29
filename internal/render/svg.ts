@@ -24,6 +24,8 @@ export interface RenderOptions {
     boundingBox?: boolean;
 }
 
+// OPT render path only
+
 // Renders a shape made up of the input points to an editable data structure
 // which can be rendered to svg.
 export const renderEditable = (points: Shape, opt: RenderOptions): XmlElement => {

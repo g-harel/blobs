@@ -31,6 +31,7 @@ const drawPoint = (ctx: CanvasRenderingContext2D, p: Coord, style: string) => {
     ctx.fillStyle = backupFillStyle;
 };
 
+// OPT draw cutout
 export const drawShape = (ctx: CanvasRenderingContext2D, debug: boolean, shape: Shape) => {
     if (shape.length < 2) throw new Error("not enough points");
 

@@ -11,6 +11,7 @@ import {
 } from "../util";
 import {Point, Shape} from "../types";
 
+// OPT extract optimization logic
 const optimizeOrder = (a: Shape, b: Shape): Shape => {
     const count = a.length;
 
@@ -38,6 +39,7 @@ const optimizeOrder = (a: Shape, b: Shape): Shape => {
     return shift(minOffset, minShape);
 };
 
+// OPT allow extra division
 export const divideShape = (count: number, points: Shape): Shape => {
     if (points.length < 3) throw new Error("not enough points");
     if (count < points.length) throw new Error("cannot remove points");
@@ -62,6 +64,7 @@ export const divideShape = (count: number, points: Shape): Shape => {
     return out;
 };
 
+// OPT disable
 const fixAnglesWith = (fixee: Shape, fixer: Shape): Shape => {
     const out: Shape = [];
     for (let i = 0; i < fixee.length; i++) {
@@ -79,6 +82,7 @@ const fixAnglesWith = (fixee: Shape, fixer: Shape): Shape => {
     return out;
 };
 
+// OPT disable
 const fixAnglesSelf = (shape: Shape): Shape => {
     const out: Shape = [];
     for (let i = 0; i < shape.length; i++) {
