@@ -7,6 +7,12 @@ export const copyPoint = (p: Point): Point => ({
     handleOut: {...p.handleOut},
 });
 
+// TODO shape iterators
+
+export const coordEqual = (a: Coord, b: Coord): boolean => {
+    return a.x === b.x && a.y === b.y;
+};
+
 export const angleOf = (a: Coord, b: Coord): number => {
     const dx = b.x - a.x;
     const dy = -b.y + a.y;

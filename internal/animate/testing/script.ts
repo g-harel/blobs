@@ -21,7 +21,7 @@ const ctx = temp;
 
 const toggle = document.getElementById("toggle");
 if (toggle === null) throw new Error("no toggle");
-toggle.onclick = () => debug = !debug;
+toggle.onclick = () => (debug = !debug);
 
 const point = (x: number, y: number, ia: number, il: number, oa: number, ol: number): Point => {
     return {
@@ -142,6 +142,16 @@ const testPrepShapesC = (percentage: number) => {
     drawShape(ctx, debug, interpolateBetweenLoop(percentage, ...prepShapes(a, b)));
 };
 
+const testPrepShapesD = (percentage: number) => {
+    const a = blob("d", 8, 0.15, {x: 0.45, y: 0.65});
+    const b: Shape = [
+        point(0.525, 0.725, 0, 0, 0, 0),
+        point(0.525, 0.725, 0, 0, 0, 0),
+        point(0.525, 0.725, 0, 0, 0, 0),
+    ];
+    drawShape(ctx, debug, interpolateBetweenLoop(percentage, ...prepShapes(a, b)));
+};
+
 const blob = (seed: string, count: number, scale: number, offset: Coord): Shape => {
     const rgen = rand(seed);
     const shape = genBlob(count, () => 0.3 + 0.2 * rgen());
@@ -170,6 +180,7 @@ const blob = (seed: string, count: number, scale: number, offset: Coord): Shape 
         testPrepShapesA(percentage);
         testPrepShapesB(percentage);
         testPrepShapesC(percentage);
+        testPrepShapesD(percentage);
 
         percentage += animationSpeed / 1000;
         percentage = mod(percentage, 1);
