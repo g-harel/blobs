@@ -4,6 +4,7 @@ import {rand} from "../internal/rand";
 import {renderEditable} from "../internal/render/svg";
 import {XmlElement} from "../editable";
 import {genBlob} from "../internal/blobs";
+import {mapShape} from "../internal/util";
 
 export interface PathOptions {
     // Bounding box dimensions.
@@ -69,18 +70,20 @@ blobs.editable = (opt: BlobOptions): XmlElement => {
     const count = 3 + Math.floor(14 * opt.complexity);
     const offset = (): number => (1 - 0.8 * opt.contrast * rgen()) / Math.E;
 
-    const shape = genBlob(count, offset);
-    for (let i = 0; i < shape.length; i++) {
-        shape[i].x *= opt.size;
-        shape[i].y *= opt.size;
-        shape[i].handleIn.length *= opt.size;
-        shape[i].handleOut.length *= opt.size;
-    }
-    for (let i = 0; i < shape.length; i++) {
-        shape[i].y = opt.size - shape[i].y;
-        shape[i].handleIn.angle *= -1;
-        shape[i].handleOut.angle *= -1;
-    }
+    const shape = mapShape(genBlob(count, offset), ({curr}) => {
+        // Change shape size.
+        curr.x *= opt.size;
+        curr.y *= opt.size;
+        curr.handleIn.length *= opt.size;
+        curr.handleOut.length *= opt.size;
+
+        // Flip shape around x-axis.
+        curr.y = opt.size - curr.y;
+        curr.handleIn.angle *= -1;
+        curr.handleOut.angle *= -1;
+
+        return curr;
+    });
 
     return renderEditable(shape, {
         closed: true,

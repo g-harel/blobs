@@ -1,5 +1,5 @@
 import {Coord, Shape} from "../types";
-import {expandHandle, mod} from "../util";
+import {expandHandle, forShape} from "../util";
 
 const pointSize = 2;
 const infoSpacing = 20;
@@ -35,10 +35,10 @@ const drawPoint = (ctx: CanvasRenderingContext2D, p: Coord, style: string) => {
 export const drawShape = (ctx: CanvasRenderingContext2D, debug: boolean, shape: Shape) => {
     if (shape.length < 2) throw new Error("not enough points");
 
-    for (let i = 0; i < shape.length; i++) {
+    forShape(shape, ({curr, next: getNext}) => {
+        const next = getNext();
+
         // Compute coordinates of handles.
-        const curr = shape[i];
-        const next = shape[mod(i + 1, shape.length)];
         const currHandle = expandHandle(curr, curr.handleOut);
         const nextHandle = expandHandle(next, next.handleIn);
 
@@ -53,5 +53,5 @@ export const drawShape = (ctx: CanvasRenderingContext2D, debug: boolean, shape: 
         ctx.moveTo(curr.x, curr.y);
         ctx.bezierCurveTo(currHandle.x, currHandle.y, nextHandle.x, nextHandle.y, next.x, next.y);
         ctx.stroke();
-    }
+    });
 };

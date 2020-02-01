@@ -1,5 +1,4 @@
 import {
-    copyPoint,
     length,
     reverse,
     shift,
@@ -8,6 +7,8 @@ import {
     mod,
     angleOf,
     coordEqual,
+    mapShape,
+    forShape,
 } from "../util";
 import {Point, Shape} from "../types";
 
@@ -40,21 +41,21 @@ const optimizeOrder = (a: Shape, b: Shape): Shape => {
 };
 
 // OPT allow extra division
-export const divideShape = (count: number, points: Shape): Shape => {
-    if (points.length < 3) throw new Error("not enough points");
-    if (count < points.length) throw new Error("cannot remove points");
-    if (count === points.length) return points.slice();
+export const divideShape = (count: number, shape: Shape): Shape => {
+    if (shape.length < 3) throw new Error("not enough points");
+    if (count < shape.length) throw new Error("cannot remove points");
+    if (count === shape.length) return shape.slice();
 
-    const lengths = [];
-    for (let i = 0; i < points.length; i++) {
-        lengths.push(length(points[i], points[mod(i + 1, points.length)]));
-    }
+    const lengths: number[] = [];
+    forShape(shape, ({curr, next}) => {
+        lengths.push(length(curr, next()));
+    });
 
-    const divisors = divideLengths(lengths, count - points.length);
+    const divisors = divideLengths(lengths, count - shape.length);
     const out: Shape = [];
-    for (let i = 0; i < points.length; i++) {
-        const curr: Point = out[out.length - 1] || points[i];
-        const next = points[mod(i + 1, points.length)];
+    for (let i = 0; i < shape.length; i++) {
+        const curr: Point = out[out.length - 1] || shape[i];
+        const next = shape[mod(i + 1, shape.length)];
         out.pop();
         out.push(...insertCount(divisors[i], curr, next));
     }
@@ -66,39 +67,29 @@ export const divideShape = (count: number, points: Shape): Shape => {
 
 // OPT disable
 const fixAnglesWith = (fixee: Shape, fixer: Shape): Shape => {
-    const out: Shape = [];
-    for (let i = 0; i < fixee.length; i++) {
-        const before = fixee[mod(i - 1, fixee.length)];
-        const after = fixee[mod(i + 1, fixee.length)];
-        const point = copyPoint(fixee[i]);
-        if (point.handleIn.length === 0 && coordEqual(before, point)) {
-            point.handleIn.angle = fixer[i].handleIn.angle;
+    return mapShape(fixee, ({index, curr, prev, next}) => {
+        if (curr.handleIn.length === 0 && coordEqual(prev(), curr)) {
+            curr.handleIn.angle = fixer[index].handleIn.angle;
         }
-        if (point.handleOut.length === 0 && coordEqual(after, point)) {
-            point.handleOut.angle = fixer[i].handleOut.angle;
+        if (curr.handleOut.length === 0 && coordEqual(next(), curr)) {
+            curr.handleOut.angle = fixer[index].handleOut.angle;
         }
-        out.push(point);
-    }
-    return out;
+        return curr;
+    });
 };
 
 // OPT disable
 const fixAnglesSelf = (shape: Shape): Shape => {
-    const out: Shape = [];
-    for (let i = 0; i < shape.length; i++) {
-        const before = shape[mod(i - 1, shape.length)];
-        const after = shape[mod(i + 1, shape.length)];
-        const angle = angleOf(before, after);
-        const point = copyPoint(shape[i]);
-        if (point.handleIn.length === 0) {
-            point.handleIn.angle = angle + Math.PI;
+    return mapShape(shape, ({curr, prev, next}) => {
+        const angle = angleOf(prev(), next());
+        if (curr.handleIn.length === 0) {
+            curr.handleIn.angle = angle + Math.PI;
         }
-        if (point.handleOut.length === 0) {
-            point.handleOut.angle = angle;
+        if (curr.handleOut.length === 0) {
+            curr.handleOut.angle = angle;
         }
-        out.push(point);
-    }
-    return out;
+        return curr;
+    });
 };
 
 const divideLengths = (lengths: number[], add: number): number[] => {
@@ -124,9 +115,9 @@ const divideLengths = (lengths: number[], add: number): number[] => {
 };
 
 export const prepShapes = (a: Shape, b: Shape): [Shape, Shape] => {
-    const points = Math.max(a.length, b.length);
-    const aNorm = divideShape(points, a);
-    const bNorm = divideShape(points, b);
+    const pointCount = Math.max(a.length, b.length);
+    const aNorm = divideShape(pointCount, a);
+    const bNorm = divideShape(pointCount, b);
     const bOpt = optimizeOrder(aNorm, bNorm);
     return [fixAnglesWith(fixAnglesSelf(aNorm), bNorm), fixAnglesWith(fixAnglesSelf(bOpt), aNorm)];
 };

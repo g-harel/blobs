@@ -1,7 +1,7 @@
 import {interpolateBetweenLoop} from "../interpolate";
 import {divideShape, prepShapes} from "../prepare";
 import {Coord, Point, Shape} from "../../types";
-import {length, insertAt, insertCount, rad, mod} from "../../util";
+import {length, insertAt, insertCount, rad, mod, mapShape, forShape} from "../../util";
 import {clear, drawInfo, drawShape} from "../../render/canvas";
 import {genBlob} from "../../blobs";
 import {rand} from "../../rand";
@@ -33,31 +33,29 @@ const point = (x: number, y: number, ia: number, il: number, oa: number, ol: num
 };
 
 const testSplitAt = (percentage: number) => {
-    let points: Shape = [
+    let shape: Shape = [
         point(0.15, 0.15, 135, 0.1, 315, 0.2),
         point(0.85, 0.15, 225, 0.1, 45, 0.2),
         point(0.85, 0.85, 315, 0.1, 135, 0.2),
         point(0.15, 0.85, 45, 0.1, 225, 0.2),
     ];
 
-    const count = points.length;
+    const count = shape.length;
     const stop = 2 * count - 1;
     for (let i = 0; i < count; i++) {
         const double = i * 2;
         const next = mod(double + 1, stop);
-        points.splice(double, 2, ...insertAt(percentage, points[double], points[next]));
+        shape.splice(double, 2, ...insertAt(percentage, shape[double], shape[next]));
     }
-    points.splice(0, 1);
+    shape.splice(0, 1);
 
     let sum = 0;
-    for (let i = 0; i < points.length; i++) {
-        const curr = points[i];
-        const next = points[mod(i + 1, points.length)];
-        sum += length(curr, next);
-    }
+    forShape(shape, ({curr, next}) => {
+        sum += length(curr, next());
+    });
     drawInfo(ctx, 1, "split at lengths sum", sum);
 
-    drawShape(ctx, debug, points);
+    drawShape(ctx, debug, shape);
 };
 
 const testSplitBy = () => {
@@ -155,15 +153,15 @@ const testPrepShapesD = (percentage: number) => {
 const blob = (seed: string, count: number, scale: number, offset: Coord): Shape => {
     const rgen = rand(seed);
     const shape = genBlob(count, () => 0.3 + 0.2 * rgen());
-    for (let i = 0; i < shape.length; i++) {
-        shape[i].x *= scale * size;
-        shape[i].y *= scale * size;
-        shape[i].x += offset.x * size;
-        shape[i].y += offset.y * size;
-        shape[i].handleIn.length *= scale * size;
-        shape[i].handleOut.length *= scale * size;
-    }
-    return shape;
+    return mapShape(shape, ({curr}) => {
+        curr.x *= scale * size;
+        curr.y *= scale * size;
+        curr.x += offset.x * size;
+        curr.y += offset.y * size;
+        curr.handleIn.length *= scale * size;
+        curr.handleOut.length *= scale * size;
+        return curr;
+    });
 };
 
 (() => {

@@ -1,6 +1,6 @@
 import {xml, XmlElement} from "../../editable";
 import {Shape} from "../types";
-import {expandHandle, mod} from "../util";
+import {expandHandle, forShape} from "../util";
 
 export interface RenderOptions {
     // Viewport size.
@@ -24,20 +24,19 @@ export interface RenderOptions {
     boundingBox?: boolean;
 }
 
-// OPT render path only
+// TODO render path only
 
 // Renders a shape made up of the input points to an editable data structure
 // which can be rendered to svg.
-export const renderEditable = (points: Shape, opt: RenderOptions): XmlElement => {
+export const renderEditable = (shape: Shape, opt: RenderOptions): XmlElement => {
     // Render path data attribute from points and handles.
-    let path = `M${points[0].x},${points[0].y}`;
-    for (let i = 0; i < points.length; i++) {
-        const curr = points[i];
-        const next = points[mod(i + 1, points.length)];
+    let path = `M${shape[0].x},${shape[0].y}`;
+    forShape(shape, ({curr, next: getNext}) => {
+        const next = getNext();
         const currControl = expandHandle(curr, curr.handleOut);
         const nextControl = expandHandle(next, next.handleIn);
         path += `C${currControl.x},${currControl.y},${nextControl.x},${nextControl.y},${next.x},${next.y}`;
-    }
+    });
 
     const stroke = opt.stroke || (opt.guides ? "black" : "none");
     const strokeWidth = opt.strokeWidth || (opt.guides ? 1 : 0);
@@ -80,9 +79,8 @@ export const renderEditable = (points: Shape, opt: RenderOptions): XmlElement =>
         }
 
         // Points and handles.
-        for (let i = 0; i < points.length; i++) {
-            const curr = points[i];
-            const next = points[mod(i + 1, points.length)];
+        forShape(shape, ({curr, next: getNext}) => {
+            const next = getNext();
             const currControl = expandHandle(curr, curr.handleOut);
             const nextControl = expandHandle(next, next.handleIn);
 
@@ -126,7 +124,7 @@ export const renderEditable = (points: Shape, opt: RenderOptions): XmlElement =>
             xmlContentGroup.children.push(xmlOutgoingHandleCircle);
             xmlContentGroup.children.push(xmlIncomingHandleCircle);
             xmlContentGroup.children.push(xmlPointCircle);
-        }
+        });
     }
 
     return xmlRoot;

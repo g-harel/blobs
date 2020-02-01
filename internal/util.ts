@@ -7,7 +7,34 @@ export const copyPoint = (p: Point): Point => ({
     handleOut: {...p.handleOut},
 });
 
-// TODO shape iterators
+export interface ShapeIteratorArgs {
+    curr: Point;
+    index: number;
+    sibling: (pos: number) => Point;
+    prev: () => Point;
+    next: () => Point;
+}
+
+export const forShape = (shape: Shape, callback: (args: ShapeIteratorArgs) => void) => {
+    for (let i = 0; i < shape.length; i++) {
+        const sibling = (pos: number) => copyPoint(shape[mod(pos, shape.length)]);
+        callback({
+            curr: copyPoint(shape[i]),
+            index: i,
+            sibling,
+            prev: () => sibling(i - 1),
+            next: () => sibling(i + 1),
+        });
+    }
+};
+
+export const mapShape = (shape: Shape, callback: (args: ShapeIteratorArgs) => Point): Shape => {
+    const out: Point[] = [];
+    forShape(shape, (args) => {
+        out.push(callback(args));
+    });
+    return out;
+};
 
 export const coordEqual = (a: Coord, b: Coord): boolean => {
     return a.x === b.x && a.y === b.y;
@@ -34,6 +61,7 @@ const collapseHandle = (point: Coord, handle: Coord): Handle => ({
     length: Math.sqrt((handle.x - point.x) ** 2 + (handle.y - point.y) ** 2),
 });
 
+// TODO make more precise
 export const length = (a: Point, b: Point): number => {
     const aHandle = expandHandle(a, a.handleOut);
     const bHandle = expandHandle(b, b.handleIn);
@@ -43,24 +71,18 @@ export const length = (a: Point, b: Point): number => {
 };
 
 export const reverse = (shape: Shape): Shape => {
-    const inverted: Shape = [];
-    for (let i = 0; i < shape.length; i++) {
-        const j = shape.length - i - 1;
-        const p = copyPoint(shape[j]);
-        p.handleIn.angle += Math.PI;
-        p.handleOut.angle += Math.PI;
-        inverted.push(p);
-    }
-    return inverted;
+    return mapShape(shape, ({index, sibling}) => {
+        const point = sibling(shape.length - index - 1);
+        point.handleIn.angle += Math.PI;
+        point.handleOut.angle += Math.PI;
+        return point;
+    });
 };
 
 export const shift = (offset: number, shape: Shape): Shape => {
-    if (offset === 0) return shape;
-    const out: Shape = [];
-    for (let i = 0; i < shape.length; i++) {
-        out.push(shape[mod(i + offset, shape.length)]);
-    }
-    return out;
+    return mapShape(shape, ({index, sibling}) => {
+        return sibling(index + offset);
+    });
 };
 
 // Add a control point to the curve between a and b.
@@ -109,27 +131,21 @@ export const insertCount = (count: number, a: Point, b: Point): Shape => {
 // Smooths out the path made up of the given points.
 // Existing handles are ignored.
 export const smooth = (shape: Shape, strength: number): Shape => {
-    const out: Shape = [];
-    for (let i = 0; i < shape.length; i++) {
-        const curr = shape[i];
-        const before = shape[mod(i - 1, shape.length)];
-        const after = shape[mod(i + 1, shape.length)];
-        const angle = angleOf(before, after);
-
-        out.push({
+    return mapShape(shape, ({curr, next, prev}) => {
+        const angle = angleOf(prev(), next());
+        return {
             x: curr.x,
             y: curr.y,
             handleIn: {
                 angle: angle + Math.PI,
-                length: strength * distance(curr, before),
+                length: strength * distance(curr, prev()),
             },
             handleOut: {
                 angle,
-                length: strength * distance(curr, after),
+                length: strength * distance(curr, next()),
             },
-        });
-    }
-    return out;
+        };
+    });
 };
 
 // Modulo operation that always produces a positive result.
