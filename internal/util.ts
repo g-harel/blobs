@@ -61,7 +61,6 @@ const collapseHandle = (point: Coord, handle: Coord): Handle => ({
     length: Math.sqrt((handle.x - point.x) ** 2 + (handle.y - point.y) ** 2),
 });
 
-// TODO make more precise
 export const length = (a: Point, b: Point): number => {
     const aHandle = expandHandle(a, a.handleOut);
     const bHandle = expandHandle(b, b.handleIn);

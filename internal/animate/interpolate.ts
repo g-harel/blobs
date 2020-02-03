@@ -1,8 +1,8 @@
 import {Shape} from "../types";
 import {split, splitLine, mod} from "../util";
 
-// TODO allow percentage > 1
 // OPT? loop
+// TODO smooth between
 
 const interpolateAngle = (percentage: number, a: number, b: number): number => {
     const tau = Math.PI * 2;
@@ -20,17 +20,18 @@ const interpolateAngle = (percentage: number, a: number, b: number): number => {
 
 const interpolateBetween = (percentage: number, a: Shape, b: Shape): Shape => {
     if (a.length !== b.length) throw new Error("shapes have different number of points");
+    const clamped = Math.min(1, Math.max(0, percentage));
     const shape: Shape = [];
     for (let i = 0; i < a.length; i++) {
         shape.push({
             ...splitLine(percentage, a[i], b[i]),
             handleIn: {
                 angle: interpolateAngle(percentage, a[i].handleIn.angle, b[i].handleIn.angle),
-                length: split(percentage, a[i].handleIn.length, b[i].handleIn.length),
+                length: split(clamped, a[i].handleIn.length, b[i].handleIn.length),
             },
             handleOut: {
                 angle: interpolateAngle(percentage, a[i].handleOut.angle, b[i].handleOut.angle),
-                length: split(percentage, a[i].handleOut.length, b[i].handleOut.length),
+                length: split(clamped, a[i].handleOut.length, b[i].handleOut.length),
             },
         });
     }
@@ -41,6 +42,6 @@ export const interpolateBetweenLoop = (percentage: number, a: Shape, b: Shape): 
     if (percentage < 0.5) {
         return interpolateBetween(2 * percentage, a, b);
     } else {
-        return interpolateBetween(2 * percentage - 1, b, a);
+        return interpolateBetween(-2 * percentage + 2, a, b);
     }
 };

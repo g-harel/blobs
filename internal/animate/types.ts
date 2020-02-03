@@ -1,3 +1,3 @@
 export interface InterpolationFunc {
-    (progress: number): number;
+    (percentage: number): number;
 }

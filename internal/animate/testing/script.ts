@@ -137,7 +137,7 @@ const testPrepShapesC = (percentage: number) => {
         point(0.45, 0.5, 0, 0, 0, 0),
         point(0.5, 0.5, 0, 0, 0, 0),
     ];
-    drawShape(ctx, debug, interpolateBetweenLoop(percentage, ...prepShapes(a, b)));
+    drawShape(ctx, debug, interpolateBetweenLoop(percentage, ...prepShapes(b, a)));
 };
 
 const testPrepShapesD = (percentage: number) => {

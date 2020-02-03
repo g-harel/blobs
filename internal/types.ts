@@ -11,7 +11,6 @@ export interface Handle {
     length: number;
 }
 
-// TODO? use four coord instead of angles
 export interface Point extends Coord {
     // Cubic bezier handles.
     handleIn: Handle;
