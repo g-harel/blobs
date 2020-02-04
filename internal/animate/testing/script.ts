@@ -1,7 +1,7 @@
-import {interpolateBetweenLoop} from "../interpolate";
+import {interpolateBetweenSmooth} from "../interpolate";
 import {divideShape, prepShapes} from "../prepare";
 import {Coord, Point, Shape} from "../../types";
-import {length, insertAt, insertCount, rad, mod, mapShape, forShape} from "../../util";
+import {length, insertAt, insertCount, rad, mod, mapShape, forShape, smooth} from "../../util";
 import {clear, drawInfo, drawShape} from "../../render/canvas";
 import {genBlob} from "../../blobs";
 import {rand} from "../../rand";
@@ -101,13 +101,13 @@ const testInterpolateBetween = (percentage: number) => {
         point(0.35, 0.82, 360 * 10, 0, 180, 0),
         point(0.3, 0.77, 90, 0, -90, 0),
     ];
-    drawShape(ctx, debug, interpolateBetweenLoop(percentage, a, b));
+    drawShape(ctx, debug, loopBetween(percentage, a, b));
 };
 
 const testPrepShapesA = (percentage: number) => {
     const a = blob("a", 6, 0.15, {x: 0.45, y: 0.1});
     const b = blob("b", 10, 0.15, {x: 0.45, y: 0.1});
-    drawShape(ctx, debug, interpolateBetweenLoop(percentage, ...prepShapes(a, b)));
+    drawShape(ctx, debug, loopBetween(percentage, ...prepShapes(a, b)));
 };
 
 const testPrepShapesB = (percentage: number) => {
@@ -118,7 +118,7 @@ const testPrepShapesB = (percentage: number) => {
         point(0.6, 0.4, 0, 0, 0, 0),
         point(0.45, 0.4, 0, 0, 0, 0),
     ];
-    drawShape(ctx, debug, interpolateBetweenLoop(percentage, ...prepShapes(a, b)));
+    drawShape(ctx, debug, loopBetween(percentage, ...prepShapes(a, b)));
 };
 
 const testPrepShapesC = (percentage: number) => {
@@ -137,7 +137,7 @@ const testPrepShapesC = (percentage: number) => {
         point(0.45, 0.5, 0, 0, 0, 0),
         point(0.5, 0.5, 0, 0, 0, 0),
     ];
-    drawShape(ctx, debug, interpolateBetweenLoop(percentage, ...prepShapes(b, a)));
+    drawShape(ctx, debug, loopBetween(percentage, ...prepShapes(b, a)));
 };
 
 const testPrepShapesD = (percentage: number) => {
@@ -147,7 +147,26 @@ const testPrepShapesD = (percentage: number) => {
         point(0.525, 0.725, 0, 0, 0, 0),
         point(0.525, 0.725, 0, 0, 0, 0),
     ];
-    drawShape(ctx, debug, interpolateBetweenLoop(percentage, ...prepShapes(a, b)));
+    drawShape(ctx, debug, loopBetween(percentage, ...prepShapes(a, b)));
+};
+
+const testPrepLetters = (percentage: number) => {
+    const a: Shape = [
+        point(0.65, 0.2, 0, 0, 0, 0),
+        point(0.85, 0.2, 0, 0, 0, 0),
+        point(0.85, 0.25, 0, 0, 0, 0),
+        point(0.7, 0.25, 0, 0, 0, 0),
+        point(0.7, 0.4, 0, 0, 0, 0),
+        point(0.8, 0.4, 0, 0, 0, 0),
+        point(0.8, 0.35, 0, 0, 0, 0),
+        point(0.75, 0.35, 0, 0, 0, 0),
+        point(0.75, 0.3, 0, 0, 0, 0),
+        point(0.85, 0.3, 0, 0, 0, 0),
+        point(0.85, 0.45, 0, 0, 0, 0),
+        point(0.65, 0.45, 0, 0, 0, 0),
+    ];
+    const b: Shape = blob("lettersa", 8, 0.25, {x: 0.65, y: 0.2});
+    drawShape(ctx, debug, loopBetween(percentage, ...prepShapes(a, b)));
 };
 
 const blob = (seed: string, count: number, scale: number, offset: Coord): Shape => {
@@ -162,6 +181,14 @@ const blob = (seed: string, count: number, scale: number, offset: Coord): Shape 
         curr.handleOut.length *= scale * size;
         return curr;
     });
+};
+
+const loopBetween = (percentage: number, a: Shape, b: Shape): Shape => {
+    if (percentage < 0.5) {
+        return interpolateBetweenSmooth(2 * percentage, a, b);
+    } else {
+        return interpolateBetweenSmooth(-2 * percentage + 2, a, b);
+    }
 };
 
 (() => {
@@ -179,6 +206,7 @@ const blob = (seed: string, count: number, scale: number, offset: Coord): Shape 
         testPrepShapesB(percentage);
         testPrepShapesC(percentage);
         testPrepShapesD(percentage);
+        testPrepLetters(percentage);
 
         percentage += animationSpeed / 1000;
         percentage = mod(percentage, 1);
