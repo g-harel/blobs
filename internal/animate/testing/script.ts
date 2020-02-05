@@ -185,9 +185,9 @@ const blob = (seed: string, count: number, scale: number, offset: Coord): Shape 
 
 const loopBetween = (percentage: number, a: Shape, b: Shape): Shape => {
     if (percentage < 0.5) {
-        return interpolateBetweenSmooth(2 * percentage, a, b);
+        return interpolateBetweenSmooth(1, 2 * percentage, a, b);
     } else {
-        return interpolateBetweenSmooth(-2 * percentage + 2, a, b);
+        return interpolateBetweenSmooth(1, -2 * percentage + 2, a, b);
     }
 };
 
