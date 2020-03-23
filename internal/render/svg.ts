@@ -31,7 +31,7 @@ export const renderPath = (shape: Shape): string => {
         const next = getNext();
         const currControl = expandHandle(curr, curr.handleOut);
         const nextControl = expandHandle(next, next.handleIn);
-        path += `C${currControl.x},${currControl.y},${nextControl.x},${nextControl.y},${next.x},${next.y}`;
+        path += ` C${currControl.x},${currControl.y} ${nextControl.x},${nextControl.y} ${next.x},${next.y}`;
     });
     return path;
 };
