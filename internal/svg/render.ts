@@ -59,12 +59,17 @@ export const renderEditable = (p: Point[], opt: RenderOptions): XmlElement => {
 
         // Start at the first point's coordinates.
         if (i === 0) {
-            path += `M${point.x},${point.y}`;
+            path += `M${point.x},${point.y} `;
             continue;
         }
 
         // Add cubic bezier coordinates using the computed handle positions.
-        path += `C${hands.x1},${hands.y1},${hands.x2},${hands.y2},${point.x},${point.y}`;
+        path += `C${hands.x1},${hands.y1} ${hands.x2},${hands.y2} ${point.x},${point.y} `;
+
+        // Remove the suffix space on the last point.
+        if (i === points.length - 1) {
+          path = path.slice(0, -1)
+        }
     }
 
     const stroke = opt.stroke || (opt.guides ? "black" : "none");
