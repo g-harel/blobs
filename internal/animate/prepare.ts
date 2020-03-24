@@ -24,7 +24,7 @@ const optimizeOrder = (a: Shape, b: Shape): Shape => {
         for (let i = 0; i < count; i++) {
             let sum = 0;
             for (let j = 0; j < count; j++) {
-                sum += distance(a[j], shape[mod(j + i, count)]);
+                sum += (100 * distance(a[j], shape[mod(j + i, count)])) ** 1 / 2;
                 if (sum > minSum) break;
             }
             if (sum <= minSum) {

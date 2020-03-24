@@ -47,10 +47,15 @@ export const interpolateBetween = (percentage: number, a: Shape, b: Shape): Shap
 // Interpolates between shapes a and b while applying a smoothing effect. Smoothing effect's
 // strength is relative to how far away the percentage is from either 0 or 1. It is strongest in the
 // middle of the animation (percentage = 0.5) or when bounds are exceeded (percentage = 1.8).
-export const interpolateBetweenSmooth = (strength: number, percentage: number, a: Shape, b: Shape): Shape => {
+export const interpolateBetweenSmooth = (
+    strength: number,
+    percentage: number,
+    a: Shape,
+    b: Shape,
+): Shape => {
     strength *= Math.min(1, Math.min(Math.abs(0 - percentage), Math.abs(1 - percentage)));
     const interpolated = interpolateBetween(percentage, a, b);
-    const smoothed = smooth(interpolated, Math.sqrt(strength + 0.25)/3);
+    const smoothed = smooth(interpolated, Math.sqrt(strength + 0.25) / 3);
     return mapShape(interpolated, ({index, curr}) => {
         const sp = smoothed[index];
         curr.handleIn.angle = interpolateAngle(strength, curr.handleIn.angle, sp.handleIn.angle);
