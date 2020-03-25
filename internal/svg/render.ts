@@ -64,7 +64,7 @@ export const renderEditable = (p: Point[], opt: RenderOptions): XmlElement => {
         }
 
         // Add cubic bezier coordinates using the computed handle positions.
-        path += `C${hands.x1},${hands.y1},${hands.x2},${hands.y2},${point.x},${point.y}`;
+        path += ` C${hands.x1},${hands.y1} ${hands.x2},${hands.y2} ${point.x},${point.y}`;
     }
 
     const stroke = opt.stroke || (opt.guides ? "black" : "none");
