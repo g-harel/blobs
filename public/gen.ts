@@ -12,8 +12,8 @@ export interface Blob {
     points: Point[];
 }
 
-export const gen = (opt: GenOptions): Blob => {
-    const rgen = rand(String(opt.seed));
+export const gen = (options: GenOptions): Blob => {
+    const rgen = rand(String(options.seed));
 
     // Scale of random movement increases as randomness approaches infinity.
     // randomness = 0   -> rangeStart = 1
@@ -23,11 +23,11 @@ export const gen = (opt: GenOptions): Blob => {
     // randomness = 20  -> rangeStart = 0.3333
     // randomness = 50  -> rangeStart = 0.1667
     // randomness = 100 -> rangeStart = 0.0909
-    const rangeStart = 1 / (1 + Math.abs(opt.randomness) / 10);
+    const rangeStart = 1 / (1 + Math.abs(options.randomness) / 10);
 
     return {
         points: genBlob(
-            3 + Math.abs(opt.extraPoints),
+            3 + Math.abs(options.extraPoints),
             () => rangeStart + rgen() * (1 - rangeStart),
         ),
     };

@@ -12,7 +12,7 @@ import {
 } from "../util";
 import {Point} from "../types";
 
-// OPT extract optimization logic
+// TODO OPT extract optimization logic
 const optimizeOrder = (a: Point[], b: Point[]): Point[] => {
     const count = a.length;
 
@@ -40,7 +40,7 @@ const optimizeOrder = (a: Point[], b: Point[]): Point[] => {
     return shift(minOffset, minOffsetBase);
 };
 
-// OPT allow extra division
+// TODO OPT allow extra division
 export const divide = (count: number, points: Point[]): Point[] => {
     if (points.length < 3) throw new Error("not enough points");
     if (count < points.length) throw new Error("cannot remove points");
@@ -65,7 +65,7 @@ export const divide = (count: number, points: Point[]): Point[] => {
     return out;
 };
 
-// OPT disable
+// TODO OPT disable
 const fixAnglesWith = (fixee: Point[], fixer: Point[]): Point[] => {
     return mapPoints(fixee, ({index, curr, prev, next}) => {
         if (curr.handleIn.length === 0 && coordEqual(prev(), curr)) {
@@ -78,7 +78,7 @@ const fixAnglesWith = (fixee: Point[], fixer: Point[]): Point[] => {
     });
 };
 
-// OPT disable
+// TODO OPT disable
 const fixAnglesSelf = (points: Point[]): Point[] => {
     return mapPoints(points, ({curr, prev, next}) => {
         const angle = angleOf(prev(), next());

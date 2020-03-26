@@ -41,47 +41,47 @@ export interface BlobOptions extends PathOptions {
 }
 
 // Generates an svg document string containing a randomized blob.
-const blobs = (opt: BlobOptions): string => {
-    return blobs.editable(opt).render();
+const blobs = (options: BlobOptions): string => {
+    return blobs.editable(options).render();
 };
 
 // Generates a randomized blob as an editable data structure which can be rendered to an svg document.
-blobs.editable = (opt: BlobOptions): XmlElement => {
-    if (!opt) {
+blobs.editable = (options: BlobOptions): XmlElement => {
+    if (!options) {
         throw new Error("no options specified");
     }
 
     // Random number generator.
-    const rgen = rand(opt.seed || String(Date.now()));
+    const rgen = rand(options.seed || String(Date.now()));
 
-    if (!opt.size) {
+    if (!options.size) {
         throw new Error("no size specified");
     }
 
-    if (!opt.stroke && !opt.color) {
+    if (!options.stroke && !options.color) {
         throw new Error("no color or stroke specified");
     }
 
-    if (opt.complexity <= 0 || opt.complexity > 1) {
+    if (options.complexity <= 0 || options.complexity > 1) {
         throw new Error("complexity out of range ]0,1]");
     }
 
-    if (opt.contrast < 0 || opt.contrast > 1) {
+    if (options.contrast < 0 || options.contrast > 1) {
         throw new Error("contrast out of range [0,1]");
     }
 
-    const count = 3 + Math.floor(14 * opt.complexity);
-    const offset = (): number => (1 - 0.8 * opt.contrast * rgen()) / Math.E;
+    const count = 3 + Math.floor(14 * options.complexity);
+    const offset = (): number => (1 - 0.8 * options.contrast * rgen()) / Math.E;
 
     const points = mapPoints(genBlob(count, offset), ({curr}) => {
         // Scale.
-        curr.x *= opt.size;
-        curr.y *= opt.size;
-        curr.handleIn.length *= opt.size;
-        curr.handleOut.length *= opt.size;
+        curr.x *= options.size;
+        curr.y *= options.size;
+        curr.handleIn.length *= options.size;
+        curr.handleOut.length *= options.size;
 
         // Flip around x-axis.
-        curr.y = opt.size - curr.y;
+        curr.y = options.size - curr.y;
         curr.handleIn.angle *= -1;
         curr.handleOut.angle *= -1;
 
@@ -90,13 +90,13 @@ blobs.editable = (opt: BlobOptions): XmlElement => {
 
     return renderEditable(points, {
         closed: true,
-        width: opt.size,
-        height: opt.size,
-        fill: opt.color,
-        transform: `rotate(${rgen() * (360 / count)},${opt.size / 2},${opt.size / 2})`,
-        stroke: opt.stroke && opt.stroke.color,
-        strokeWidth: opt.stroke && opt.stroke.width,
-        guides: opt.guides,
+        width: options.size,
+        height: options.size,
+        fill: options.color,
+        transform: `rotate(${rgen() * (360 / count)},${options.size / 2},${options.size / 2})`,
+        stroke: options.stroke && options.stroke.color,
+        strokeWidth: options.stroke && options.stroke.width,
+        guides: options.guides,
     });
 };
 

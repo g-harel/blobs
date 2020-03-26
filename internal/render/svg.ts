@@ -37,40 +37,40 @@ export const renderPath = (points: Point[]): string => {
 };
 
 // Renders the input points to an editable data structure which can be rendered to svg.
-export const renderEditable = (points: Point[], opt: RenderOptions): XmlElement => {
-    const stroke = opt.stroke || (opt.guides ? "black" : "none");
-    const strokeWidth = opt.strokeWidth || (opt.guides ? 1 : 0);
+export const renderEditable = (points: Point[], options: RenderOptions): XmlElement => {
+    const stroke = options.stroke || (options.guides ? "black" : "none");
+    const strokeWidth = options.strokeWidth || (options.guides ? 1 : 0);
 
     const xmlRoot = xml("svg");
-    xmlRoot.attributes.width = opt.width;
-    xmlRoot.attributes.height = opt.height;
-    xmlRoot.attributes.viewBox = `0 0 ${opt.width} ${opt.height}`;
+    xmlRoot.attributes.width = options.width;
+    xmlRoot.attributes.height = options.height;
+    xmlRoot.attributes.viewBox = `0 0 ${options.width} ${options.height}`;
     xmlRoot.attributes.xmlns = "http://www.w3.org/2000/svg";
 
     const xmlContentGroup = xml("g");
-    xmlContentGroup.attributes.transform = opt.transform || "";
+    xmlContentGroup.attributes.transform = options.transform || "";
 
     const xmlBlobPath = xml("path");
     xmlBlobPath.attributes.stroke = stroke;
     xmlBlobPath.attributes["stroke-width"] = strokeWidth;
-    xmlBlobPath.attributes.fill = opt.fill || "none";
+    xmlBlobPath.attributes.fill = options.fill || "none";
     xmlBlobPath.attributes.d = renderPath(points);
 
     xmlContentGroup.children.push(xmlBlobPath);
     xmlRoot.children.push(xmlContentGroup);
 
     // Render guides if configured to do so.
-    if (opt.guides) {
-        const color = opt.stroke || "black";
-        const size = opt.strokeWidth || 1;
+    if (options.guides) {
+        const color = options.stroke || "black";
+        const size = options.strokeWidth || 1;
 
         // Bounding box.
-        if (opt.boundingBox) {
+        if (options.boundingBox) {
             const xmlBoundingRect = xml("rect");
             xmlBoundingRect.attributes.x = 0;
             xmlBoundingRect.attributes.y = 0;
-            xmlBoundingRect.attributes.width = opt.width;
-            xmlBoundingRect.attributes.height = opt.height;
+            xmlBoundingRect.attributes.width = options.width;
+            xmlBoundingRect.attributes.height = options.height;
             xmlBoundingRect.attributes.fill = "none";
             xmlBoundingRect.attributes.stroke = color;
             xmlBoundingRect.attributes["stroke-width"] = 2 * size;
