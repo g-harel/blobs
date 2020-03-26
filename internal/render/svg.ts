@@ -1,6 +1,6 @@
 import {xml, XmlElement} from "../../editable";
-import {Shape} from "../types";
-import {expandHandle, forShape} from "../util";
+import {Point} from "../types";
+import {expandHandle, forPoints} from "../util";
 
 export interface RenderOptions {
     // Viewport size.
@@ -24,10 +24,10 @@ export interface RenderOptions {
     boundingBox?: boolean;
 }
 
-export const renderPath = (shape: Shape): string => {
+export const renderPath = (points: Point[]): string => {
     // Render path data attribute from points and handles.
-    let path = `M${shape[0].x},${shape[0].y}`;
-    forShape(shape, ({curr, next: getNext}) => {
+    let path = `M${points[0].x},${points[0].y}`;
+    forPoints(points, ({curr, next: getNext}) => {
         const next = getNext();
         const currControl = expandHandle(curr, curr.handleOut);
         const nextControl = expandHandle(next, next.handleIn);
@@ -36,9 +36,8 @@ export const renderPath = (shape: Shape): string => {
     return path;
 };
 
-// Renders a shape made up of the input points to an editable data structure
-// which can be rendered to svg.
-export const renderEditable = (shape: Shape, opt: RenderOptions): XmlElement => {
+// Renders the input points to an editable data structure which can be rendered to svg.
+export const renderEditable = (points: Point[], opt: RenderOptions): XmlElement => {
     const stroke = opt.stroke || (opt.guides ? "black" : "none");
     const strokeWidth = opt.strokeWidth || (opt.guides ? 1 : 0);
 
@@ -55,7 +54,7 @@ export const renderEditable = (shape: Shape, opt: RenderOptions): XmlElement => 
     xmlBlobPath.attributes.stroke = stroke;
     xmlBlobPath.attributes["stroke-width"] = strokeWidth;
     xmlBlobPath.attributes.fill = opt.fill || "none";
-    xmlBlobPath.attributes.d = renderPath(shape);
+    xmlBlobPath.attributes.d = renderPath(points);
 
     xmlContentGroup.children.push(xmlBlobPath);
     xmlRoot.children.push(xmlContentGroup);
@@ -80,7 +79,7 @@ export const renderEditable = (shape: Shape, opt: RenderOptions): XmlElement => 
         }
 
         // Points and handles.
-        forShape(shape, ({curr, next: getNext}) => {
+        forPoints(points, ({curr, next: getNext}) => {
             const next = getNext();
             const currControl = expandHandle(curr, curr.handleOut);
             const nextControl = expandHandle(next, next.handleIn);

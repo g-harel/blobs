@@ -1,17 +1,17 @@
-import {Shape} from "./types";
+import {Point} from "./types";
 import {smooth} from "../internal/util";
 
-export const genBlob = (pointCount: number, offset: () => number): Shape => {
+export const genBlob = (pointCount: number, offset: () => number): Point[] => {
     const angle = (Math.PI * 2) / pointCount;
     const boundingSize = 1;
     const boundingCenter = boundingSize / 2;
 
-    const shape: Shape = [];
+    const points: Point[] = [];
     for (let i = 0; i < pointCount; i++) {
         const randPointOffset = offset();
         const pointX = Math.sin(i * angle);
         const pointY = Math.cos(i * angle);
-        shape.push({
+        points.push({
             x: boundingCenter + pointX * randPointOffset,
             y: boundingCenter + pointY * randPointOffset,
             handleIn: {angle: 0, length: 0},
@@ -22,5 +22,5 @@ export const genBlob = (pointCount: number, offset: () => number): Shape => {
     // https://math.stackexchange.com/a/873589/235756
     const smoothingStrength = ((4 / 3) * Math.tan(angle / 4)) / Math.sin(angle / 2) / 2;
 
-    return smooth(shape, smoothingStrength);
+    return smooth(points, smoothingStrength);
 };

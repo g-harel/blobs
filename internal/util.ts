@@ -1,4 +1,4 @@
-import {Coord, Handle, Point, Shape} from "./types";
+import {Coord, Handle, Point} from "./types";
 
 export const copyPoint = (p: Point): Point => ({
     x: p.x,
@@ -7,7 +7,7 @@ export const copyPoint = (p: Point): Point => ({
     handleOut: {...p.handleOut},
 });
 
-export interface ShapeIteratorArgs {
+export interface PointIteratorArgs {
     curr: Point;
     index: number;
     sibling: (pos: number) => Point;
@@ -15,11 +15,11 @@ export interface ShapeIteratorArgs {
     next: () => Point;
 }
 
-export const forShape = (shape: Shape, callback: (args: ShapeIteratorArgs) => void) => {
-    for (let i = 0; i < shape.length; i++) {
-        const sibling = (pos: number) => copyPoint(shape[mod(pos, shape.length)]);
+export const forPoints = (points: Point[], callback: (args: PointIteratorArgs) => void) => {
+    for (let i = 0; i < points.length; i++) {
+        const sibling = (pos: number) => copyPoint(points[mod(pos, points.length)]);
         callback({
-            curr: copyPoint(shape[i]),
+            curr: copyPoint(points[i]),
             index: i,
             sibling,
             prev: () => sibling(i - 1),
@@ -28,9 +28,12 @@ export const forShape = (shape: Shape, callback: (args: ShapeIteratorArgs) => vo
     }
 };
 
-export const mapShape = (shape: Shape, callback: (args: ShapeIteratorArgs) => Point): Shape => {
+export const mapPoints = (
+    points: Point[],
+    callback: (args: PointIteratorArgs) => Point,
+): Point[] => {
     const out: Point[] = [];
-    forShape(shape, (args) => {
+    forPoints(points, (args) => {
         out.push(callback(args));
     });
     return out;
@@ -69,17 +72,17 @@ export const length = (a: Point, b: Point): number => {
     return (ab + abHandle + a.handleOut.length + b.handleIn.length) / 2;
 };
 
-export const reverse = (shape: Shape): Shape => {
-    return mapShape(shape, ({index, sibling}) => {
-        const point = sibling(shape.length - index - 1);
+export const reverse = (points: Point[]): Point[] => {
+    return mapPoints(points, ({index, sibling}) => {
+        const point = sibling(points.length - index - 1);
         point.handleIn.angle += Math.PI;
         point.handleOut.angle += Math.PI;
         return point;
     });
 };
 
-export const shift = (offset: number, shape: Shape): Shape => {
-    return mapShape(shape, ({index, sibling}) => {
+export const shift = (offset: number, points: Point[]): Point[] => {
+    return mapPoints(points, ({index, sibling}) => {
         return sibling(index + offset);
     });
 };
@@ -119,7 +122,7 @@ export const insertAt = (percentage: number, a: Point, b: Point): [Point, Point,
     return [c, d, e];
 };
 
-export const insertCount = (count: number, a: Point, b: Point): Shape => {
+export const insertCount = (count: number, a: Point, b: Point): Point[] => {
     if (count < 2) return [a, b];
     const percentage = 1 / count;
     const [c, d, e] = insertAt(percentage, a, b);
@@ -129,8 +132,8 @@ export const insertCount = (count: number, a: Point, b: Point): Shape => {
 
 // Smooths out the path made up of the given points.
 // Existing handles are ignored.
-export const smooth = (shape: Shape, strength: number): Shape => {
-    return mapShape(shape, ({curr, next, prev}) => {
+export const smooth = (points: Point[], strength: number): Point[] => {
+    return mapPoints(points, ({curr, next, prev}) => {
         const angle = angleOf(prev(), next());
         return {
             x: curr.x,

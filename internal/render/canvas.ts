@@ -1,5 +1,5 @@
-import {Coord, Shape} from "../types";
-import {expandHandle, forShape} from "../util";
+import {Coord, Point} from "../types";
+import {expandHandle, forPoints} from "../util";
 
 const pointSize = 2;
 const infoSpacing = 20;
@@ -31,10 +31,10 @@ const drawPoint = (ctx: CanvasRenderingContext2D, p: Coord, style: string) => {
     ctx.fillStyle = backupFillStyle;
 };
 
-export const drawShape = (ctx: CanvasRenderingContext2D, debug: boolean, shape: Shape) => {
-    if (shape.length < 2) throw new Error("not enough points");
+export const drawClosed = (ctx: CanvasRenderingContext2D, debug: boolean, points: Point[]) => {
+    if (points.length < 2) throw new Error("not enough points");
 
-    forShape(shape, ({curr, next: getNext}) => {
+    forPoints(points, ({curr, next: getNext}) => {
         const next = getNext();
 
         // Compute coordinates of handles.

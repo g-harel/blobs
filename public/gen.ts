@@ -1,6 +1,6 @@
 import {genBlob} from "../internal/blobs";
 import {rand} from "../internal/rand";
-import {Shape} from "../internal/types";
+import {Point} from "../internal/types";
 
 export interface GenOptions {
     seed: string | number;
@@ -9,10 +9,10 @@ export interface GenOptions {
 }
 
 export interface Blob {
-    shape: Shape;
+    points: Point[];
 }
 
-export const gen = (opt: GenOptions) => {
+export const gen = (opt: GenOptions): Blob => {
     const rgen = rand(String(opt.seed));
 
     // Scale of random movement increases as randomness approaches infinity.
@@ -25,5 +25,10 @@ export const gen = (opt: GenOptions) => {
     // randomness = 100 -> rangeStart = 0.0909
     const rangeStart = 1 / (1 + Math.abs(opt.randomness) / 10);
 
-    return genBlob(3 + Math.abs(opt.extraPoints), () => rangeStart + rgen() * (1 - rangeStart));
+    return {
+        points: genBlob(
+            3 + Math.abs(opt.extraPoints),
+            () => rangeStart + rgen() * (1 - rangeStart),
+        ),
+    };
 };

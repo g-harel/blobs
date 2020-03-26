@@ -1,5 +1,5 @@
-import {Shape} from "../types";
-import {split, splitLine, mod, smooth, mapShape} from "../util";
+import {Point} from "../types";
+import {split, splitLine, mod, smooth, mapPoints} from "../util";
 
 // Interpolates between angles a and b. Angles are normalized to avoid unnecessary rotation.
 // Direction is chosen to produce the smallest possible movement.
@@ -17,19 +17,19 @@ const interpolateAngle = (percentage: number, a: number, b: number): number => {
     return split(percentage, aNorm, bNorm);
 };
 
-// Interpolates linearly between shapes a and b. Can only interpolate between shapes that have the
+// Interpolates linearly between a and b. Can only interpolate between point lists that have the
 // same number of points. Easing effects can be applied to the percentage given to this function.
 // Percentages outside the 0-1 range are supported.
-export const interpolateBetween = (percentage: number, a: Shape, b: Shape): Shape => {
-    if (a.length !== b.length) throw new Error("shapes have different number of points");
+export const interpolateBetween = (percentage: number, a: Point[], b: Point[]): Point[] => {
+    if (a.length !== b.length) throw new Error("must have equal number of points");
 
     // Clamped range for use in values that could look incorrect otherwise.
     // ex. Handles that invert if their value goes negative (creates loops at corners).
     const clamped = Math.min(1, Math.max(0, percentage));
 
-    const shape: Shape = [];
+    const points: Point[] = [];
     for (let i = 0; i < a.length; i++) {
-        shape.push({
+        points.push({
             ...splitLine(percentage, a[i], b[i]),
             handleIn: {
                 angle: interpolateAngle(percentage, a[i].handleIn.angle, b[i].handleIn.angle),
@@ -41,22 +41,22 @@ export const interpolateBetween = (percentage: number, a: Shape, b: Shape): Shap
             },
         });
     }
-    return shape;
+    return points;
 };
 
-// Interpolates between shapes a and b while applying a smoothing effect. Smoothing effect's
-// strength is relative to how far away the percentage is from either 0 or 1. It is strongest in the
-// middle of the animation (percentage = 0.5) or when bounds are exceeded (percentage = 1.8).
+// Interpolates between a and b while applying a smoothing effect. Smoothing effect's strength is
+// relative to how far away the percentage is from either 0 or 1. It is strongest in the middle of
+// the animation (percentage = 0.5) or when bounds are exceeded (percentage = 1.8).
 export const interpolateBetweenSmooth = (
     strength: number,
     percentage: number,
-    a: Shape,
-    b: Shape,
-): Shape => {
+    a: Point[],
+    b: Point[],
+): Point[] => {
     strength *= Math.min(1, Math.min(Math.abs(0 - percentage), Math.abs(1 - percentage)));
     const interpolated = interpolateBetween(percentage, a, b);
     const smoothed = smooth(interpolated, Math.sqrt(strength + 0.25) / 3);
-    return mapShape(interpolated, ({index, curr}) => {
+    return mapPoints(interpolated, ({index, curr}) => {
         const sp = smoothed[index];
         curr.handleIn.angle = interpolateAngle(strength, curr.handleIn.angle, sp.handleIn.angle);
         curr.handleIn.length = split(strength, curr.handleIn.length, sp.handleIn.length);

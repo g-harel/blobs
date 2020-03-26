@@ -1,10 +1,8 @@
-// https://www.blobmaker.app/
-
 import {rand} from "../internal/rand";
 import {renderEditable} from "../internal/render/svg";
 import {XmlElement} from "../editable";
 import {genBlob} from "../internal/blobs";
-import {mapShape} from "../internal/util";
+import {mapPoints} from "../internal/util";
 
 const isBrowser = new Function("try {return this===window;}catch(e){ return false;}");
 const isLocalhost = () => location.hostname === "localhost" || location.hostname === "127.0.0.1";
@@ -16,10 +14,10 @@ export interface PathOptions {
     // Bounding box dimensions.
     size: number;
 
-    // Shape complexity.
+    // Number of points.
     complexity: number;
 
-    // Shape contrast.
+    // Amount of randomness.
     contrast: number;
 
     // Value to seed random number generator.
@@ -42,13 +40,12 @@ export interface BlobOptions extends PathOptions {
     guides?: boolean;
 }
 
-// Generates an svg document string containing a randomized rounded shape.
+// Generates an svg document string containing a randomized blob.
 const blobs = (opt: BlobOptions): string => {
     return blobs.editable(opt).render();
 };
 
-// Generates an editable data structure which can be rendered to an svg document
-// containing a randomized rounded shape.
+// Generates a randomized blob as an editable data structure which can be rendered to an svg document.
 blobs.editable = (opt: BlobOptions): XmlElement => {
     if (!opt) {
         throw new Error("no options specified");
@@ -76,14 +73,14 @@ blobs.editable = (opt: BlobOptions): XmlElement => {
     const count = 3 + Math.floor(14 * opt.complexity);
     const offset = (): number => (1 - 0.8 * opt.contrast * rgen()) / Math.E;
 
-    const shape = mapShape(genBlob(count, offset), ({curr}) => {
-        // Change shape size.
+    const points = mapPoints(genBlob(count, offset), ({curr}) => {
+        // Scale.
         curr.x *= opt.size;
         curr.y *= opt.size;
         curr.handleIn.length *= opt.size;
         curr.handleOut.length *= opt.size;
 
-        // Flip shape around x-axis.
+        // Flip around x-axis.
         curr.y = opt.size - curr.y;
         curr.handleIn.angle *= -1;
         curr.handleOut.angle *= -1;
@@ -91,7 +88,7 @@ blobs.editable = (opt: BlobOptions): XmlElement => {
         return curr;
     });
 
-    return renderEditable(shape, {
+    return renderEditable(points, {
         closed: true,
         width: opt.size,
         height: opt.size,

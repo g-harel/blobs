@@ -7,55 +7,55 @@ import {
     mod,
     angleOf,
     coordEqual,
-    mapShape,
-    forShape,
+    mapPoints,
+    forPoints,
 } from "../util";
-import {Point, Shape} from "../types";
+import {Point} from "../types";
 
 // OPT extract optimization logic
-const optimizeOrder = (a: Shape, b: Shape): Shape => {
+const optimizeOrder = (a: Point[], b: Point[]): Point[] => {
     const count = a.length;
 
     let minSum = Infinity;
     let minOffset = 0;
-    let minShape: Shape = [];
+    let minOffsetBase: Point[] = [];
 
-    const setMinOffset = (shape: Shape) => {
+    const setMinOffset = (points: Point[]) => {
         for (let i = 0; i < count; i++) {
             let sum = 0;
             for (let j = 0; j < count; j++) {
-                sum += (100 * distance(a[j], shape[mod(j + i, count)])) ** 1 / 2;
+                sum += (100 * distance(a[j], points[mod(j + i, count)])) ** 1 / 2;
                 if (sum > minSum) break;
             }
             if (sum <= minSum) {
                 minSum = sum;
                 minOffset = i;
-                minShape = shape;
+                minOffsetBase = points;
             }
         }
     };
     setMinOffset(b);
     setMinOffset(reverse(b));
 
-    return shift(minOffset, minShape);
+    return shift(minOffset, minOffsetBase);
 };
 
 // OPT allow extra division
-export const divideShape = (count: number, shape: Shape): Shape => {
-    if (shape.length < 3) throw new Error("not enough points");
-    if (count < shape.length) throw new Error("cannot remove points");
-    if (count === shape.length) return shape.slice();
+export const divide = (count: number, points: Point[]): Point[] => {
+    if (points.length < 3) throw new Error("not enough points");
+    if (count < points.length) throw new Error("cannot remove points");
+    if (count === points.length) return points.slice();
 
     const lengths: number[] = [];
-    forShape(shape, ({curr, next}) => {
+    forPoints(points, ({curr, next}) => {
         lengths.push(length(curr, next()));
     });
 
-    const divisors = divideLengths(lengths, count - shape.length);
-    const out: Shape = [];
-    for (let i = 0; i < shape.length; i++) {
-        const curr: Point = out[out.length - 1] || shape[i];
-        const next = shape[mod(i + 1, shape.length)];
+    const divisors = divideLengths(lengths, count - points.length);
+    const out: Point[] = [];
+    for (let i = 0; i < points.length; i++) {
+        const curr: Point = out[out.length - 1] || points[i];
+        const next = points[mod(i + 1, points.length)];
         out.pop();
         out.push(...insertCount(divisors[i], curr, next));
     }
@@ -66,8 +66,8 @@ export const divideShape = (count: number, shape: Shape): Shape => {
 };
 
 // OPT disable
-const fixAnglesWith = (fixee: Shape, fixer: Shape): Shape => {
-    return mapShape(fixee, ({index, curr, prev, next}) => {
+const fixAnglesWith = (fixee: Point[], fixer: Point[]): Point[] => {
+    return mapPoints(fixee, ({index, curr, prev, next}) => {
         if (curr.handleIn.length === 0 && coordEqual(prev(), curr)) {
             curr.handleIn.angle = fixer[index].handleIn.angle;
         }
@@ -79,8 +79,8 @@ const fixAnglesWith = (fixee: Shape, fixer: Shape): Shape => {
 };
 
 // OPT disable
-const fixAnglesSelf = (shape: Shape): Shape => {
-    return mapShape(shape, ({curr, prev, next}) => {
+const fixAnglesSelf = (points: Point[]): Point[] => {
+    return mapPoints(points, ({curr, prev, next}) => {
         const angle = angleOf(prev(), next());
         if (curr.handleIn.length === 0) {
             curr.handleIn.angle = angle + Math.PI;
@@ -114,10 +114,10 @@ const divideLengths = (lengths: number[], add: number): number[] => {
     return divisors;
 };
 
-export const prepShapes = (a: Shape, b: Shape): [Shape, Shape] => {
+export const prepare = (a: Point[], b: Point[]): [Point[], Point[]] => {
     const pointCount = Math.max(a.length, b.length);
-    const aNorm = divideShape(pointCount, a);
-    const bNorm = divideShape(pointCount, b);
+    const aNorm = divide(pointCount, a);
+    const bNorm = divide(pointCount, b);
     const bOpt = optimizeOrder(aNorm, bNorm);
     return [fixAnglesWith(fixAnglesSelf(aNorm), bNorm), fixAnglesWith(fixAnglesSelf(bOpt), aNorm)];
 };

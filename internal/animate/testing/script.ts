@@ -1,8 +1,8 @@
 import {interpolateBetweenSmooth} from "../interpolate";
-import {divideShape, prepShapes} from "../prepare";
-import {Coord, Point, Shape} from "../../types";
-import {length, insertAt, insertCount, rad, mod, mapShape, forShape, smooth} from "../../util";
-import {clear, drawInfo, drawShape} from "../../render/canvas";
+import {divide, prepare} from "../prepare";
+import {Coord, Point} from "../../types";
+import {length, insertAt, insertCount, rad, mod, mapPoints, forPoints} from "../../util";
+import {clear, drawInfo, drawClosed} from "../../render/canvas";
 import {genBlob} from "../../blobs";
 import {rand} from "../../rand";
 
@@ -33,35 +33,35 @@ const point = (x: number, y: number, ia: number, il: number, oa: number, ol: num
 };
 
 const testSplitAt = (percentage: number) => {
-    let shape: Shape = [
+    let points: Point[] = [
         point(0.15, 0.15, 135, 0.1, 315, 0.2),
         point(0.85, 0.15, 225, 0.1, 45, 0.2),
         point(0.85, 0.85, 315, 0.1, 135, 0.2),
         point(0.15, 0.85, 45, 0.1, 225, 0.2),
     ];
 
-    const count = shape.length;
+    const count = points.length;
     const stop = 2 * count - 1;
     for (let i = 0; i < count; i++) {
         const double = i * 2;
         const next = mod(double + 1, stop);
-        shape.splice(double, 2, ...insertAt(percentage, shape[double], shape[next]));
+        points.splice(double, 2, ...insertAt(percentage, points[double], points[next]));
     }
-    shape.splice(0, 1);
+    points.splice(0, 1);
 
     let sum = 0;
-    forShape(shape, ({curr, next}) => {
+    forPoints(points, ({curr, next}) => {
         sum += length(curr, next());
     });
     drawInfo(ctx, 1, "split at lengths sum", sum);
 
-    drawShape(ctx, debug, shape);
+    drawClosed(ctx, debug, points);
 };
 
 const testSplitBy = () => {
     const count = 10;
     for (let i = 0; i < count; i++) {
-        drawShape(
+        drawClosed(
             ctx,
             debug,
             insertCount(
@@ -73,13 +73,13 @@ const testSplitBy = () => {
     }
 };
 
-const testDivideShape = () => {
+const testDividePoints = () => {
     const count = 10;
     for (let i = 0; i < count; i++) {
-        drawShape(
+        drawClosed(
             ctx,
             debug,
-            divideShape(i + 3, [
+            divide(i + 3, [
                 point(0.3, 0.2 + i * 0.05, -10, 0.04, -45, 0.02),
                 point(0.35, 0.2 + i * 0.05 - 0.02, 180, 0.02, 0, 0.02),
                 point(0.4, 0.2 + i * 0.05, -135, 0.02, 170, 0.04),
@@ -101,29 +101,29 @@ const testInterpolateBetween = (percentage: number) => {
         point(0.35, 0.82, 360 * 10, 0, 180, 0),
         point(0.3, 0.77, 90, 0, -90, 0),
     ];
-    drawShape(ctx, debug, loopBetween(percentage, a, b));
+    drawClosed(ctx, debug, loopBetween(percentage, a, b));
 };
 
-const testPrepShapesA = (percentage: number) => {
+const testPrepPointsA = (percentage: number) => {
     const a = blob("a", 6, 0.15, {x: 0.45, y: 0.1});
     const b = blob("b", 10, 0.15, {x: 0.45, y: 0.1});
-    drawShape(ctx, debug, loopBetween(percentage, ...prepShapes(a, b)));
+    drawClosed(ctx, debug, loopBetween(percentage, ...prepare(a, b)));
 };
 
-const testPrepShapesB = (percentage: number) => {
+const testPrepPointsB = (percentage: number) => {
     const a = blob("a", 8, 0.15, {x: 0.45, y: 0.25});
-    const b: Shape = [
+    const b: Point[] = [
         point(0.45, 0.25, 0, 0, 0, 0),
         point(0.6, 0.25, 0, 0, 0, 0),
         point(0.6, 0.4, 0, 0, 0, 0),
         point(0.45, 0.4, 0, 0, 0, 0),
     ];
-    drawShape(ctx, debug, loopBetween(percentage, ...prepShapes(a, b)));
+    drawClosed(ctx, debug, loopBetween(percentage, ...prepare(a, b)));
 };
 
-const testPrepShapesC = (percentage: number) => {
+const testPrepPointsC = (percentage: number) => {
     const a = blob("c", 8, 0.15, {x: 0.45, y: 0.45});
-    const b: Shape = [
+    const b: Point[] = [
         point(0.5, 0.45, 0, 0, 0, 0),
         point(0.55, 0.45, 0, 0, 0, 0),
         point(0.55, 0.5, 0, 0, 0, 0),
@@ -137,21 +137,21 @@ const testPrepShapesC = (percentage: number) => {
         point(0.45, 0.5, 0, 0, 0, 0),
         point(0.5, 0.5, 0, 0, 0, 0),
     ];
-    drawShape(ctx, debug, loopBetween(percentage, ...prepShapes(b, a)));
+    drawClosed(ctx, debug, loopBetween(percentage, ...prepare(b, a)));
 };
 
-const testPrepShapesD = (percentage: number) => {
+const testPrepPointsD = (percentage: number) => {
     const a = blob("d", 8, 0.15, {x: 0.45, y: 0.65});
-    const b: Shape = [
+    const b: Point[] = [
         point(0.525, 0.725, 0, 0, 0, 0),
         point(0.525, 0.725, 0, 0, 0, 0),
         point(0.525, 0.725, 0, 0, 0, 0),
     ];
-    drawShape(ctx, debug, loopBetween(percentage, ...prepShapes(a, b)));
+    drawClosed(ctx, debug, loopBetween(percentage, ...prepare(a, b)));
 };
 
 const testPrepLetters = (percentage: number) => {
-    const a: Shape = [
+    const a: Point[] = [
         point(0.65, 0.2, 0, 0, 0, 0),
         point(0.85, 0.2, 0, 0, 0, 0),
         point(0.85, 0.25, 0, 0, 0, 0),
@@ -165,14 +165,14 @@ const testPrepLetters = (percentage: number) => {
         point(0.85, 0.45, 0, 0, 0, 0),
         point(0.65, 0.45, 0, 0, 0, 0),
     ];
-    const b: Shape = blob("lettersa", 8, 0.25, {x: 0.65, y: 0.2});
-    drawShape(ctx, debug, loopBetween(percentage, ...prepShapes(a, b)));
+    const b: Point[] = blob("", 8, 0.25, {x: 0.65, y: 0.2});
+    drawClosed(ctx, debug, loopBetween(percentage, ...prepare(a, b)));
 };
 
-const blob = (seed: string, count: number, scale: number, offset: Coord): Shape => {
+const blob = (seed: string, count: number, scale: number, offset: Coord): Point[] => {
     const rgen = rand(seed);
-    const shape = genBlob(count, () => 0.3 + 0.2 * rgen());
-    return mapShape(shape, ({curr}) => {
+    const points = genBlob(count, () => 0.3 + 0.2 * rgen());
+    return mapPoints(points, ({curr}) => {
         curr.x *= scale * size;
         curr.y *= scale * size;
         curr.x += offset.x * size;
@@ -183,7 +183,7 @@ const blob = (seed: string, count: number, scale: number, offset: Coord): Shape 
     });
 };
 
-const loopBetween = (percentage: number, a: Shape, b: Shape): Shape => {
+const loopBetween = (percentage: number, a: Point[], b: Point[]): Point[] => {
     if (percentage < 0.5) {
         return interpolateBetweenSmooth(1, 2 * percentage, a, b);
     } else {
@@ -200,12 +200,12 @@ const loopBetween = (percentage: number, a: Shape, b: Shape): Shape => {
         drawInfo(ctx, 0, "percentage", percentage);
         testSplitAt(percentage);
         testSplitBy();
-        testDivideShape();
+        testDividePoints();
         testInterpolateBetween(percentage);
-        testPrepShapesA(percentage);
-        testPrepShapesB(percentage);
-        testPrepShapesC(percentage);
-        testPrepShapesD(percentage);
+        testPrepPointsA(percentage);
+        testPrepPointsB(percentage);
+        testPrepPointsC(percentage);
+        testPrepPointsD(percentage);
         testPrepLetters(percentage);
 
         percentage += animationSpeed / 1000;

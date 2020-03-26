@@ -16,5 +16,3 @@ export interface Point extends Coord {
     handleIn: Handle;
     handleOut: Handle;
 }
-
-export type Shape = Point[];

@@ -42,8 +42,8 @@ _Options are **not** [sanitized](https://en.wikipedia.org/wiki/HTML_sanitization
 Name           | Type       | Description
 -------------- | ---------- | ---------------------------------------------
 `size`         | `number`   | Bounding box dimensions (in pixels)
-`complexity`   | `number`   | Shape complexity (number of points)
-`contrast`     | `number`   | Shape contrast (randomness of point position)
+`complexity`   | `number`   | Blob complexity (number of points)
+`contrast`     | `number`   | Blob contrast (randomness of point position)
 
 
 #### Optional
