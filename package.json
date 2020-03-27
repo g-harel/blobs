@@ -9,8 +9,8 @@
   "scripts": {
     "prepack": "npm run build",
     "postpublish": "npm run clean",
-    "build": "npm run clean && rollup -c rollup.config.ts",
-    "clean": "trash '**/*.js' '**/*.js.map' '**/*.d.ts' '!**/node_modules/**/*'",
+    "build": "npm run clean && rollup -c rollup.config.js",
+    "clean": "trash '**/*.js' '**/*.js.map' '**/*.d.ts' '!**/node_modules/**/*' '!rollup.config.js'",
     "fmt": "prettier --list-different --write --ignore-path .gitignore '**/*.{js,ts}'",
     "anim": "parcel internal/animate/testing/index.html --open",
     "test": "jest"
