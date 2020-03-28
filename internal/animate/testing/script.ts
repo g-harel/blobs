@@ -3,7 +3,7 @@ import {divide, prepare} from "../prepare";
 import {Coord, Point} from "../../types";
 import {length, insertAt, insertCount, rad, mod, mapPoints, forPoints} from "../../util";
 import {clear, drawInfo, drawClosed} from "../../render/canvas";
-import {genBlob} from "../../blobs";
+import {genBlob} from "../../gen";
 import {rand} from "../../rand";
 
 let animationSpeed = 2;

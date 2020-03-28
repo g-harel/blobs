@@ -1,13 +1,13 @@
 import {rand} from "../internal/rand";
 import {renderEditable} from "../internal/render/svg";
 import {XmlElement} from "../editable";
-import {genBlob} from "../internal/blobs";
+import {genBlob} from "../internal/gen";
 import {mapPoints} from "../internal/util";
 
 const isBrowser = new Function("try {return this===window;}catch(e){ return false;}");
 const isLocalhost = () => location.hostname === "localhost" || location.hostname === "127.0.0.1";
 if (!isBrowser() || (isBrowser() && isLocalhost())) {
-    console.warn("You are using the legacy blobs API!\nPlease use TODO instead.");
+    console.warn("You are using the legacy blobs API!\nPlease use 'blobs/v2' instead.");
 }
 
 export interface PathOptions {

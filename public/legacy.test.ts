@@ -1,4 +1,4 @@
-import blobs, {BlobOptions} from "./blobs";
+import blobs, {BlobOptions} from "./legacy";
 
 const genMinimalOptions = (): BlobOptions => ({
     size: 1000 * Math.random(),

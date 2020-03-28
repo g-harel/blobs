@@ -3,16 +3,16 @@ import {uglify} from "rollup-plugin-uglify";
 
 const bundles = [
     {
-        entry: "legacy/blobs.ts",
+        entry: "public/legacy.ts",
         output: "index.js",
     },
     {
-        entry: "legacy/blobs.ts",
+        entry: "public/legacy.ts",
         output: "v1/index.js",
     },
     {
-        entry: "public/gen.ts",
-        output: "v2/gen.js",
+        entry: "public/blobs.ts",
+        output: "v2/index.js",
     },
 ];
 
