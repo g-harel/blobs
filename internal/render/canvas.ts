@@ -34,23 +34,34 @@ const drawPoint = (ctx: CanvasRenderingContext2D, p: Coord, style: string) => {
 export const drawClosed = (ctx: CanvasRenderingContext2D, debug: boolean, points: Point[]) => {
     if (points.length < 2) throw new Error("not enough points");
 
-    forPoints(points, ({curr, next: getNext}) => {
-        const next = getNext();
+    // Draw debug points.
+    if (debug) {
+        forPoints(points, ({curr, next: getNext}) => {
+            const next = getNext();
 
-        // Compute coordinates of handles.
-        const currHandle = expandHandle(curr, curr.handleOut);
-        const nextHandle = expandHandle(next, next.handleIn);
+            // Compute coordinates of handles.
+            const currHandle = expandHandle(curr, curr.handleOut);
+            const nextHandle = expandHandle(next, next.handleIn);
 
-        if (debug) {
             drawPoint(ctx, curr, "");
             drawLine(ctx, curr, currHandle, "#ccc");
             drawLine(ctx, next, nextHandle, "#b6b");
-        }
+        });
+    }
 
-        // Draw curve between curr and next points.
-        ctx.beginPath();
-        ctx.moveTo(curr.x, curr.y);
-        ctx.bezierCurveTo(currHandle.x, currHandle.y, nextHandle.x, nextHandle.y, next.x, next.y);
-        ctx.stroke();
+    ctx.stroke(renderPath2D(points));
+};
+
+export const renderPath2D = (points: Point[]): Path2D => {
+    const path = new Path2D();
+    path.moveTo(points[0].x, points[0].y);
+
+    forPoints(points, ({curr, next: getNext}) => {
+        const next = getNext();
+        const currHandle = expandHandle(curr, curr.handleOut);
+        const nextHandle = expandHandle(next, next.handleIn);
+        path.bezierCurveTo(currHandle.x, currHandle.y, nextHandle.x, nextHandle.y, next.x, next.y);
     });
+
+    return path;
 };

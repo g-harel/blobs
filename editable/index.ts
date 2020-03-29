@@ -1,3 +1,5 @@
+// TODO move to legacy.
+
 // Generic XML element.
 export interface IXml {
     render(): string;

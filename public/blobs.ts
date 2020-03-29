@@ -2,11 +2,8 @@ import {genBlob} from "../internal/gen";
 import {rand} from "../internal/rand";
 import {Point} from "../internal/types";
 import {mapPoints} from "../internal/util";
-import {renderPath, renderEditable} from "../internal/render/svg";
-
-// TODO include editable types in this file
-// TODO make path editable in editable svg
-// TODO make editable svg more structured
+import {renderPath} from "../internal/render/svg";
+import {renderPath2D} from "../internal/render/canvas";
 
 export interface BlobOptions {
     seed: string | number;
@@ -15,17 +12,31 @@ export interface BlobOptions {
     size: number;
 }
 
-export interface CanvasOptions {}
+export interface CanvasOptions {
+    offsetX?: number;
+    offsetY?: number;
+}
 
 export interface SvgOptions {
-    style: {
-        color: string;
-        strokeColor: string;
-    }
+    fill?: string;
+    stroke?: string;
+    strokeWidth?: number;
 }
+
+const typeCheck = (name: string, val: any, expected: string[]) => {
+    const actual = typeof val;
+    if (!expected.includes(actual)) {
+        throw `(blobs2) "${name}" should have type "${expected.join("|")}" but was "${actual}".`;
+    }
+};
 
 export const raw = (blobOptions: BlobOptions): Point[] => {
     const rgen = rand(String(blobOptions.seed));
+
+    typeCheck("seed", blobOptions.seed, ["string", "number"]);
+    typeCheck("extraPoints", blobOptions.extraPoints, ["number"]);
+    typeCheck("randomness", blobOptions.randomness, ["number"]);
+    typeCheck("size", blobOptions.size, ["number"]);
 
     // Scale of random movement increases as randomness approaches infinity.
     // randomness = 0   -> rangeStart = 1
@@ -39,39 +50,41 @@ export const raw = (blobOptions: BlobOptions): Point[] => {
 
     const points = genBlob(
         3 + Math.abs(blobOptions.extraPoints),
-        () => rangeStart + rgen() * (1 - rangeStart),
+        () => (rangeStart + rgen() * (1 - rangeStart)) / 2,
     );
 
+    const size = Math.abs(blobOptions.size);
     return mapPoints(points, ({curr}) => {
-        curr.x *= blobOptions.size;
-        curr.y *= blobOptions.size;
-        curr.handleIn.length *= blobOptions.size;
-        curr.handleOut.length *= blobOptions.size;
+        curr.x *= size;
+        curr.y *= size;
+        curr.handleIn.length *= size;
+        curr.handleOut.length *= size;
         return curr;
     });
 };
 
-export const canvas = (blobOptions: BlobOptions, canvasOptions: CanvasOptions) => {
-    // TODO
+export const canvas = (blobOptions: BlobOptions, canvasOptions: CanvasOptions): Path2D => {
+    return renderPath2D(
+        mapPoints(raw(blobOptions), ({curr}) => {
+            curr.x += canvasOptions.offsetX || 0;
+            curr.y += canvasOptions.offsetY || 0;
+            return curr;
+        }),
+    );
 };
 
-export const svg = (blobOptions: BlobOptions, svgOptions: SvgOptions) => {};
+export const svg = (blobOptions: BlobOptions, svgOptions: SvgOptions): string => {
+    const path = svgPath(blobOptions);
+    const size = Math.floor(blobOptions.size);
+    const fill = svgOptions.fill === undefined ? "#ec576b" : svgOptions.fill;
+    const stroke = svgOptions.stroke === undefined ? "none" : svgOptions.stroke;
+    const strokeWidth = svgOptions.strokeWidth === undefined ? 1 : svgOptions.strokeWidth;
+    return `
+<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg">
+    <path stroke="${stroke}" stroke-width="${strokeWidth}" fill="${fill}" d="${path}"/>
+</svg>`.trim();
+};
 
 export const svgPath = (blobOptions: BlobOptions): string => {
     return renderPath(raw(blobOptions));
-};
-
-export const svgEditable = (blobOptions: BlobOptions, svgOptions: SvgOptions) => {
-    // TODO fill from svgOptions
-    // return renderEditable(raw(blobOptions), {
-    //     closed: true,
-    //     height: blobOptions.size,
-    //     width: blobOptions.size,
-    //     boundingBox: false,
-    //     fill: "",
-    //     guides: false,
-    //     stroke: "",
-    //     strokeWidth: 0,
-    //     transform: "",
-    // });
 };

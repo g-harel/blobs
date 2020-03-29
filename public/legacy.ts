@@ -4,6 +4,7 @@ import {XmlElement} from "../editable";
 import {genBlob} from "../internal/gen";
 import {mapPoints} from "../internal/util";
 
+// TODO check if file (ex. file://...)
 const isBrowser = new Function("try {return this===window;}catch(e){ return false;}");
 const isLocalhost = () => location.hostname === "localhost" || location.hostname === "127.0.0.1";
 if (!isBrowser() || (isBrowser() && isLocalhost())) {
