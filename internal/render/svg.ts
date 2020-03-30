@@ -1,4 +1,3 @@
-import {xml, XmlElement} from "../../editable";
 import {Point} from "../types";
 import {expandHandle, forPoints} from "../util";
 
@@ -41,16 +40,16 @@ export const renderEditable = (points: Point[], options: RenderOptions): XmlElem
     const stroke = options.stroke || (options.guides ? "black" : "none");
     const strokeWidth = options.strokeWidth || (options.guides ? 1 : 0);
 
-    const xmlRoot = xml("svg");
+    const xmlRoot = new XmlElement("svg");
     xmlRoot.attributes.width = options.width;
     xmlRoot.attributes.height = options.height;
     xmlRoot.attributes.viewBox = `0 0 ${options.width} ${options.height}`;
     xmlRoot.attributes.xmlns = "http://www.w3.org/2000/svg";
 
-    const xmlContentGroup = xml("g");
+    const xmlContentGroup = new XmlElement("g");
     xmlContentGroup.attributes.transform = options.transform || "";
 
-    const xmlBlobPath = xml("path");
+    const xmlBlobPath = new XmlElement("path");
     xmlBlobPath.attributes.stroke = stroke;
     xmlBlobPath.attributes["stroke-width"] = strokeWidth;
     xmlBlobPath.attributes.fill = options.fill || "none";
@@ -66,7 +65,7 @@ export const renderEditable = (points: Point[], options: RenderOptions): XmlElem
 
         // Bounding box.
         if (options.boundingBox) {
-            const xmlBoundingRect = xml("rect");
+            const xmlBoundingRect = new XmlElement("rect");
             xmlBoundingRect.attributes.x = 0;
             xmlBoundingRect.attributes.y = 0;
             xmlBoundingRect.attributes.width = options.width;
@@ -84,7 +83,7 @@ export const renderEditable = (points: Point[], options: RenderOptions): XmlElem
             const currControl = expandHandle(curr, curr.handleOut);
             const nextControl = expandHandle(next, next.handleIn);
 
-            const xmlOutgoingHandleLine = xml("line");
+            const xmlOutgoingHandleLine = new XmlElement("line");
             xmlOutgoingHandleLine.attributes.x1 = curr.x;
             xmlOutgoingHandleLine.attributes.y1 = curr.y;
             xmlOutgoingHandleLine.attributes.x2 = currControl.x;
@@ -92,7 +91,7 @@ export const renderEditable = (points: Point[], options: RenderOptions): XmlElem
             xmlOutgoingHandleLine.attributes["stroke-width"] = size;
             xmlOutgoingHandleLine.attributes.stroke = color;
 
-            const xmlIncomingHandleLine = xml("line");
+            const xmlIncomingHandleLine = new XmlElement("line");
             xmlIncomingHandleLine.attributes.x1 = next.x;
             xmlIncomingHandleLine.attributes.y1 = next.y;
             xmlIncomingHandleLine.attributes.x2 = nextControl.x;
@@ -101,19 +100,19 @@ export const renderEditable = (points: Point[], options: RenderOptions): XmlElem
             xmlIncomingHandleLine.attributes.stroke = color;
             xmlIncomingHandleLine.attributes["stroke-dasharray"] = 2 * size;
 
-            const xmlOutgoingHandleCircle = xml("circle");
+            const xmlOutgoingHandleCircle = new XmlElement("circle");
             xmlOutgoingHandleCircle.attributes.cx = currControl.x;
             xmlOutgoingHandleCircle.attributes.cy = currControl.y;
             xmlOutgoingHandleCircle.attributes.r = size;
             xmlOutgoingHandleCircle.attributes.fill = color;
 
-            const xmlIncomingHandleCircle = xml("circle");
+            const xmlIncomingHandleCircle = new XmlElement("circle");
             xmlIncomingHandleCircle.attributes.cx = nextControl.x;
             xmlIncomingHandleCircle.attributes.cy = nextControl.y;
             xmlIncomingHandleCircle.attributes.r = size;
             xmlIncomingHandleCircle.attributes.fill = color;
 
-            const xmlPointCircle = xml("circle");
+            const xmlPointCircle = new XmlElement("circle");
             xmlPointCircle.attributes.cx = curr.x;
             xmlPointCircle.attributes.cy = curr.y;
             xmlPointCircle.attributes.r = 2 * size;
@@ -129,3 +128,38 @@ export const renderEditable = (points: Point[], options: RenderOptions): XmlElem
 
     return xmlRoot;
 };
+
+// Structured element with tag, attributes and children.
+export class XmlElement {
+    public attributes: Record<string, string | number> = {};
+    public children: any[] = [];
+
+    public constructor(public tag: string) {}
+
+    public render(): string {
+        const attributes = this.renderAttributes();
+        const content = this.renderChildren();
+        if (content === "") {
+            return `<${this.tag}${attributes}/>`;
+        }
+        return `<${this.tag}${attributes}>${content}</${this.tag}>`;
+    }
+
+    private renderAttributes(): string {
+        const attributes = Object.keys(this.attributes);
+        if (attributes.length === 0) return "";
+        let out = "";
+        for (const attribute of attributes) {
+            out += ` ${attribute}="${this.attributes[attribute]}"`;
+        }
+        return out;
+    }
+
+    private renderChildren(): string {
+        let out = "";
+        for (const child of this.children) {
+            out += child.render();
+        }
+        return out;
+    }
+}

@@ -1,6 +1,5 @@
 import {rand} from "../internal/rand";
-import {renderEditable} from "../internal/render/svg";
-import {XmlElement} from "../editable";
+import {renderEditable, XmlElement} from "../internal/render/svg";
 import {genBlob} from "../internal/gen";
 import {mapPoints} from "../internal/util";
 
@@ -100,5 +99,8 @@ blobs.editable = (options: BlobOptions): XmlElement => {
         guides: options.guides,
     });
 };
+
+// Shortcut to create an XmlElement without "new";
+blobs.xml = (tag: string) => new XmlElement(tag);
 
 export default blobs;

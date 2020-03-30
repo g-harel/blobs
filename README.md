@@ -1,3 +1,10 @@
+<!--
+
+TODO rewrite v1 docs in separate doc
+TODO update docs for v2
+
+ -->
+
 <p align="center">
     <a href="https://blobs.dev">
         <img width="460" height="300" src="./assets/logo-color.svg?sanitize=true">

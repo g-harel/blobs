@@ -1,23 +1,23 @@
-import {xml} from ".";
+import {XmlElement} from "./svg";
 
-describe("internal/xml/xml", () => {
-    describe("render", () => {
+describe("internal/render/svg", () => {
+    describe("XmlElement", () => {
         it("should render element tags", () => {
-            const elem = xml("test");
+            const elem = new XmlElement("test");
             expect(elem.render()).toBe("<test/>");
         });
 
         it("should render element attributes", () => {
-            const elem = xml("test");
+            const elem = new XmlElement("test");
             elem.attributes.a = 1;
             elem.attributes["b-c"] = "d";
             expect(elem.render()).toBe('<test a="1" b-c="d"/>');
         });
 
         it("should render nested elements", () => {
-            const a = xml("a");
-            const aa = xml("aa");
-            const ab = xml("ab");
+            const a = new XmlElement("a");
+            const aa = new XmlElement("aa");
+            const ab = new XmlElement("ab");
             const aba = {render: () => "aba"};
             a.children.push(aa);
             a.children.push(ab);
