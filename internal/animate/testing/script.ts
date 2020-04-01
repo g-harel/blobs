@@ -5,11 +5,12 @@ import {length, insertAt, insertCount, rad, mod, mapPoints, forPoints} from "../
 import {clear, drawInfo, drawClosed} from "../../render/canvas";
 import {genBlob} from "../../gen";
 import {rand} from "../../rand";
+import * as blobs2 from "../../../public/blobs";
 
 let animationSpeed = 2;
 let animationStart = 0.3;
 let debug = true;
-let size = 1000;
+let size = 1300;
 
 const canvas = document.createElement("canvas");
 document.body.appendChild(canvas);
@@ -169,6 +170,34 @@ const testPrepLetters = (percentage: number) => {
     drawClosed(ctx, debug, loopBetween(percentage, ...prepare(a, b)));
 };
 
+const testGen = () => {
+    const cellSideCount = 16;
+    const cellSize = size / cellSideCount;
+    ctx.save();
+    ctx.strokeStyle = "#fafafa";
+    ctx.fillStyle = "#f1f1f1";
+    for (let i = 0; i < cellSideCount; i++) {
+        for (let j = 0; j < cellSideCount; j++) {
+            ctx.strokeRect(i * cellSize, j * cellSize, cellSize, cellSize);
+            ctx.fill(
+                blobs2.canvas(
+                    {
+                        extraPoints: j,
+                        randomness: i,
+                        seed: i + j - i * j,
+                        size: cellSize,
+                    },
+                    {
+                        offsetX: i * cellSize,
+                        offsetY: j * cellSize,
+                    },
+                ),
+            );
+        }
+    }
+    ctx.restore();
+};
+
 const blob = (seed: string, count: number, scale: number, offset: Coord): Point[] => {
     const rgen = rand(seed);
     const points = genBlob(count, () => 0.3 + 0.2 * rgen());
@@ -197,6 +226,7 @@ const loopBetween = (percentage: number, a: Point[], b: Point[]): Point[] => {
     const renderFrame = () => {
         clear(ctx);
 
+        testGen();
         drawInfo(ctx, 0, "percentage", percentage);
         testSplitAt(percentage);
         testSplitBy();
