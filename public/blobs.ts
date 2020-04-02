@@ -30,7 +30,7 @@ const typeCheck = (name: string, val: any, expected: string[]) => {
     }
 };
 
-export const raw = (blobOptions: BlobOptions): Point[] => {
+const raw = (blobOptions: BlobOptions): Point[] => {
     const rgen = rand(String(blobOptions.seed));
 
     typeCheck("seed", blobOptions.seed, ["string", "number"]);
@@ -63,7 +63,7 @@ export const raw = (blobOptions: BlobOptions): Point[] => {
     });
 };
 
-export const canvas = (blobOptions: BlobOptions, canvasOptions: CanvasOptions): Path2D => {
+export const canvas = (blobOptions: BlobOptions, canvasOptions: CanvasOptions = {}): Path2D => {
     return renderPath2D(
         mapPoints(raw(blobOptions), ({curr}) => {
             curr.x += canvasOptions.offsetX || 0;
@@ -73,12 +73,12 @@ export const canvas = (blobOptions: BlobOptions, canvasOptions: CanvasOptions): 
     );
 };
 
-export const svg = (blobOptions: BlobOptions, svgOptions: SvgOptions): string => {
+export const svg = (blobOptions: BlobOptions, svgOptions: SvgOptions = {}): string => {
     const path = svgPath(blobOptions);
     const size = Math.floor(blobOptions.size);
     const fill = svgOptions.fill === undefined ? "#ec576b" : svgOptions.fill;
     const stroke = svgOptions.stroke === undefined ? "none" : svgOptions.stroke;
-    const strokeWidth = svgOptions.strokeWidth === undefined ? 1 : svgOptions.strokeWidth;
+    const strokeWidth = svgOptions.strokeWidth === undefined ? 0 : svgOptions.strokeWidth;
     return `
 <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg">
     <path stroke="${stroke}" stroke-width="${strokeWidth}" fill="${fill}" d="${path}"/>

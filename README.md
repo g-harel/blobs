@@ -1,7 +1,6 @@
 <!--
 
 TODO rewrite v1 docs in separate doc
-TODO update docs for v2
 
  -->
 
@@ -46,23 +45,22 @@ _Options are **not** [sanitized](https://en.wikipedia.org/wiki/HTML_sanitization
 
 #### Required
 
-Name           | Type       | Description
--------------- | ---------- | ---------------------------------------------
-`size`         | `number`   | Bounding box dimensions (in pixels)
-`complexity`   | `number`   | Blob complexity (number of points)
-`contrast`     | `number`   | Blob contrast (randomness of point position)
-
+| Name         | Type     | Description                                  |
+| ------------ | -------- | -------------------------------------------- |
+| `size`       | `number` | Bounding box dimensions (in pixels)          |
+| `complexity` | `number` | Blob complexity (number of points)           |
+| `contrast`   | `number` | Blob contrast (randomness of point position) |
 
 #### Optional
 
-Name           | Type       | Default    | Description
--------------- | ---------- | ---------- | -------------------------------------
-`color`        | `string?`  | `"none"`   | Fill color
-`stroke`       | `object?`  | `...`      | Stroke options
-`stroke.color` | `string`   | `"none"`   | Stroke color
-`stroke.width` | `number`   | `0`        | Stroke width (in pixels)
-`seed`         | `string?`  | _`random`_ | Value to seed random number generator
-`guides`       | `boolean?` | `false`    | Render points, handles and stroke
+| Name           | Type       | Default    | Description                           |
+| -------------- | ---------- | ---------- | ------------------------------------- |
+| `color`        | `string?`  | `"none"`   | Fill color                            |
+| `stroke`       | `object?`  | `...`      | Stroke options                        |
+| `stroke.color` | `string`   | `"none"`   | Stroke color                          |
+| `stroke.width` | `number`   | `0`        | Stroke width (in pixels)              |
+| `seed`         | `string?`  | _`random`_ | Value to seed random number generator |
+| `guides`       | `boolean?` | `false`    | Render points, handles and stroke     |
 
 _Either `stroke` or `color` must be defined._
 
@@ -72,16 +70,16 @@ _Guides will use stroke color and width if defined. Otherwise, they default to `
 
 ```typescript
 const options = {
-   size: 600,
-   complexity: 0.2,
-   contrast: 0.4,
-   color: "#ec576b",
-   stroke: {
-      width: 0,
-      color: "black",
-   },
-   guides: false,
-   seed: "1234",
+    size: 600,
+    complexity: 0.2,
+    contrast: 0.4,
+    color: "#ec576b",
+    stroke: {
+        width: 0,
+        color: "black",
+    },
+    guides: false,
+    seed: "1234",
 };
 ```
 
