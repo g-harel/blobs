@@ -1,112 +1,108 @@
-<!--
-
-TODO rewrite v1 docs in separate doc
-
- -->
-
 <p align="center">
-    <a href="https://blobs.dev">
-        <img width="460" height="300" src="./assets/logo-color.svg?sanitize=true">
-    </a>
-    <br>
-    <a href="https://www.npmjs.com/package/blobs">
-        <img src="https://img.shields.io/npm/v/blobs.svg">
-    </a>
-    <a href="https://bundlephobia.com/result?p=blobs">
-        <img src="https://img.shields.io/bundlephobia/minzip/blobs.svg">
-    </a>
-    <br>
-    <a href="https://blobs.dev">
-        <img src="https://svgsaur.us/?c=0366d6&t=PLAYGROUND&o=b&s=23&w=170&y=38&h=46" />
-    </a>
+    <a href="https://github.com/g-harel/blobs/README.legacy.md"><b>Legacy documentation</b></a>
 </p>
 
-## Install
+<br>
 
-```shell
-$ npm install blobs
+<a href="https://blobs.dev">
+    <img align="left" width="360" height="300" src="./assets/logo-color.svg?sanitize=true">
+</a>
+
+<br>
+<br>
+
+[![](https://img.shields.io/npm/v/blobs.svg)](https://www.npmjs.com/package/blobs)
+
+```ts
+// $ npm install blobs
+import * as blobs2 from "blobs/v2";
 ```
 
 ```html
-<script src="https://unpkg.com/blobs"></script>
+<script src="https://unpkg.com/blobs/v2"></script>
 ```
 
-## Usage
+<br>
+<br>
+<br>
+<br>
 
-```typescript
-const svg = blobs(options);
+## SVG Path
+
+```js
+const svgPath = blobs2.svg({
+    seed: Date.now(),
+    extraPoints: 8,
+    randomness: 4,
+    size: 256,
+});
+doSomething(svgPath);
 ```
 
-![](https://svgsaur.us?t=&w=5&h=32&b=fdcc56)![](https://svgsaur.us/?t=WARNING&w=103&h=32&s=16&y=21&x=12&b=feefcd&f=arial&o=b) ![](https://svgsaur.us?t=&w=1&h=48&)
+## SVG
 
-_Options are **not** [sanitized](https://en.wikipedia.org/wiki/HTML_sanitization). Never trust raw user-submitted values in the options._
-
-## Options
-
-#### Required
-
-| Name         | Type     | Description                                  |
-| ------------ | -------- | -------------------------------------------- |
-| `size`       | `number` | Bounding box dimensions (in pixels)          |
-| `complexity` | `number` | Blob complexity (number of points)           |
-| `contrast`   | `number` | Blob contrast (randomness of point position) |
-
-#### Optional
-
-| Name           | Type       | Default    | Description                           |
-| -------------- | ---------- | ---------- | ------------------------------------- |
-| `color`        | `string?`  | `"none"`   | Fill color                            |
-| `stroke`       | `object?`  | `...`      | Stroke options                        |
-| `stroke.color` | `string`   | `"none"`   | Stroke color                          |
-| `stroke.width` | `number`   | `0`        | Stroke width (in pixels)              |
-| `seed`         | `string?`  | _`random`_ | Value to seed random number generator |
-| `guides`       | `boolean?` | `false`    | Render points, handles and stroke     |
-
-_Either `stroke` or `color` must be defined._
-
-_Guides will use stroke color and width if defined. Otherwise, they default to `black` stroke with width of `1`._
-
-##### Example Options Object
-
-```typescript
-const options = {
-    size: 600,
-    complexity: 0.2,
-    contrast: 0.4,
-    color: "#ec576b",
-    stroke: {
-        width: 0,
-        color: "black",
+```js
+const svgString = blobs2.svg(
+    {
+        seed: Date.now(),
+        extraPoints: 8,
+        randomness: 4,
+        size: 256,
     },
-    guides: false,
-    seed: "1234",
-};
+    {
+        fill: "white", // 🚨 NOT SANITIZED
+        stroke: "black", // 🚨 NOT SANITIZED
+        strokeWidth: 4,
+    },
+);
+container.innerHTML = svgString;
 ```
 
-## Advanced
+## Canvas
 
-If you need to edit the output svg for your use case, blobs also allows for _editable_ output.
-
-```typescript
-const editableSvg = blobs.editable(options);
+```js
+const path = blobs2.canvas(
+    {
+        seed: Date.now(),
+        extraPoints: 16,
+        randomness: 2,
+        size: 128,
+    },
+    {
+        offsetX: 16,
+        offsetY: 32,
+    },
+);
+ctx.stroke(path);
 ```
 
-The output of this function is a data structure that represents a nested svg document. This structure can be changed and rendered to a string using its `render` function.
+## Complete API
 
-```typescript
-editableSvg.attributes.width = 1000;
-const svg = editableSvg.render();
-```
-
-Utilities to create nodes in the editable output can be imported from `blobs/editable`.
-
-```typescript
-import {xml} from "blobs/editable";
-
-const xmlChild = xml("path");
-xmlChild.attributes.stroke = "red";
-// ...
-editableSvg.children.push(xmlChild);
+```ts
+export interface BlobOptions {
+    // A given seed will always produce the same blob.
+    // Use `Date.now()` for pseudorandom behavior.
+    seed: string | number;
+    // Actual number of points will be `3 + extraPoints`.
+    extraPoints: number;
+    // Increases the amount of variation in point position.
+    randomness: number;
+    // Size of bounding box.
+    size: number;
+}
+export interface CanvasOptions {
+    // Coordinates of top-left corner of blob.
+    offsetX?: number;
+    offsetY?: number;
+}
+export interface SvgOptions {
+    fill?: string; // Default: "#ec576b".
+    stroke?: string; // Default: "none".
+    strokeWidth?: number; // Default: 0.
+}
+export const canvas: (blobOptions: BlobOptions, canvasOptions?: CanvasOptions) => Path2D;
+export const svg: (blobOptions: BlobOptions, svgOptions?: SvgOptions) => string;
+export const svgPath: (blobOptions: BlobOptions) => string;
 ```
 
 ## License

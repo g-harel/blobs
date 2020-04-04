@@ -1,7 +1,7 @@
 {
   "name": "blobs",
-  "version": "1.1.0",
-  "description": "svg blob generator",
+  "version": "2.0.0-beta.0",
+  "description": "Random blob generator",
   "author": "g-harel",
   "license": "MIT",
   "main": "index.js",
@@ -37,8 +37,11 @@
     "url": "https://github.com/g-harel/blobs/issues"
   },
   "keywords": [
+    "random",
+    "blob",
     "svg",
-    "blob"
+    "path",
+    "canvas"
   ],
   "prettier": {
     "tabWidth": 4,
