@@ -1,5 +1,5 @@
 import {rand} from "../internal/rand";
-import {renderEditable, XmlElement} from "../internal/render/svg";
+import {renderEditable, XmlElement as InternalXmlElement} from "../internal/render/svg";
 import {genBlob} from "../internal/gen";
 import {mapPoints} from "../internal/util";
 
@@ -100,7 +100,14 @@ blobs.editable = (options: BlobOptions): XmlElement => {
     });
 };
 
+export interface XmlElement {
+    tag: string;
+    attributes: Record<string, string | number>;
+    children: XmlElement[];
+    render(): string;
+}
+
 // Shortcut to create an XmlElement without "new";
-blobs.xml = (tag: string) => new XmlElement(tag);
+blobs.xml = (tag: string): XmlElement => new InternalXmlElement(tag);
 
 export default blobs;

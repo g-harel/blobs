@@ -63,7 +63,7 @@ const raw = (blobOptions: BlobOptions): Point[] => {
     });
 };
 
-export const canvas = (blobOptions: BlobOptions, canvasOptions: CanvasOptions = {}): Path2D => {
+export const canvasPath = (blobOptions: BlobOptions, canvasOptions: CanvasOptions = {}): Path2D => {
     return renderPath2D(
         mapPoints(raw(blobOptions), ({curr}) => {
             curr.x += canvasOptions.offsetX || 0;

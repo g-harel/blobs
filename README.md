@@ -1,5 +1,5 @@
 <p align="center">
-    <a href="https://github.com/g-harel/blobs/README.legacy.md"><b>Legacy documentation</b></a>
+    <a href="https://github.com/g-harel/blobs/blob/master/README.legacy.md"><b>Legacy documentation</b></a>
 </p>
 
 <br>
@@ -61,7 +61,7 @@ container.innerHTML = svgString;
 ## Canvas
 
 ```js
-const path = blobs2.canvas(
+const path = blobs2.canvasPath(
     {
         seed: Date.now(),
         extraPoints: 16,
@@ -100,7 +100,7 @@ export interface SvgOptions {
     stroke?: string; // Default: "none".
     strokeWidth?: number; // Default: 0.
 }
-export const canvas: (blobOptions: BlobOptions, canvasOptions?: CanvasOptions) => Path2D;
+export const canvasPath: (blobOptions: BlobOptions, canvasOptions?: CanvasOptions) => Path2D;
 export const svg: (blobOptions: BlobOptions, svgOptions?: SvgOptions) => string;
 export const svgPath: (blobOptions: BlobOptions) => string;
 ```

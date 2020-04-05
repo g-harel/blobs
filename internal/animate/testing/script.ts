@@ -180,7 +180,7 @@ const testGen = () => {
         for (let j = 0; j < cellSideCount; j++) {
             ctx.strokeRect(i * cellSize, j * cellSize, cellSize, cellSize);
             ctx.fill(
-                blobs2.canvas(
+                blobs2.canvasPath(
                     {
                         extraPoints: j,
                         randomness: i,

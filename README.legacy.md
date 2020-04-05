@@ -76,7 +76,7 @@ editableSvg.attributes.width = 1000;
 const svg = editableSvg.render();
 ```
 
-Utilities to create nodes in the editable output can be imported from `blobs/editable`.
+New elements can be added anywhere in the hierarchy.
 
 ```typescript
 const xmlChild = blobs.xml("path");
