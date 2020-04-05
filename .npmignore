@@ -4,4 +4,4 @@
 !package.json
 !*.js
 !*.js.map
-!*.d.ts
+!index.d.ts
