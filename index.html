@@ -4,7 +4,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
     <title>blobs - playground</title>
     <link href="https://fonts.googleapis.com/css?family=Roboto+Mono:400" rel="stylesheet">
-    <script src="https://unpkg.com/blobs@2.0.0-beta.0"></script>
+    <script src="https://unpkg.com/blobs@2.0.0-beta.1"></script>
+    <script src="https://unpkg.com/blobs@2.0.0-beta.1/v2"></script>
 </head>
 <body>
     <style>
@@ -115,10 +116,10 @@
         function refreshMobile() {
             if (!mobileElem) return;
 
-            mobileElem.innerHTML = blobs({
-                color: "#ec576b",
-                complexity: 0.3,
-                contrast: 0.6,
+            mobileElem.innerHTML = blobs2.svg({
+                seed: Math.random(),
+                extraPoints: 4,
+                randomness: 8,
                 size: 300,
             });
         }
