@@ -2,6 +2,6 @@
 !README.md
 !LICENSE
 !package.json
-!*.js
-!*.js.map
-!index.d.ts
+!**/*.js
+!**/*.js.map
+!**/index.d.ts
