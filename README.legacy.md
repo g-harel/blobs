@@ -1,3 +1,7 @@
+The legacy API exists to preserve compatibility for users importing the package using a `script` tag. Because [unpkg.com](https://unpkg.com) serves the latest version of the package if no version is specified, I can't break backwards compatibility, even with a major release. This API also preserves a few features that could potentially be still be useful to some users (guide rendering and editable svg).
+
+---
+
 ## Install
 
 ```ts

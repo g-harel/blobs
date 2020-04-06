@@ -31,7 +31,7 @@ import * as blobs2 from "blobs/v2";
 
 ```js
 const svgPath = blobs2.svg({
-    seed: Date.now(),
+    seed: Math.random(),
     extraPoints: 8,
     randomness: 4,
     size: 256,
@@ -44,7 +44,7 @@ doSomething(svgPath);
 ```js
 const svgString = blobs2.svg(
     {
-        seed: Date.now(),
+        seed: Math.random(),
         extraPoints: 8,
         randomness: 4,
         size: 256,
@@ -63,7 +63,7 @@ container.innerHTML = svgString;
 ```js
 const path = blobs2.canvasPath(
     {
-        seed: Date.now(),
+        seed: Math.random(),
         extraPoints: 16,
         randomness: 2,
         size: 128,
@@ -81,7 +81,7 @@ ctx.stroke(path);
 ```ts
 export interface BlobOptions {
     // A given seed will always produce the same blob.
-    // Use `Date.now()` for pseudorandom behavior.
+    // Use `Math.random()` for pseudorandom behavior.
     seed: string | number;
     // Actual number of points will be `3 + extraPoints`.
     extraPoints: number;
