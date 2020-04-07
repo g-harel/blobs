@@ -33,6 +33,7 @@ const typeCheck = (name: string, val: any, expected: string[]) => {
 const raw = (blobOptions: BlobOptions): Point[] => {
     const rgen = rand(String(blobOptions.seed));
 
+    typeCheck("blobOptions", blobOptions, ["object"]);
     typeCheck("seed", blobOptions.seed, ["string", "number"]);
     typeCheck("extraPoints", blobOptions.extraPoints, ["number"]);
     typeCheck("randomness", blobOptions.randomness, ["number"]);

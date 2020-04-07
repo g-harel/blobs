@@ -1,3 +1,11 @@
+# 2.0.0
+
+-   **BREAKING** Editable SVG element creation function has moved to `blobs.xml(tagName)`.
+-   Added `"blobs/v2"`
+    -   30% smaller compressed size
+    -   Supports canvas rendering
+    -   Supports raw SVG path rendering
+
 # 1.1.0
 
 -   Add support for editable output
