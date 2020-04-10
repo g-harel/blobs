@@ -40,7 +40,6 @@ const optimizeOrder = (a: Point[], b: Point[]): Point[] => {
     return shift(minOffset, minOffsetBase);
 };
 
-// TODO OPT allow extra division
 export const divide = (count: number, points: Point[]): Point[] => {
     if (points.length < 3) throw new Error("not enough points");
     if (count < points.length) throw new Error("cannot remove points");
@@ -65,7 +64,10 @@ export const divide = (count: number, points: Point[]): Point[] => {
     return out;
 };
 
-// TODO OPT disable
+// If point has no handle and is on top of the point before or after it, use the
+// angle of the fixer shape's point at the same index. This is especially useful
+// when all the points of the initial shape are concentrated on the same
+// coordinates and "expand" into the target shape.
 const fixAnglesWith = (fixee: Point[], fixer: Point[]): Point[] => {
     return mapPoints(fixee, ({index, curr, prev, next}) => {
         if (curr.handleIn.length === 0 && coordEqual(prev(), curr)) {
@@ -78,7 +80,7 @@ const fixAnglesWith = (fixee: Point[], fixer: Point[]): Point[] => {
     });
 };
 
-// TODO OPT disable
+// If point has no handle, use angle between before and after points.
 const fixAnglesSelf = (points: Point[]): Point[] => {
     return mapPoints(points, ({curr, prev, next}) => {
         const angle = angleOf(prev(), next());
@@ -114,10 +116,17 @@ const divideLengths = (lengths: number[], add: number): number[] => {
     return divisors;
 };
 
-export const prepare = (a: Point[], b: Point[]): [Point[], Point[]] => {
-    const pointCount = Math.max(a.length, b.length);
+export const prepare = (
+    a: Point[],
+    b: Point[],
+    options: {rawAngles: boolean; divideRatio: number},
+): [Point[], Point[]] => {
+    const pointCount = options.divideRatio * Math.max(a.length, b.length);
     const aNorm = divide(pointCount, a);
     const bNorm = divide(pointCount, b);
     const bOpt = optimizeOrder(aNorm, bNorm);
-    return [fixAnglesWith(fixAnglesSelf(aNorm), bNorm), fixAnglesWith(fixAnglesSelf(bOpt), aNorm)];
+    return [
+        options.rawAngles ? aNorm : fixAnglesWith(fixAnglesSelf(aNorm), bNorm),
+        options.rawAngles ? bOpt : fixAnglesWith(fixAnglesSelf(bOpt), aNorm),
+    ];
 };

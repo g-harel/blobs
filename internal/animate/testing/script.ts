@@ -108,7 +108,11 @@ const testInterpolateBetween = (percentage: number) => {
 const testPrepPointsA = (percentage: number) => {
     const a = blob("a", 6, 0.15, {x: 0.45, y: 0.1});
     const b = blob("b", 10, 0.15, {x: 0.45, y: 0.1});
-    drawClosed(ctx, debug, loopBetween(percentage, ...prepare(a, b)));
+    drawClosed(
+        ctx,
+        debug,
+        loopBetween(percentage, ...prepare(a, b, {rawAngles: false, divideRatio: 1})),
+    );
 };
 
 const testPrepPointsB = (percentage: number) => {
@@ -119,7 +123,11 @@ const testPrepPointsB = (percentage: number) => {
         point(0.6, 0.4, 0, 0, 0, 0),
         point(0.45, 0.4, 0, 0, 0, 0),
     ];
-    drawClosed(ctx, debug, loopBetween(percentage, ...prepare(a, b)));
+    drawClosed(
+        ctx,
+        debug,
+        loopBetween(percentage, ...prepare(a, b, {rawAngles: false, divideRatio: 1})),
+    );
 };
 
 const testPrepPointsC = (percentage: number) => {
@@ -138,7 +146,11 @@ const testPrepPointsC = (percentage: number) => {
         point(0.45, 0.5, 0, 0, 0, 0),
         point(0.5, 0.5, 0, 0, 0, 0),
     ];
-    drawClosed(ctx, debug, loopBetween(percentage, ...prepare(b, a)));
+    drawClosed(
+        ctx,
+        debug,
+        loopBetween(percentage, ...prepare(b, a, {rawAngles: false, divideRatio: 1})),
+    );
 };
 
 const testPrepPointsD = (percentage: number) => {
@@ -148,7 +160,11 @@ const testPrepPointsD = (percentage: number) => {
         point(0.525, 0.725, 0, 0, 0, 0),
         point(0.525, 0.725, 0, 0, 0, 0),
     ];
-    drawClosed(ctx, debug, loopBetween(percentage, ...prepare(a, b)));
+    drawClosed(
+        ctx,
+        debug,
+        loopBetween(percentage, ...prepare(a, b, {rawAngles: false, divideRatio: 1})),
+    );
 };
 
 const testPrepLetters = (percentage: number) => {
@@ -167,7 +183,11 @@ const testPrepLetters = (percentage: number) => {
         point(0.65, 0.45, 0, 0, 0, 0),
     ];
     const b: Point[] = blob("", 8, 0.25, {x: 0.65, y: 0.2});
-    drawClosed(ctx, debug, loopBetween(percentage, ...prepare(a, b)));
+    drawClosed(
+        ctx,
+        debug,
+        loopBetween(percentage, ...prepare(a, b, {rawAngles: false, divideRatio: 1})),
+    );
 };
 
 const testGen = () => {
