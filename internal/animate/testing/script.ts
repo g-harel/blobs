@@ -233,6 +233,21 @@ const blob = (seed: string, count: number, scale: number, offset: Coord): Point[
 };
 
 const loopBetween = (percentage: number, a: Point[], b: Point[]): Point[] => {
+    // Draw before/after shapes + point path.
+    ctx.save();
+    ctx.strokeStyle = "#ffaaaa";
+    drawClosed(ctx, false, a);
+    ctx.strokeStyle = "#aaaaff";
+    drawClosed(ctx, false, b);
+    ctx.strokeStyle = "#33ff33";
+    for (let i = 0; i < a.length; i++) {
+        ctx.beginPath();
+        ctx.moveTo(a[i].x, a[i].y);
+        ctx.lineTo(b[i].x, b[i].y);
+        ctx.stroke();
+    }
+    ctx.restore();
+
     if (percentage < 0.5) {
         return interpolateBetweenSmooth(1, 2 * percentage, a, b);
     } else {

@@ -12,23 +12,22 @@ import {
 } from "../util";
 import {Point} from "../types";
 
-// TODO OPT extract optimization logic
 const optimizeOrder = (a: Point[], b: Point[]): Point[] => {
     const count = a.length;
 
-    let minSum = Infinity;
+    let minTotal = Infinity;
     let minOffset = 0;
     let minOffsetBase: Point[] = [];
 
     const setMinOffset = (points: Point[]) => {
         for (let i = 0; i < count; i++) {
-            let sum = 0;
+            let total = 0;
             for (let j = 0; j < count; j++) {
-                sum += (100 * distance(a[j], points[mod(j + i, count)])) ** 1 / 2;
-                if (sum > minSum) break;
+                total += (100 * distance(a[j], points[mod(j + i, count)])) ** 2;
+                if (total > minTotal) break;
             }
-            if (sum <= minSum) {
-                minSum = sum;
+            if (total <= minTotal) {
+                minTotal = total;
                 minOffset = i;
                 minOffsetBase = points;
             }
