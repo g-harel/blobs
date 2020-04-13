@@ -1,3 +1,7 @@
+# 2.0.1
+
+-   Fix typo in code example of README
+
 # 2.0.0
 
 -   **BREAKING** Editable SVG element creation function has moved to `blobs.xml(tagName)`.

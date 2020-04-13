@@ -30,7 +30,7 @@ import * as blobs2 from "blobs/v2";
 ## SVG Path
 
 ```js
-const svgPath = blobs2.svg({
+const svgPath = blobs2.svgPath({
     seed: Math.random(),
     extraPoints: 8,
     randomness: 4,
