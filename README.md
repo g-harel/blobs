@@ -87,11 +87,11 @@ export interface BlobOptions {
     extraPoints: number;
     // Increases the amount of variation in point position.
     randomness: number;
-    // Size of bounding box.
+    // Size of the bounding box.
     size: number;
 }
 export interface CanvasOptions {
-    // Coordinates of top-left corner of blob.
+    // Coordinates of top-left corner of the blob.
     offsetX?: number;
     offsetY?: number;
 }
