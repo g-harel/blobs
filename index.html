@@ -1,191 +1,80 @@
 <!DOCTYPE html>
-<head lang="en">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-    <title>blobs - playground</title>
-    <link href="https://fonts.googleapis.com/css?family=Roboto+Mono:400" rel="stylesheet">
-    <script src="https://unpkg.com/blobs@2.0.0-beta.1"></script>
-    <script src="https://unpkg.com/blobs@2.0.0-beta.1/v2"></script>
-</head>
-<body>
-    <style>
-        * {
-            color: #111;
-            font-family: 'Roboto Mono', monospace;
-            font-weight: 400;
-        }
+<html>
+    <head lang="en">
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+        <title>blobs</title>
+        <script src="https://unpkg.com/blobs/v2"></script>
+    </head>
+    <body>
+        <style>
+            html {
+                height: 100%;
+                width: 100%;
+            }
 
-        html {
-            font-size: 10px;
-            height: 100vh;
-            overflow: hidden;
-            width: 100vw;
-        }
-
-        body {
-            display: flex;
-            flex-direction: column;
-            font-size: 1.1em;
-            height: 100%;
-            justify-content: center;
-            margin: 0;
-            width: 100%;
-        }
-
-        header {
-            padding: 40px 60px;
-            position: fixed;
-            top: 0;
-        }
-
-        main {
-            display: flex;
-            flex-direction: row;
-            margin: 0 auto;
-        }
-
-        #mobile-blob {
-            display: none;
-        }
-
-        .options-container {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            padding-right: 200px;
-        }
-
-        .edit-me {
-            height: 0px;
-            transform: translate(180px, -120px);
-            width: 200px;
-        }
-
-        #options {
-            font-size: 2em;
-            padding: 20px;
-            text-align: left;
-        }
-
-        #error {
-            color: #ec576b;
-            font-family: monospace;
-            font-size: 1.5em;
-            text-align: center;
-        }
-
-        @media (max-width: 1000px)  {
             body {
                 align-items: center;
+                display: flex;
+                flex-direction: column;
+                height: 100%;
+                justify-content: space-between;
+                margin: 0;
+                width: 100%;
             }
 
-            #mobile-blob {
-                display: block;
-                padding-top: 20vh;
+            header {
+                padding-top: 3rem;
             }
 
-            #blob, .options-container, #error {
-                display: none;
-            }
-        }
-
-    </style>
-
-    <header>
-        <a href="http://github.com/g-harel/blobs">
-            <img width="200" src="./assets/logo-grey.svg" />
-        </a>
-    </header>
-
-    <main>
-        <div id="mobile-blob" onclick="refreshMobile()"></div>
-        <div id="blob"></div>
-        <div class="options-container">
-            <div class="edit-me">
-                <img src="./assets/edit.svg" />
-            </div>
-            <pre id="options" contenteditable oninput="changed()"></pre>
-        </div>
-    </main>
-    <div id="error">&nbsp;</div>
-
-    <!-- Generate random blob for mobile users. -->
-    <script>
-        var mobileElem = document.getElementById("mobile-blob");
-
-        function refreshMobile() {
-            if (!mobileElem) return;
-
-            mobileElem.innerHTML = blobs2.svg({
-                seed: Math.random(),
-                extraPoints: 4,
-                randomness: 8,
-                size: 300,
-            });
-        }
-
-        refreshMobile();
-    </script>
-
-    <!-- Regenerate the blob from current options. -->
-    <script>
-        var blobElem = document.getElementById("blob");
-        var optionsElem = document.getElementById("options");
-        var errorElem = document.getElementById("error");
-
-        // Initial options.
-        if (optionsElem) {
-            optionsElem.innerHTML = "{\n" +
-                "   complexity: 0.2,\n" +
-                "   contrast: 0.4,\n" +
-                "   guides: false,\n" +
-                "   seed: \"blobs\",\n" +
-                "}";
-        }
-
-        function refresh() {
-            if (!blobElem || !optionsElem || !errorElem) return;
-
-            var options = optionsElem.innerHTML;
-
-            var parsedOptions;
-            try {
-                parsedOptions = eval("(" + options + ")");
-            } catch (e) {
-                errorElem.innerHTML = "Could not parse options: " + e.toString();
-                console.warn(e);
-                return;
+            #blob svg path {
+                cursor: pointer;
             }
 
-            if (parsedOptions && typeof parsedOptions === "object") {
-                parsedOptions.size = 600;
-                parsedOptions.color = "#ec576b";
+            footer {
+                padding: calc(2rem + 10vw) 0 2rem;
             }
 
-            try {
-                blobElem.innerHTML = blobs(parsedOptions);
-            } catch (e) {
-                errorElem.innerHTML = e.toString();
-                console.warn(e);
+            footer a {
+                color: #aaa;
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu,
+                    Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+                font-weight: 600;
+                margin: 0 1rem;
+                text-decoration: none;
             }
-        }
+        </style>
 
-        // Immediate update when page is loaded.
-        refresh();
-    </script>
+        <header>
+            <a href="http://github.com/g-harel/blobs">
+                <img width="200" src="./assets/logo-grey.svg" />
+            </a>
+        </header>
 
-    <!-- Wait for a pause in typing to refresh. -->
-    <script>
-        var delay = 400;
-        var timeout;
+        <main id="blob" onclick="refresh()"></main>
 
-        function changed() {
-            // Error state is removed when new input is detected.
-            errorElem.innerHTML = "&nbsp;";
+        <footer>
+            <a href="mailto:gabrielj.harel@gmail.com">contact</a>
+            <a href="https://github.com/g-harel/blobs">github</a>
+            <a href="https://npmjs.com/package/blobs">npm</a>
+        </footer>
 
-            clearTimeout(timeout);
-            timeout = setTimeout(refresh, delay);
-        }
-    </script>
-</body>
+        <script>
+            var mobileElem = document.getElementById("blob");
+
+            function refresh() {
+                if (!mobileElem) return;
+                console.log(window.innerWidth);
+
+                mobileElem.innerHTML = blobs2.svg({
+                    seed: Math.random(),
+                    extraPoints: 4,
+                    randomness: 6,
+                    size: Math.min(600, window.innerWidth - 100),
+                });
+            }
+
+            refresh();
+        </script>
+    </body>
 </html>

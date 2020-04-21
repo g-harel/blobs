@@ -55,11 +55,6 @@ export const canvasPath = (): CanvasAnimation => {
 
         const renderTime = Date.now();
 
-        // Remove old frames.
-        while (internalFrames.length > 0 && internalFrames[0].timestamp < renderTime) {
-            internalFrames.shift();
-        }
-
         // Remove frames when they are no longer needed. At least one past frame is needed to
         // interpolate from it to the next frame.
         while (true) {
@@ -71,7 +66,13 @@ export const canvasPath = (): CanvasAnimation => {
         // Animation freezes at the final shape if there are no more keyframes.
         if (internalFrames.length === 1) return renderPath2D(internalFrames[0].initialPoints);
 
-        return renderPath2D(interpolateBetween(0.5, internalFrames[0].preparedPoints, internalFrames[1].preparedPoints));
+        return renderPath2D(
+            interpolateBetween(
+                0.5,
+                internalFrames[0].preparedPoints,
+                internalFrames[1].preparedPoints,
+            ),
+        );
     };
 
     const transition: CanvasAnimation["transition"] = () => {};
