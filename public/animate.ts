@@ -5,9 +5,11 @@ import {genFromOptions} from "../internal/gen";
 import {mapPoints} from "../internal/util";
 import {interpolateBetween} from "../internal/animate/interpolate";
 import {InterpolationFunc} from "../internal/animate/types";
+import {prepare} from "../internal/animate/prepare";
 
 // TODO copy keyframes as soon as possible to make sure they aren't modified afterwards.
 // TODO make sure callbacks don't fill up the stack.
+// TODO defend against "bad" keyframes like negative timing.
 
 interface Keyframe {
     delay?: number;
@@ -34,12 +36,13 @@ interface InternalKeyframe {
     timingFunction: InterpolationFunc;
     cancelTimeouts: () => void;
     initialPoints: Point[];
-    preparedPoints?: Point[];
+    preparedBeforePoints?: Point[];
+    preparedAfterPoints?: Point[];
 }
 
 export const canvasPath = (): CanvasAnimation => {
     let internalFrames: InternalKeyframe[] = [];
-    // TODO timing state
+    let delayTimeout: number | undefined = undefined;
     // TODO store current blob when interrupts happen to use as source.
 
     const genBlob = (keyframe: CanvasKeyframe): Point[] =>
@@ -66,16 +69,47 @@ export const canvasPath = (): CanvasAnimation => {
         // Animation freezes at the final shape if there are no more keyframes.
         if (internalFrames.length === 1) return renderPath2D(internalFrames[0].initialPoints);
 
-        return renderPath2D(
-            interpolateBetween(
-                0.5,
-                internalFrames[0].preparedPoints,
-                internalFrames[1].preparedPoints,
-            ),
-        );
+        // Use and cache prepared points for current interpolation.
+        let preparedStartPoints: Point[] | undefined = internalFrames[0].preparedAfterPoints;
+        let preparedEndPoints: Point[] | undefined = internalFrames[1].preparedBeforePoints;
+        if (!preparedStartPoints || !preparedEndPoints) {
+            [preparedStartPoints, preparedEndPoints] = prepare(
+                internalFrames[0].initialPoints,
+                internalFrames[1].initialPoints,
+                {rawAngles: false, divideRatio: 1},
+            );
+            internalFrames[0].preparedAfterPoints = preparedStartPoints;
+            internalFrames[1].preparedBeforePoints = preparedEndPoints;
+        }
+
+        // Calculate progress between frames as a fraction.
+        const progress =
+            (renderTime - internalFrames[0].timestamp) /
+            (internalFrames[1].timestamp - internalFrames[0].timestamp);
+
+        return renderPath2D(interpolateBetween(progress, preparedStartPoints, preparedEndPoints));
     };
 
-    const transition: CanvasAnimation["transition"] = () => {};
+    const transition: CanvasAnimation["transition"] = (...keyframes) => {
+        // Erase animation when given no keyframes.
+        if (keyframes.length === 0) {
+            internalFrames = [];
+            return;
+        }
+
+        // Postpone animation if first frame is delayed.
+        if (keyframes[0].delay) {
+            const copiedKeyframes: CanvasKeyframe[] = JSON.parse(JSON.stringify(keyframes));
+            delete copiedKeyframes[0].delay;
+            clearTimeout(delayTimeout);
+            delayTimeout = setTimeout(() => {
+                transition(...copiedKeyframes);
+            }, keyframes[0].delay) as any;
+            return;
+        }
+
+        // TODO generate internal frames. Delayed frames can just copy the previous one.
+    };
 
     return {renderFrame, transition};
 };
