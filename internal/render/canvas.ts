@@ -54,6 +54,8 @@ export const drawClosed = (ctx: CanvasRenderingContext2D, debug: boolean, points
 
 export const renderPath2D = (points: Point[]): Path2D => {
     const path = new Path2D();
+
+    if (points.length < 1) return path;
     path.moveTo(points[0].x, points[0].y);
 
     forPoints(points, ({curr, next: getNext}) => {

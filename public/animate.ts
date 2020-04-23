@@ -40,9 +40,60 @@ interface InternalKeyframe {
     preparedAfterPoints?: Point[];
 }
 
+const removeStale = (keyframes: InternalKeyframe[], timestamp: number): InternalKeyframe[] => {
+    if (keyframes.length <= 1) return keyframes;
+    const staleCount = keyframes.filter((k) => k.timestamp < timestamp).length;
+    // Keep a single stale frame for the current transition.
+    return keyframes.slice(staleCount - 1);
+};
+
+const cancelTimeouts = (keyframes: InternalKeyframe[]) => {
+    for (const frame of keyframes) {
+        // Cancelling an already executed timeout is a noop.
+        frame.cancelTimeouts();
+    }
+};
+
+// TODO cache prepared points? Ideally without modifying keyframes argument.
+const renderAt = (keyframes: InternalKeyframe[], timestamp: number): Point[] => {
+    if (keyframes.length === 0) return [];
+
+    // Animation freezes at the final shape if there are no more keyframes.
+    if (keyframes.length === 1) return keyframes[0].initialPoints;
+
+    // Find the start/end keyframes according to the timestamp.
+    let startKeyframe = keyframes[0];
+    let endKeyframe = keyframes[1];
+    for (let i = 2; i < keyframes.length; i++) {
+        if (endKeyframe.timestamp < timestamp) break;
+        startKeyframe = keyframes[i - 1];
+        endKeyframe = keyframes[i];
+    }
+
+    // Use and cache prepared points for current interpolation.
+    let preparedStartPoints: Point[] | undefined = startKeyframe.preparedAfterPoints;
+    let preparedEndPoints: Point[] | undefined = endKeyframe.preparedBeforePoints;
+    if (!preparedStartPoints || !preparedEndPoints) {
+        [preparedStartPoints, preparedEndPoints] = prepare(
+            startKeyframe.initialPoints,
+            endKeyframe.initialPoints,
+            {rawAngles: false, divideRatio: 1},
+        );
+    }
+
+    // Calculate progress between frames as a fraction.
+    const progress =
+        (timestamp - startKeyframe.timestamp) / (endKeyframe.timestamp - startKeyframe.timestamp);
+
+    // Apply timing function of end frame.
+    const adjustedProgress = endKeyframe.timingFunction(progress);
+
+    // TODO use timing function.
+    return interpolateBetween(adjustedProgress, preparedStartPoints, preparedEndPoints);
+};
+
 export const canvasPath = (): CanvasAnimation => {
     let internalFrames: InternalKeyframe[] = [];
-    let delayTimeout: number | undefined = undefined;
     // TODO store current blob when interrupts happen to use as source.
 
     const genBlob = (keyframe: CanvasKeyframe): Point[] =>
@@ -53,61 +104,39 @@ export const canvasPath = (): CanvasAnimation => {
         });
 
     const renderFrame: CanvasAnimation["renderFrame"] = () => {
-        // When transition was called with no frames.
-        if (internalFrames.length === 0) return new Path2D();
-
         const renderTime = Date.now();
-
-        // Remove frames when they are no longer needed. At least one past frame is needed to
-        // interpolate from it to the next frame.
-        while (true) {
-            if (internalFrames.length <= 1) break;
-            if (internalFrames[1].timestamp > renderTime) break;
-            internalFrames.shift();
-        }
-
-        // Animation freezes at the final shape if there are no more keyframes.
-        if (internalFrames.length === 1) return renderPath2D(internalFrames[0].initialPoints);
-
-        // Use and cache prepared points for current interpolation.
-        let preparedStartPoints: Point[] | undefined = internalFrames[0].preparedAfterPoints;
-        let preparedEndPoints: Point[] | undefined = internalFrames[1].preparedBeforePoints;
-        if (!preparedStartPoints || !preparedEndPoints) {
-            [preparedStartPoints, preparedEndPoints] = prepare(
-                internalFrames[0].initialPoints,
-                internalFrames[1].initialPoints,
-                {rawAngles: false, divideRatio: 1},
-            );
-            internalFrames[0].preparedAfterPoints = preparedStartPoints;
-            internalFrames[1].preparedBeforePoints = preparedEndPoints;
-        }
-
-        // Calculate progress between frames as a fraction.
-        const progress =
-            (renderTime - internalFrames[0].timestamp) /
-            (internalFrames[1].timestamp - internalFrames[0].timestamp);
-
-        return renderPath2D(interpolateBetween(progress, preparedStartPoints, preparedEndPoints));
+        // No need to cancel any timeouts since stale frames have passed.
+        internalFrames = removeStale(internalFrames, renderTime);
+        return renderPath2D(renderAt(internalFrames, renderTime));
     };
 
     const transition: CanvasAnimation["transition"] = (...keyframes) => {
-        // Erase animation when given no keyframes.
+        // Immediately wipe animation when given no keyframes.
         if (keyframes.length === 0) {
+            cancelTimeouts(internalFrames);
             internalFrames = [];
             return;
         }
 
-        // Postpone animation if first frame is delayed.
-        if (keyframes[0].delay) {
-            const copiedKeyframes: CanvasKeyframe[] = JSON.parse(JSON.stringify(keyframes));
-            delete copiedKeyframes[0].delay;
-            clearTimeout(delayTimeout);
-            delayTimeout = setTimeout(() => {
-                transition(...copiedKeyframes);
-            }, keyframes[0].delay) as any;
-            return;
-        }
+        cancelTimeouts(internalFrames);
 
+        const transitionTime = Date.now();
+        let totalTime = 0;
+
+        // Add current state as initial frame.
+        internalFrames = [
+            {
+                cancelTimeouts: () => {},
+                initialPoints: renderAt(internalFrames, transitionTime),
+                timestamp: transitionTime,
+                timingFunction: (p) => p,
+            },
+        ];
+        for (let i = 0; i < keyframes.length; i++) {
+            const keyframe = keyframes[i];
+            if (keyframe.delay && i > 0) {
+            }
+        }
         // TODO generate internal frames. Delayed frames can just copy the previous one.
     };
 

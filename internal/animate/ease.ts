@@ -16,7 +16,7 @@ export const easeEnd: InterpolationFunc = (percentage: number) => {
     return 1 - (percentage - 1) ** 2;
 };
 
-export const easeOutElastic: InterpolationFunc = (percentage: number) => {
+export const bounce: InterpolationFunc = (percentage: number) => {
     const p = 0.1;
     return Math.pow(2, -10 * percentage) * Math.sin(((percentage - p / 4) * (2 * Math.PI)) / p) + 1;
 };
