@@ -2,17 +2,31 @@ import {TimingFunc} from "./timing";
 import {Point} from "../types";
 import {prepare} from "./prepare";
 import {interpolateBetween} from "./interpolate";
+import {BlobOptions} from "../../public/blobs";
+
+// TODO move timeouts out of these utils.
+
+export interface Keyframe {
+    delay?: number;
+    duration: number;
+    timingFunction?: "ease" | "linear" | "bounce"; // ...
+    blobOptions: BlobOptions;
+}
 
 export interface InternalKeyframe {
+    id: string;
     timestamp: number;
     timingFunction: TimingFunc;
-    cancelTimeouts: () => void;
     initialPoints: Point[];
     preparedBeforePoints?: Point[];
     preparedAfterPoints?: Point[];
 }
 
-export const removeStale = (
+const genId = (): string => {
+    return String(Math.random()).substr(2);
+}
+
+export const removeStaleFrames = (
     keyframes: InternalKeyframe[],
     timestamp: number,
 ): InternalKeyframe[] => {
@@ -22,15 +36,8 @@ export const removeStale = (
     return keyframes.slice(staleCount - 1);
 };
 
-export const cancelTimeouts = (keyframes: InternalKeyframe[]) => {
-    for (const frame of keyframes) {
-        // Cancelling an already executed timeout is a noop.
-        frame.cancelTimeouts();
-    }
-};
-
 // TODO cache prepared points? Ideally without modifying keyframes argument.
-export const renderAt = (keyframes: InternalKeyframe[], timestamp: number): Point[] => {
+export const renderFramesAt = (keyframes: InternalKeyframe[], timestamp: number): Point[] => {
     if (keyframes.length === 0) return [];
 
     // Animation freezes at the final shape if there are no more keyframes.
@@ -65,4 +72,32 @@ export const renderAt = (keyframes: InternalKeyframe[], timestamp: number): Poin
 
     // TODO use timing function.
     return interpolateBetween(adjustedProgress, preparedStartPoints, preparedEndPoints);
+};
+
+// TODO generate internal frames. Delayed frames can just copy the previous one.
+// TODO store current blob when interrupts happen to use as source.
+// TODO don't remove any frames.
+export const transitionFrames = (
+    currentFrames: InternalKeyframe[],
+    newFrames: Keyframe[],
+    timestamp: number,
+): InternalKeyframe[] => {
+    let totalTime = 0;
+
+    // Add current state as initial frame.
+    let internalFrames: InternalKeyframe[] = [
+        {
+            id: genId(),
+            initialPoints: renderFramesAt(currentFrames, timestamp),
+            timestamp: timestamp,
+            timingFunction: (p) => p,
+        },
+    ];
+    for (let i = 0; i < newFrames.length; i++) {
+        const keyframe = newFrames[i];
+        if (keyframe.delay && i > 0) {
+        }
+    }
+
+    return [];
 };

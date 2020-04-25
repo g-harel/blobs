@@ -1,22 +1,20 @@
-import {BlobOptions, CanvasOptions} from "./blobs";
+import {CanvasOptions} from "./blobs";
 import {Point} from "../internal/types";
 import {renderPath2D} from "../internal/render/canvas";
 import {genFromOptions} from "../internal/gen";
 import {mapPoints} from "../internal/util";
-import {InternalKeyframe, removeStale, renderAt, cancelTimeouts} from "../internal/animate/state";
+import {
+    InternalKeyframe,
+    renderFramesAt,
+    transitionFrames,
+    Keyframe,
+    removeStaleFrames,
+} from "../internal/animate/state";
 
 // TODO copy keyframes as soon as possible to make sure they aren't modified afterwards.
 // TODO make sure callbacks don't fill up the stack.
 // TODO defend against "bad" keyframes like negative timing.
-
-interface Keyframe {
-    delay?: number;
-    duration: number;
-    timingFunction?: "ease" | "linear" | "bounce"; // ...
-    // Not guaranteed to run if interrupted.
-    callback?: () => void;
-    blobOptions: BlobOptions;
-}
+// TODO keyframe callbacks
 
 export interface CanvasKeyframe extends Keyframe {
     canvasOptions?: CanvasOptions;
@@ -31,7 +29,6 @@ export interface CanvasAnimation {
 
 export const canvasPath = (): CanvasAnimation => {
     let internalFrames: InternalKeyframe[] = [];
-    // TODO store current blob when interrupts happen to use as source.
 
     const genBlob = (keyframe: CanvasKeyframe): Point[] =>
         mapPoints(genFromOptions(keyframe.blobOptions), ({curr}) => {
@@ -42,39 +39,20 @@ export const canvasPath = (): CanvasAnimation => {
 
     const renderFrame: CanvasAnimation["renderFrame"] = () => {
         const renderTime = Date.now();
-        // No need to cancel any timeouts since stale frames have passed.
-        internalFrames = removeStale(internalFrames, renderTime);
-        return renderPath2D(renderAt(internalFrames, renderTime));
+        internalFrames = removeStaleFrames(internalFrames, renderTime);
+        return renderPath2D(renderFramesAt(internalFrames, renderTime));
     };
 
     const transition: CanvasAnimation["transition"] = (...keyframes) => {
+        const transitionTime = Date.now();
+
         // Immediately wipe animation when given no keyframes.
         if (keyframes.length === 0) {
-            cancelTimeouts(internalFrames);
             internalFrames = [];
             return;
         }
 
-        cancelTimeouts(internalFrames);
-
-        const transitionTime = Date.now();
-        let totalTime = 0;
-
-        // Add current state as initial frame.
-        internalFrames = [
-            {
-                cancelTimeouts: () => {},
-                initialPoints: renderAt(internalFrames, transitionTime),
-                timestamp: transitionTime,
-                timingFunction: (p) => p,
-            },
-        ];
-        for (let i = 0; i < keyframes.length; i++) {
-            const keyframe = keyframes[i];
-            if (keyframe.delay && i > 0) {
-            }
-        }
-        // TODO generate internal frames. Delayed frames can just copy the previous one.
+        internalFrames = transitionFrames(internalFrames, keyframes, transitionTime);
     };
 
     return {renderFrame, transition};
