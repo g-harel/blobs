@@ -1,15 +1,13 @@
-import {TimingFunc} from "./timing";
+import {TimingFunc, timingFunctions} from "./timing";
 import {Point} from "../types";
 import {prepare} from "./prepare";
 import {interpolateBetween} from "./interpolate";
 import {BlobOptions} from "../../public/blobs";
 
-// TODO move timeouts out of these utils.
-
 export interface Keyframe {
     delay?: number;
     duration: number;
-    timingFunction?: "ease" | "linear" | "bounce"; // ...
+    timingFunction?: keyof typeof timingFunctions;
     blobOptions: BlobOptions;
 }
 
@@ -24,7 +22,7 @@ export interface InternalKeyframe {
 
 const genId = (): string => {
     return String(Math.random()).substr(2);
-}
+};
 
 export const removeStaleFrames = (
     keyframes: InternalKeyframe[],
