@@ -2,31 +2,45 @@ export interface TimingFunc {
     (percentage: number): number;
 }
 
-const linear: TimingFunc = (percentage: number) => {
-    return percentage;
+const linear: TimingFunc = (p) => {
+    return p;
 };
 
-const easeIn: TimingFunc = (percentage: number) => {
-    return 1 - (percentage - 1) ** 2;
+const easeIn: TimingFunc = (p) => {
+    return 1 - (p - 1) ** 2;
 };
 
-const easeOut: TimingFunc = (percentage: number) => {
-    return 1 - easeIn(1 - percentage);
+const easeOut: TimingFunc = (p) => {
+    return 1 - easeIn(1 - p);
 };
 
-const easeInOut: TimingFunc = (percentage: number) => {
-    return 0.5 + 0.5 * Math.sin(Math.PI * (percentage + 1.5));
+const easeInOut: TimingFunc = (p) => {
+    return 0.5 + 0.5 * Math.sin(Math.PI * (p + 1.5));
 };
 
-const elastic = (): TimingFunc => (percentage: number) => {
-    const p = 0.1;
-    return Math.pow(2, -10 * percentage) * Math.sin(((percentage - p / 4) * (2 * Math.PI)) / p) + 1;
+const elasticIn = (s: number): TimingFunc => (p) => {
+    return Math.pow(2, -10 * p) * Math.sin(((p - s / 4) * (2 * Math.PI)) / s) + 1;
 };
 
+const elasticOut = (s: number): TimingFunc => (p) => {
+    return 1 - elasticIn(s)(1 - p);
+};
+
+// https://www.desmos.com/calculator/fqisoq1kuw
 export const timingFunctions = {
     linear,
     easeIn,
     easeOut,
     easeInOut,
-    elastic,
+    elasticIn0: elasticIn(1),
+    elasticIn1: elasticIn(0.16),
+    elasticIn2: elasticIn(0.09),
+    elasticIn3: elasticIn(0.05),
+    elasticOut0: elasticOut(1),
+    elasticOut1: elasticOut(0.16),
+    elasticOut2: elasticOut(0.09),
+    elasticOut3: elasticOut(0.05),
 };
+
+// Type assertion.
+const _: Record<string, TimingFunc> = timingFunctions;
