@@ -9,6 +9,7 @@ import {
     transitionFrames,
     Keyframe,
     removeStaleFrames,
+    RenderCache,
 } from "../internal/animate/state";
 
 // TODO copy keyframes as soon as possible to make sure they aren't modified afterwards.
@@ -16,7 +17,11 @@ import {
 // TODO defend against "bad" keyframes like negative timing.
 // TODO keyframe callbacks
 
-export interface CanvasKeyframe extends Keyframe {
+interface CallbackKeyframe extends Keyframe {
+    callback?: () => void;
+}
+
+export interface CanvasKeyframe extends CallbackKeyframe {
     canvasOptions?: CanvasOptions;
 }
 
@@ -27,32 +32,70 @@ export interface CanvasAnimation {
     transition(...keyframes: CanvasKeyframe[]): void;
 }
 
+interface CallbackStore {
+    [frameId: string]: () => void;
+}
+
+const removeExpiredFrameCallbacks = (
+    oldStore: CallbackStore,
+    frames: InternalKeyframe[],
+): CallbackStore => {
+    const newStore: CallbackStore = {};
+    for (const frame of frames) {
+        newStore[frame.id] = oldStore[frame.id];
+    }
+    return newStore;
+};
+
 export const canvasPath = (): CanvasAnimation => {
     let internalFrames: InternalKeyframe[] = [];
-
-    const genBlob = (keyframe: CanvasKeyframe): Point[] =>
-        mapPoints(genFromOptions(keyframe.blobOptions), ({curr}) => {
-            curr.x += keyframe?.canvasOptions?.offsetX || 0;
-            curr.y += keyframe?.canvasOptions?.offsetY || 0;
-            return curr;
-        });
+    let renderCache: RenderCache = {};
+    let callbackStore: CallbackStore = {};
 
     const renderFrame: CanvasAnimation["renderFrame"] = () => {
         const renderTime = Date.now();
         internalFrames = removeStaleFrames(internalFrames, renderTime);
-        return renderPath2D(renderFramesAt(internalFrames, renderTime));
+        const renderOutput = renderFramesAt({
+            cache: renderCache,
+            timestamp: renderTime,
+            currentFrames: internalFrames,
+        });
+        renderCache = renderOutput.cache;
+        if (renderOutput.lastFrameId && callbackStore[renderOutput.lastFrameId]) {
+            callbackStore[renderOutput.lastFrameId]();
+            delete callbackStore[renderOutput.lastFrameId];
+        }
+        return renderPath2D(renderOutput.points);
     };
+
+    const genBlob = (keyframe: CanvasKeyframe): Point[] => {
+        return mapPoints(genFromOptions(keyframe.blobOptions), ({curr}) => {
+            curr.x += keyframe?.canvasOptions?.offsetX || 0;
+            curr.y += keyframe?.canvasOptions?.offsetY || 0;
+            return curr;
+        });
+    }
 
     const transition: CanvasAnimation["transition"] = (...keyframes) => {
         const transitionTime = Date.now();
+        const transitionOutput = transitionFrames({
+            cache: renderCache,
+            timestamp: transitionTime,
+            currentFrames: internalFrames,
+            newFrames: keyframes,
+        });
+        renderCache = transitionOutput.cache;
+        internalFrames = transitionOutput.newFrames;
 
-        // Immediately wipe animation when given no keyframes.
-        if (keyframes.length === 0) {
-            internalFrames = [];
-            return;
+        // Remove callbacks that are no longer associated with a known frame.
+        callbackStore = removeExpiredFrameCallbacks(callbackStore, internalFrames);
+
+        // Populate the callback using returned frame ids.
+        for (const newFrame of internalFrames) {
+            if (newFrame.transitionSourceFrameIndex === null) continue;
+            const {callback} = keyframes[newFrame.transitionSourceFrameIndex];
+            if (callback) callbackStore[newFrame.id] = callback;
         }
-
-        internalFrames = transitionFrames(internalFrames, keyframes, transitionTime);
     };
 
     return {renderFrame, transition};

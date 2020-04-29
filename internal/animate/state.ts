@@ -16,6 +16,7 @@ export interface InternalKeyframe {
     timestamp: number;
     timingFunction: TimingFunc;
     initialPoints: Point[];
+    transitionSourceFrameIndex: number | null;
 }
 
 export interface RenderCache {
@@ -26,7 +27,7 @@ export interface RenderCache {
 }
 
 export interface RenderInput {
-    keyframes: InternalKeyframe[];
+    currentFrames: InternalKeyframe[];
     timestamp: number;
     cache: RenderCache;
 }
@@ -42,7 +43,7 @@ export interface TransitionInput extends RenderInput {
 }
 
 export interface TransitionOutput {
-    frames: InternalKeyframe[];
+    newFrames: InternalKeyframe[];
     cache: RenderCache;
 }
 
@@ -61,25 +62,25 @@ export const removeStaleFrames = (
 };
 
 export const renderFramesAt = (input: RenderInput): RenderOutput => {
-    const {cache, keyframes} = input;
+    const {cache, currentFrames} = input;
 
-    if (keyframes.length === 0) {
+    if (currentFrames.length === 0) {
         return {cache, lastFrameId: null, points: []};
     }
 
     // Animation freezes at the final shape if there are no more keyframes.
-    if (keyframes.length === 1) {
-        const first = keyframes[0];
+    if (currentFrames.length === 1) {
+        const first = currentFrames[0];
         return {cache, lastFrameId: first.id, points: first.initialPoints};
     }
 
     // Find the start/end keyframes according to the timestamp.
-    let startKeyframe = keyframes[0];
-    let endKeyframe = keyframes[1];
-    for (let i = 2; i < keyframes.length; i++) {
+    let startKeyframe = currentFrames[0];
+    let endKeyframe = currentFrames[1];
+    for (let i = 2; i < currentFrames.length; i++) {
         if (endKeyframe.timestamp < input.timestamp) break;
-        startKeyframe = keyframes[i - 1];
-        endKeyframe = keyframes[i];
+        startKeyframe = currentFrames[i - 1];
+        endKeyframe = currentFrames[i];
     }
 
     // Use and cache prepared points for current interpolation.
@@ -108,14 +109,21 @@ export const renderFramesAt = (input: RenderInput): RenderOutput => {
         cache,
         lastFrameId: startKeyframe.id,
         points: interpolateBetween(adjustedProgress, preparedStartPoints, preparedEndPoints),
-    }
+    };
 };
+
+// TODO render cache cleaner.
 
 // TODO generate internal frames. Delayed frames can just copy the previous one.
 // TODO store current blob when interrupts happen to use as source.
 // TODO don't remove any frames.
 export const transitionFrames = (input: TransitionInput): TransitionOutput => {
     const {cache, timestamp, newFrames} = input;
+
+    // Wipe animation when given no keyframes.
+    if (input.newFrames.length === 0) {
+        return {cache: input.cache, newFrames: []};
+    }
 
     // Add current state as initial frame.
     const currentState = renderFramesAt(input);
@@ -125,6 +133,7 @@ export const transitionFrames = (input: TransitionInput): TransitionOutput => {
             initialPoints: currentState.points,
             timestamp: timestamp,
             timingFunction: (p) => p,
+            transitionSourceFrameIndex: null,
         },
     ];
 
@@ -135,5 +144,5 @@ export const transitionFrames = (input: TransitionInput): TransitionOutput => {
         }
     }
 
-    return {cache, frames: internalFrames};
+    return {cache, newFrames: internalFrames};
 };
