@@ -29,22 +29,23 @@ export interface RenderCache {
 export interface RenderInput {
     currentFrames: InternalKeyframe[];
     timestamp: number;
-    cache: RenderCache;
+    renderCache: RenderCache;
 }
 
 export interface RenderOutput {
     points: Point[];
     lastFrameId: string | null;
-    cache: RenderCache;
+    renderCache: RenderCache;
 }
 
 export interface TransitionInput extends RenderInput {
     newFrames: Keyframe[];
+    blobGenerator: <T extends Keyframe>(options: T) => Point[],
 }
 
 export interface TransitionOutput {
     newFrames: InternalKeyframe[];
-    cache: RenderCache;
+    renderCache: RenderCache;
 }
 
 const genId = (): string => {
@@ -73,16 +74,16 @@ export const cleanRenderCache = (
 }
 
 export const renderFramesAt = (input: RenderInput): RenderOutput => {
-    const {cache, currentFrames} = input;
+    const {renderCache, currentFrames} = input;
 
     if (currentFrames.length === 0) {
-        return {cache, lastFrameId: null, points: []};
+        return {renderCache, lastFrameId: null, points: []};
     }
 
     // Animation freezes at the final shape if there are no more keyframes.
     if (currentFrames.length === 1) {
         const first = currentFrames[0];
-        return {cache, lastFrameId: first.id, points: first.initialPoints};
+        return {renderCache, lastFrameId: first.id, points: first.initialPoints};
     }
 
     // Find the start/end keyframes according to the timestamp.
@@ -95,16 +96,16 @@ export const renderFramesAt = (input: RenderInput): RenderOutput => {
     }
 
     // Use and cache prepared points for current interpolation.
-    let preparedStartPoints: Point[] | undefined = cache[startKeyframe.id].preparedStartPoints;
-    let preparedEndPoints: Point[] | undefined = cache[endKeyframe.id].preparedEndPoints;
+    let preparedStartPoints: Point[] | undefined = renderCache[startKeyframe.id].preparedStartPoints;
+    let preparedEndPoints: Point[] | undefined = renderCache[endKeyframe.id].preparedEndPoints;
     if (!preparedStartPoints || !preparedEndPoints) {
         [preparedStartPoints, preparedEndPoints] = prepare(
             startKeyframe.initialPoints,
             endKeyframe.initialPoints,
             {rawAngles: false, divideRatio: 1},
         );
-        cache[startKeyframe.id].preparedStartPoints = preparedStartPoints;
-        cache[endKeyframe.id].preparedEndPoints = preparedEndPoints;
+        renderCache[startKeyframe.id].preparedStartPoints = preparedStartPoints;
+        renderCache[endKeyframe.id].preparedEndPoints = preparedEndPoints;
     }
 
     // Calculate progress between frames as a fraction.
@@ -115,9 +116,8 @@ export const renderFramesAt = (input: RenderInput): RenderOutput => {
     // Apply timing function of end frame.
     const adjustedProgress = endKeyframe.timingFunction(progress);
 
-    // TODO use timing function.
     return {
-        cache,
+        renderCache,
         lastFrameId: startKeyframe.id,
         points: interpolateBetween(adjustedProgress, preparedStartPoints, preparedEndPoints),
     };
@@ -127,11 +127,11 @@ export const renderFramesAt = (input: RenderInput): RenderOutput => {
 // TODO store current blob when interrupts happen to use as source.
 // TODO don't remove any frames.
 export const transitionFrames = (input: TransitionInput): TransitionOutput => {
-    const {cache, timestamp, newFrames} = input;
+    const {renderCache, timestamp, newFrames} = input;
 
     // Wipe animation when given no keyframes.
     if (input.newFrames.length === 0) {
-        return {cache: input.cache, newFrames: []};
+        return {renderCache: input.renderCache, newFrames: []};
     }
 
     // Add current state as initial frame.
@@ -153,5 +153,5 @@ export const transitionFrames = (input: TransitionInput): TransitionOutput => {
         }
     }
 
-    return {cache, newFrames: internalFrames};
+    return {renderCache, newFrames: internalFrames};
 };

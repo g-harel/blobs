@@ -48,6 +48,14 @@ const removeExpiredFrameCallbacks = (
     return newStore;
 };
 
+const canvasBlobGenerator = (keyframe: CanvasKeyframe): Point[] => {
+    return mapPoints(genFromOptions(keyframe.blobOptions), ({curr}) => {
+        curr.x += keyframe?.canvasOptions?.offsetX || 0;
+        curr.y += keyframe?.canvasOptions?.offsetY || 0;
+        return curr;
+    });
+}
+
 export const canvasPath = (): CanvasAnimation => {
     let internalFrames: InternalKeyframe[] = [];
     let renderCache: RenderCache = {};
@@ -57,11 +65,11 @@ export const canvasPath = (): CanvasAnimation => {
         const renderTime = Date.now();
         internalFrames = removeStaleFrames(internalFrames, renderTime);
         const renderOutput = renderFramesAt({
-            cache: renderCache,
+            renderCache: renderCache,
             timestamp: renderTime,
             currentFrames: internalFrames,
         });
-        renderCache = renderOutput.cache;
+        renderCache = renderOutput.renderCache;
         if (renderOutput.lastFrameId && callbackStore[renderOutput.lastFrameId]) {
             callbackStore[renderOutput.lastFrameId]();
             delete callbackStore[renderOutput.lastFrameId];
@@ -69,26 +77,19 @@ export const canvasPath = (): CanvasAnimation => {
         return renderPath2D(renderOutput.points);
     };
 
-    const genBlob = (keyframe: CanvasKeyframe): Point[] => {
-        return mapPoints(genFromOptions(keyframe.blobOptions), ({curr}) => {
-            curr.x += keyframe?.canvasOptions?.offsetX || 0;
-            curr.y += keyframe?.canvasOptions?.offsetY || 0;
-            return curr;
-        });
-    }
-
     const transition: CanvasAnimation["transition"] = (...keyframes) => {
         const transitionTime = Date.now();
         const transitionOutput = transitionFrames({
-            cache: renderCache,
+            renderCache: renderCache,
             timestamp: transitionTime,
             currentFrames: internalFrames,
             newFrames: keyframes,
+            blobGenerator: canvasBlobGenerator,
         });
-        renderCache = transitionOutput.cache;
+        renderCache = transitionOutput.renderCache;
         internalFrames = transitionOutput.newFrames;
 
-        // Remove callbacks that are no longer associated with a known frame.
+        // Cleanup stored data that is no longer associated with a known frame.
         callbackStore = removeExpiredFrameCallbacks(internalFrames, callbackStore);
         renderCache = cleanRenderCache(internalFrames, renderCache);
 
