@@ -61,6 +61,17 @@ export const removeStaleFrames = (
     return keyframes.slice(staleCount - 1);
 };
 
+export const cleanRenderCache = (
+    keyframes: InternalKeyframe[],
+    renderCache: RenderCache,
+): RenderCache => {
+    const newCache: RenderCache = {};
+    for (const frame of keyframes) {
+        newCache[frame.id] = renderCache[frame.id];
+    }
+    return newCache;
+}
+
 export const renderFramesAt = (input: RenderInput): RenderOutput => {
     const {cache, currentFrames} = input;
 
@@ -111,8 +122,6 @@ export const renderFramesAt = (input: RenderInput): RenderOutput => {
         points: interpolateBetween(adjustedProgress, preparedStartPoints, preparedEndPoints),
     };
 };
-
-// TODO render cache cleaner.
 
 // TODO generate internal frames. Delayed frames can just copy the previous one.
 // TODO store current blob when interrupts happen to use as source.

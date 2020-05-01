@@ -10,6 +10,7 @@ import {
     Keyframe,
     removeStaleFrames,
     RenderCache,
+    cleanRenderCache,
 } from "../internal/animate/state";
 
 // TODO copy keyframes as soon as possible to make sure they aren't modified afterwards.
@@ -37,8 +38,8 @@ interface CallbackStore {
 }
 
 const removeExpiredFrameCallbacks = (
-    oldStore: CallbackStore,
     frames: InternalKeyframe[],
+    oldStore: CallbackStore,
 ): CallbackStore => {
     const newStore: CallbackStore = {};
     for (const frame of frames) {
@@ -88,7 +89,8 @@ export const canvasPath = (): CanvasAnimation => {
         internalFrames = transitionOutput.newFrames;
 
         // Remove callbacks that are no longer associated with a known frame.
-        callbackStore = removeExpiredFrameCallbacks(callbackStore, internalFrames);
+        callbackStore = removeExpiredFrameCallbacks(internalFrames, callbackStore);
+        renderCache = cleanRenderCache(internalFrames, renderCache);
 
         // Populate the callback using returned frame ids.
         for (const newFrame of internalFrames) {
