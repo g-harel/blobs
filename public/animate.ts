@@ -1,4 +1,4 @@
-import {CanvasOptions} from "./blobs";
+import {CanvasOptions, BlobOptions} from "./blobs";
 import {Point} from "../internal/types";
 import {renderPath2D} from "../internal/render/canvas";
 import {genFromOptions} from "../internal/gen";
@@ -23,6 +23,7 @@ interface CallbackKeyframe extends Keyframe {
 }
 
 export interface CanvasKeyframe extends CallbackKeyframe {
+    blobOptions: BlobOptions;
     canvasOptions?: CanvasOptions;
 }
 
@@ -79,7 +80,7 @@ export const canvasPath = (): CanvasAnimation => {
 
     const transition: CanvasAnimation["transition"] = (...keyframes) => {
         const transitionTime = Date.now();
-        const transitionOutput = transitionFrames({
+        const transitionOutput = transitionFrames<CanvasKeyframe>({
             renderCache: renderCache,
             timestamp: transitionTime,
             currentFrames: internalFrames,

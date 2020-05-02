@@ -2,13 +2,11 @@ import {TimingFunc, timingFunctions} from "./timing";
 import {Point} from "../types";
 import {prepare} from "./prepare";
 import {interpolateBetween} from "./interpolate";
-import {BlobOptions} from "../../public/blobs";
 
 export interface Keyframe {
     delay?: number;
     duration: number;
     timingFunction?: keyof typeof timingFunctions;
-    blobOptions: BlobOptions;
 }
 
 export interface InternalKeyframe {
@@ -38,9 +36,9 @@ export interface RenderOutput {
     renderCache: RenderCache;
 }
 
-export interface TransitionInput extends RenderInput {
-    newFrames: Keyframe[];
-    blobGenerator: <T extends Keyframe>(options: T) => Point[],
+export interface TransitionInput<T extends Keyframe> extends RenderInput {
+    newFrames: T[];
+    blobGenerator:(options: T) => Point[],
 }
 
 export interface TransitionOutput {
@@ -126,7 +124,7 @@ export const renderFramesAt = (input: RenderInput): RenderOutput => {
 // TODO generate internal frames. Delayed frames can just copy the previous one.
 // TODO store current blob when interrupts happen to use as source.
 // TODO don't remove any frames.
-export const transitionFrames = (input: TransitionInput): TransitionOutput => {
+export const transitionFrames = <T extends Keyframe>(input: TransitionInput<T>): TransitionOutput => {
     const {renderCache, timestamp, newFrames} = input;
 
     // Wipe animation when given no keyframes.
