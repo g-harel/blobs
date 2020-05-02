@@ -38,7 +38,7 @@ export interface RenderOutput {
 
 export interface TransitionInput<T extends Keyframe> extends RenderInput {
     newFrames: T[];
-    blobGenerator:(options: T) => Point[],
+    shapeGenerator:(keyframe: T) => Point[],
 }
 
 export interface TransitionOutput {
@@ -122,7 +122,7 @@ export const renderFramesAt = (input: RenderInput): RenderOutput => {
 };
 
 // TODO generate internal frames. Delayed frames can just copy the previous one.
-// TODO store current blob when interrupts happen to use as source.
+// TODO store current shape when interrupts happen to use as source.
 // TODO don't remove any frames.
 export const transitionFrames = <T extends Keyframe>(input: TransitionInput<T>): TransitionOutput => {
     const {renderCache, timestamp, newFrames} = input;

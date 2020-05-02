@@ -85,7 +85,7 @@ export const canvasPath = (): CanvasAnimation => {
             timestamp: transitionTime,
             currentFrames: internalFrames,
             newFrames: keyframes,
-            blobGenerator: canvasBlobGenerator,
+            shapeGenerator: canvasBlobGenerator,
         });
         renderCache = transitionOutput.renderCache;
         internalFrames = transitionOutput.newFrames;
