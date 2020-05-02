@@ -8,16 +8,10 @@ import {
     renderFramesAt,
     transitionFrames,
     Keyframe,
-    removeStaleFrames,
     RenderCache,
-    cleanRenderCache,
 } from "../internal/animate/state";
 
-// TODO copy keyframes as soon as possible to make sure they aren't modified afterwards.
-// TODO make sure callbacks don't fill up the stack.
-// TODO defend against "bad" keyframes like negative timing.
-// TODO keyframe callbacks
-
+// TODO make sure recursive callbacks don't fill up the stack.
 interface CallbackKeyframe extends Keyframe {
     callback?: () => void;
 }
@@ -38,17 +32,6 @@ interface CallbackStore {
     [frameId: string]: () => void;
 }
 
-const removeExpiredFrameCallbacks = (
-    frames: InternalKeyframe[],
-    oldStore: CallbackStore,
-): CallbackStore => {
-    const newStore: CallbackStore = {};
-    for (const frame of frames) {
-        newStore[frame.id] = oldStore[frame.id];
-    }
-    return newStore;
-};
-
 const canvasBlobGenerator = (keyframe: CanvasKeyframe): Point[] => {
     return mapPoints(genFromOptions(keyframe.blobOptions), ({curr}) => {
         curr.x += keyframe?.canvasOptions?.offsetX || 0;
@@ -63,38 +46,39 @@ export const canvasPath = (): CanvasAnimation => {
     let callbackStore: CallbackStore = {};
 
     const renderFrame: CanvasAnimation["renderFrame"] = () => {
-        const renderTime = Date.now();
-        internalFrames = removeStaleFrames(internalFrames, renderTime);
         const renderOutput = renderFramesAt({
             renderCache: renderCache,
-            timestamp: renderTime,
+            timestamp: Date.now(),
             currentFrames: internalFrames,
         });
+
+        // Update render cache with returned value.
         renderCache = renderOutput.renderCache;
+
+        // Invoke callback if defined and the first time the frame is reached.
         if (renderOutput.lastFrameId && callbackStore[renderOutput.lastFrameId]) {
             callbackStore[renderOutput.lastFrameId]();
             delete callbackStore[renderOutput.lastFrameId];
         }
+
         return renderPath2D(renderOutput.points);
     };
 
     const transition: CanvasAnimation["transition"] = (...keyframes) => {
-        const transitionTime = Date.now();
         const transitionOutput = transitionFrames<CanvasKeyframe>({
             renderCache: renderCache,
-            timestamp: transitionTime,
+            timestamp:  Date.now(),
             currentFrames: internalFrames,
             newFrames: keyframes,
             shapeGenerator: canvasBlobGenerator,
         });
-        renderCache = transitionOutput.renderCache;
+
+        // Reset internal state..
         internalFrames = transitionOutput.newFrames;
+        callbackStore = {};
+        renderCache = {};
 
-        // Cleanup stored data that is no longer associated with a known frame.
-        callbackStore = removeExpiredFrameCallbacks(internalFrames, callbackStore);
-        renderCache = cleanRenderCache(internalFrames, renderCache);
-
-        // Populate the callback using returned frame ids.
+        // Populate callback store using returned frame ids.
         for (const newFrame of internalFrames) {
             if (newFrame.transitionSourceFrameIndex === null) continue;
             const {callback} = keyframes[newFrame.transitionSourceFrameIndex];

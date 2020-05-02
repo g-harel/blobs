@@ -14,7 +14,8 @@ export interface InternalKeyframe {
     timestamp: number;
     timingFunction: TimingFunc;
     initialPoints: Point[];
-    transitionSourceFrameIndex: number | null;
+    transitionSourceFrameIndex: number;
+    isSynthetic: boolean;
 }
 
 export interface RenderCache {
@@ -43,33 +44,11 @@ export interface TransitionInput<T extends Keyframe> extends RenderInput {
 
 export interface TransitionOutput {
     newFrames: InternalKeyframe[];
-    renderCache: RenderCache;
 }
 
 const genId = (): string => {
     return String(Math.random()).substr(2);
 };
-
-export const removeStaleFrames = (
-    keyframes: InternalKeyframe[],
-    timestamp: number,
-): InternalKeyframe[] => {
-    if (keyframes.length <= 1) return keyframes;
-    const staleCount = keyframes.filter((k) => k.timestamp < timestamp).length;
-    // Keep a single stale frame for the current transition.
-    return keyframes.slice(staleCount - 1);
-};
-
-export const cleanRenderCache = (
-    keyframes: InternalKeyframe[],
-    renderCache: RenderCache,
-): RenderCache => {
-    const newCache: RenderCache = {};
-    for (const frame of keyframes) {
-        newCache[frame.id] = renderCache[frame.id];
-    }
-    return newCache;
-}
 
 export const renderFramesAt = (input: RenderInput): RenderOutput => {
     const {renderCache, currentFrames} = input;
@@ -123,13 +102,14 @@ export const renderFramesAt = (input: RenderInput): RenderOutput => {
 
 // TODO generate internal frames. Delayed frames can just copy the previous one.
 // TODO store current shape when interrupts happen to use as source.
-// TODO don't remove any frames.
+// TODO defend against "bad" keyframes like negative timing.
+// TODO copy keyframes as soon as possible to make sure they aren't modified afterwards.
 export const transitionFrames = <T extends Keyframe>(input: TransitionInput<T>): TransitionOutput => {
-    const {renderCache, timestamp, newFrames} = input;
+    const {timestamp, newFrames} = input;
 
     // Wipe animation when given no keyframes.
     if (input.newFrames.length === 0) {
-        return {renderCache: input.renderCache, newFrames: []};
+        return {newFrames: []};
     }
 
     // Add current state as initial frame.
@@ -140,7 +120,8 @@ export const transitionFrames = <T extends Keyframe>(input: TransitionInput<T>):
             initialPoints: currentState.points,
             timestamp: timestamp,
             timingFunction: (p) => p,
-            transitionSourceFrameIndex: null,
+            transitionSourceFrameIndex: -1,
+            isSynthetic: true,
         },
     ];
 
@@ -151,5 +132,5 @@ export const transitionFrames = <T extends Keyframe>(input: TransitionInput<T>):
         }
     }
 
-    return {renderCache, newFrames: internalFrames};
+    return {newFrames: internalFrames};
 };
