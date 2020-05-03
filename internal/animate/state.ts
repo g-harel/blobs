@@ -39,7 +39,7 @@ export interface RenderOutput {
 
 export interface TransitionInput<T extends Keyframe> extends RenderInput {
     newFrames: T[];
-    shapeGenerator:(keyframe: T) => Point[],
+    shapeGenerator: (keyframe: T) => Point[];
 }
 
 export interface TransitionOutput {
@@ -73,7 +73,8 @@ export const renderFramesAt = (input: RenderInput): RenderOutput => {
     }
 
     // Use and cache prepared points for current interpolation.
-    let preparedStartPoints: Point[] | undefined = renderCache[startKeyframe.id].preparedStartPoints;
+    let preparedStartPoints: Point[] | undefined =
+        renderCache[startKeyframe.id].preparedStartPoints;
     let preparedEndPoints: Point[] | undefined = renderCache[endKeyframe.id].preparedEndPoints;
     if (!preparedStartPoints || !preparedEndPoints) {
         [preparedStartPoints, preparedEndPoints] = prepare(
@@ -100,37 +101,58 @@ export const renderFramesAt = (input: RenderInput): RenderOutput => {
     };
 };
 
-// TODO generate internal frames. Delayed frames can just copy the previous one.
-// TODO store current shape when interrupts happen to use as source.
 // TODO defend against "bad" keyframes like negative timing.
-// TODO copy keyframes as soon as possible to make sure they aren't modified afterwards.
-export const transitionFrames = <T extends Keyframe>(input: TransitionInput<T>): TransitionOutput => {
-    const {timestamp, newFrames} = input;
+export const transitionFrames = <T extends Keyframe>(
+    input: TransitionInput<T>,
+): TransitionOutput => {
+    // Erase all old frames.
+    const newInternalFrames: InternalKeyframe[] = [];
 
-    // Wipe animation when given no keyframes.
+    // Reset animation when given no keyframes.
     if (input.newFrames.length === 0) {
-        return {newFrames: []};
+        return {newFrames: newInternalFrames};
     }
 
     // Add current state as initial frame.
     const currentState = renderFramesAt(input);
-    let internalFrames: InternalKeyframe[] = [
-        {
-            id: genId(),
-            initialPoints: currentState.points,
-            timestamp: timestamp,
-            timingFunction: (p) => p,
-            transitionSourceFrameIndex: -1,
-            isSynthetic: true,
-        },
-    ];
+    newInternalFrames.push({
+        id: genId(),
+        initialPoints: currentState.points,
+        timestamp: input.timestamp,
+        timingFunction: timingFunctions.linear,
+        transitionSourceFrameIndex: -1,
+        isSynthetic: true,
+    });
 
-    let totalTime = 0;
-    for (let i = 0; i < newFrames.length; i++) {
-        const keyframe = newFrames[i];
-        if (keyframe.delay && i > 0) {
+    // Generate and add new frames.
+    let totalOffset = 0;
+    for (let i = 0; i < input.newFrames.length; i++) {
+        const keyframe = input.newFrames[i];
+
+        // Copy previous frame when current one has a delay.
+        if (keyframe.delay) {
+            totalOffset += keyframe.delay;
+            const prevFrame = newInternalFrames[newInternalFrames.length - 1];
+            newInternalFrames.push({
+                id: genId(),
+                initialPoints: prevFrame.initialPoints,
+                timestamp: input.timestamp + totalOffset,
+                timingFunction: timingFunctions.linear,
+                transitionSourceFrameIndex: i - 1,
+                isSynthetic: true,
+            });
         }
+
+        totalOffset += keyframe.duration;
+        newInternalFrames.push({
+            id: genId(),
+            initialPoints: input.shapeGenerator(keyframe),
+            timestamp: input.timestamp + totalOffset,
+            timingFunction: timingFunctions[keyframe.timingFunction || "linear"],
+            transitionSourceFrameIndex: i,
+            isSynthetic: false,
+        });
     }
 
-    return {newFrames: internalFrames};
+    return {newFrames: newInternalFrames};
 };

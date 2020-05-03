@@ -38,7 +38,7 @@ const canvasBlobGenerator = (keyframe: CanvasKeyframe): Point[] => {
         curr.y += keyframe?.canvasOptions?.offsetY || 0;
         return curr;
     });
-}
+};
 
 export const canvasPath = (): CanvasAnimation => {
     let internalFrames: InternalKeyframe[] = [];
@@ -67,7 +67,7 @@ export const canvasPath = (): CanvasAnimation => {
     const transition: CanvasAnimation["transition"] = (...keyframes) => {
         const transitionOutput = transitionFrames<CanvasKeyframe>({
             renderCache: renderCache,
-            timestamp:  Date.now(),
+            timestamp: Date.now(),
             currentFrames: internalFrames,
             newFrames: keyframes,
             shapeGenerator: canvasBlobGenerator,
@@ -80,7 +80,7 @@ export const canvasPath = (): CanvasAnimation => {
 
         // Populate callback store using returned frame ids.
         for (const newFrame of internalFrames) {
-            if (newFrame.transitionSourceFrameIndex === null) continue;
+            if (newFrame.isSynthetic) continue;
             const {callback} = keyframes[newFrame.transitionSourceFrameIndex];
             if (callback) callbackStore[newFrame.id] = callback;
         }
