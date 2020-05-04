@@ -125,7 +125,7 @@ export const prepare = (
     const bNorm = divide(pointCount, b);
     const bOpt = optimizeOrder(aNorm, bNorm);
     return [
-        options.rawAngles ? aNorm : fixAnglesWith(fixAnglesSelf(aNorm), bNorm),
+        options.rawAngles ? aNorm : fixAnglesWith(fixAnglesSelf(aNorm), bOpt),
         options.rawAngles ? bOpt : fixAnglesWith(fixAnglesSelf(bOpt), aNorm),
     ];
 };
