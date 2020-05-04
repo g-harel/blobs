@@ -74,15 +74,19 @@ export const renderFramesAt = (input: RenderInput): RenderOutput => {
 
     // Use and cache prepared points for current interpolation.
     let preparedStartPoints: Point[] | undefined =
-        renderCache[startKeyframe.id].preparedStartPoints;
-    let preparedEndPoints: Point[] | undefined = renderCache[endKeyframe.id].preparedEndPoints;
+        renderCache[startKeyframe.id]?.preparedStartPoints;
+    let preparedEndPoints: Point[] | undefined = renderCache[endKeyframe.id]?.preparedEndPoints;
     if (!preparedStartPoints || !preparedEndPoints) {
         [preparedStartPoints, preparedEndPoints] = prepare(
             startKeyframe.initialPoints,
             endKeyframe.initialPoints,
             {rawAngles: false, divideRatio: 1},
         );
+
+        renderCache[startKeyframe.id] = renderCache[startKeyframe.id] || {};
         renderCache[startKeyframe.id].preparedStartPoints = preparedStartPoints;
+
+        renderCache[endKeyframe.id] = renderCache[endKeyframe.id] || {};
         renderCache[endKeyframe.id].preparedEndPoints = preparedEndPoints;
     }
 
@@ -91,12 +95,15 @@ export const renderFramesAt = (input: RenderInput): RenderOutput => {
         (input.timestamp - startKeyframe.timestamp) /
         (endKeyframe.timestamp - startKeyframe.timestamp);
 
+    // Keep progress withing expected range (ex. division by 0).
+    const clampedProgress = Math.max(0, Math.min(1, progress));
+
     // Apply timing function of end frame.
-    const adjustedProgress = endKeyframe.timingFunction(progress);
+    const adjustedProgress = endKeyframe.timingFunction(clampedProgress);
 
     return {
         renderCache,
-        lastFrameId: startKeyframe.id,
+        lastFrameId: clampedProgress === 1 ? endKeyframe.id : startKeyframe.id,
         points: interpolateBetween(adjustedProgress, preparedStartPoints, preparedEndPoints),
     };
 };
@@ -115,6 +122,22 @@ export const transitionFrames = <T extends Keyframe>(
 
     // Add current state as initial frame.
     const currentState = renderFramesAt(input);
+    if (currentState.lastFrameId === null) {
+        // If there is currently no shape being rendered, use a point in the
+        // center of the next frame as the initial point.
+        const firstShape = input.shapeGenerator(input.newFrames[0]);
+        let firstShapeCenterPoint: Point = {
+            x: 0,
+            y: 0,
+            handleIn: {angle: 0, length: 0},
+            handleOut: {angle: 0, length: 0},
+        };
+        for (const point of firstShape) {
+            firstShapeCenterPoint.x += point.x / firstShape.length;
+            firstShapeCenterPoint.y += point.y / firstShape.length;
+        }
+        currentState.points = [firstShapeCenterPoint, firstShapeCenterPoint, firstShapeCenterPoint];
+    }
     newInternalFrames.push({
         id: genId(),
         initialPoints: currentState.points,

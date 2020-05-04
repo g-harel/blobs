@@ -27,6 +27,8 @@ const elasticOut = (s: number): TimingFunc => (p) => {
 };
 
 // https://www.desmos.com/calculator/fqisoq1kuw
+// TODO lower magnitude/amount of bounce.
+// TODO Rename in/out to avoid confusion (out is out from point before).
 export const timingFunctions = {
     linear,
     easeIn,
