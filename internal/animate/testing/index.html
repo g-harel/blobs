@@ -13,11 +13,19 @@
             body * {
                 border: 1px solid #eee;
             }
+
+            .buttons {
+                display: flex;
+                flex-direction: column;
+            }
         </style>
     </head>
 
     <body>
-        <button id="toggle">TOGGLE<br />DEBUG</button>
+        <div class="buttons">
+            <button id="toggle">TOGGLE<br />DEBUG</button>
+            <button id="interact">INTERACT</button>
+        </div>
         <script src="./script.ts"></script>
     </body>
 </html>

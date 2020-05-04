@@ -6,6 +6,7 @@ import {clear, drawInfo, drawClosed} from "../../render/canvas";
 import {genBlob} from "../../gen";
 import {rand} from "../../rand";
 import * as blobs2 from "../../../public/blobs";
+import * as blobs2Animate from "../../../public/animate";
 
 let animationSpeed = 2;
 let animationStart = 0.3;
@@ -23,6 +24,9 @@ const ctx = temp;
 const toggle = document.getElementById("toggle");
 if (toggle === null) throw new Error("no toggle");
 toggle.onclick = () => (debug = !debug);
+
+const interact = document.getElementById("interact") as any;
+if (toggle === null) throw new Error("no interact");
 
 const point = (x: number, y: number, ia: number, il: number, oa: number, ol: number): Point => {
     return {
@@ -255,6 +259,58 @@ const loopBetween = (percentage: number, a: Point[], b: Point[]): Point[] => {
     }
 };
 
+const animation = blobs2Animate.canvasPath();
+
+const loopAnimation = () => {
+    console.log("LOOP");
+
+    animation.transition(
+        {
+            duration: 2000,
+            blobOptions: {
+                extraPoints: 3,
+                randomness: 3,
+                seed: "blob1",
+                size: 200,
+            },
+        },
+        {
+            duration: 2000,
+            callback: loopAnimation,
+            blobOptions: {
+                extraPoints: 3,
+                randomness: 3,
+                seed: "blob2",
+                size: 200,
+            },
+        },
+    );
+};
+
+animation.transition({
+    duration: 100,
+    callback: loopAnimation,
+    blobOptions: {
+        extraPoints: 3,
+        randomness: 3,
+        seed: "start",
+        size: 200,
+    },
+});
+
+interact.onclick = () => {
+    animation.transition({
+        duration: 1000,
+        callback: loopAnimation,
+        blobOptions: {
+            extraPoints: 3,
+            randomness: 7,
+            seed: "onClick",
+            size: 200,
+        },
+    });
+};
+
 (() => {
     let percentage = animationStart;
 
@@ -276,6 +332,8 @@ const loopBetween = (percentage: number, a: Point[], b: Point[]): Point[] => {
         percentage += animationSpeed / 1000;
         percentage = mod(percentage, 1);
         if (animationSpeed > 0) requestAnimationFrame(renderFrame);
+
+        ctx.fill(animation.renderFrame());
     };
     renderFrame();
 })();
