@@ -67,7 +67,7 @@ export const renderFramesAt = (input: RenderInput): RenderOutput => {
     let startKeyframe = currentFrames[0];
     let endKeyframe = currentFrames[1];
     for (let i = 2; i < currentFrames.length; i++) {
-        if (endKeyframe.timestamp < input.timestamp) break;
+        if (endKeyframe.timestamp > input.timestamp) break;
         startKeyframe = currentFrames[i - 1];
         endKeyframe = currentFrames[i];
     }

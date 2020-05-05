@@ -262,52 +262,45 @@ const loopBetween = (percentage: number, a: Point[], b: Point[]): Point[] => {
 const animation = blobs2Animate.canvasPath();
 
 const loopAnimation = () => {
-    console.log("LOOP");
-
-    animation.transition(
-        {
-            duration: 2000,
-            blobOptions: {
-                extraPoints: 3,
-                randomness: 3,
-                seed: "blob1",
-                size: 200,
-            },
+    animation.transition({
+        duration: 2000 + 1000 * Math.random(),
+        callback: loopAnimation,
+        timingFunction: "easeInOut",
+        blobOptions: {
+            extraPoints: 3,
+            randomness: 4,
+            seed: Math.random(),
+            size: 200,
         },
-        {
-            duration: 2000,
-            callback: loopAnimation,
-            blobOptions: {
-                extraPoints: 3,
-                randomness: 3,
-                seed: "blob2",
-                size: 200,
-            },
-        },
-    );
+    });
 };
 
 animation.transition({
-    duration: 100,
+    duration: 0,
     callback: loopAnimation,
     blobOptions: {
-        extraPoints: 3,
-        randomness: 3,
-        seed: "start",
+        extraPoints: 1,
+        randomness: 0,
+        seed: 0,
         size: 200,
     },
 });
 
 interact.onclick = () => {
     animation.transition({
-        duration: 1000,
+        duration: 400,
         callback: loopAnimation,
+        timingFunction: "elasticIn0",
         blobOptions: {
             extraPoints: 3,
-            randomness: 7,
-            seed: "onClick",
-            size: 200,
+            randomness: 8,
+            seed: Math.random(),
+            size: 180,
         },
+        canvasOptions: {
+            offsetX: 10,
+            offsetY: 10,
+        }
     });
 };
 
@@ -329,11 +322,12 @@ interact.onclick = () => {
         testPrepPointsD(percentage);
         testPrepLetters(percentage);
 
+        ctx.fill(animation.renderFrame());
+
         percentage += animationSpeed / 1000;
         percentage = mod(percentage, 1);
         if (animationSpeed > 0) requestAnimationFrame(renderFrame);
 
-        ctx.fill(animation.renderFrame());
     };
     renderFrame();
 })();

@@ -20,6 +20,7 @@ const interpolateAngle = (percentage: number, a: number, b: number): number => {
 // Interpolates linearly between a and b. Can only interpolate between point lists that have the
 // same number of points. Easing effects can be applied to the percentage given to this function.
 // Percentages outside the 0-1 range are supported.
+// TODO handle length should continue animating?
 export const interpolateBetween = (percentage: number, a: Point[], b: Point[]): Point[] => {
     if (a.length !== b.length) throw new Error("must have equal number of points");
 
