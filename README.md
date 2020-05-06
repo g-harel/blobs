@@ -13,6 +13,8 @@
 
 [![](https://img.shields.io/npm/v/blobs.svg)](https://www.npmjs.com/package/blobs)
 
+<!-- TODO make sure these don't look broken on npm-rendered markdown -->
+
 ```ts
 // $ npm install blobs
 import * as blobs2 from "blobs/v2";

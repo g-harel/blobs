@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+    <head lang="en">
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+        <title>blobs</title>
+        <script src="./v2/animate/index.js"></script>
+    </head>
+    <body>
+        <style>
+            html,
+            body,
+            main {
+                height: 100%;
+                width: 100%;
+                margin: 0;
+            }
+
+            header {
+                padding-top: 2rem;
+                position: fixed;
+                top: 0;
+                text-align: center;
+                width: 100%;
+            }
+
+            a {
+                color: #aaa;
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu,
+                    Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+                font-weight: 600;
+                padding: 1rem;
+                text-decoration: none;
+                user-select: none;
+            }
+
+            main {
+                align-items: center;
+                display: flex;
+                justify-content: center;
+            }
+
+            main canvas {
+                cursor: pointer;
+            }
+        </style>
+
+        <header>
+            <a href="mailto:gabrielj.harel@gmail.com">contact</a>
+            <a href="https://github.com/g-harel/blobs">github</a>
+            <a href="https://npmjs.com/package/blobs">npm</a>
+        </header>
+
+        <main>
+            <canvas id="canvas"></canvas>
+        </main>
+
+        <script>
+            // Set blob size relative to window, but limit to 600.
+            const size = Math.min(600, window.innerWidth - 64);
+
+            // Fetch reference to canvas and resize dynamically.
+            const canvas = document.getElementById("canvas");
+            canvas.width = size;
+            canvas.height = size;
+
+            // Set blob color and set context to erase intersection of content.
+            const ctx = canvas.getContext("2d");
+            ctx.fillStyle = "#ec576b";
+            ctx.globalCompositeOperation = "xor";
+
+            // Use logo word asset to cut out from the generated blob.
+            const logoWord = new Image();
+            logoWord.src = "./assets/logo-word-white.svg";
+
+            // Create animation and draw its frames in `requestAnimationFrame` callbacks.
+            const animation = blobs2Animate.canvasPath();
+            const renderFrame = () => {
+                ctx.clearRect(0, 0, size, size);
+                ctx.drawImage(logoWord, size / 10, size / 10, (size * 4) / 5, (size * 4) / 5);
+                ctx.fill(animation.renderFrame());
+                requestAnimationFrame(renderFrame);
+            };
+            requestAnimationFrame(renderFrame);
+
+            // Generate a keyframe with overridable default values.
+            const genFrame = (overrides) => ({
+                duration: 4000,
+                timingFunction: "easeInOut",
+                callback: loopAnimation,
+                blobOptions: {
+                    extraPoints: 3,
+                    randomness: 4,
+                    seed: Math.random(),
+                    size: size,
+                },
+                ...overrides,
+            });
+
+            // Callback for every frame which starts transition to a new frame.
+            const loopAnimation = () => animation.transition(genFrame());
+
+            // Immediately show a shape.
+            animation.transition(genFrame({duration: 0}));
+
+            // Quickly animate to a new frame when canvas is clicked.
+            canvas.onclick = () => {
+                animation.transition(genFrame({duration: 400, timingFunction: "elasticIn0"}));
+            };
+        </script>
+    </body>
+</html>
