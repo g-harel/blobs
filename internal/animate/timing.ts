@@ -44,5 +44,5 @@ export const timingFunctions = {
     elasticOut3: elasticOut(0.05),
 };
 
-// Type assertion.
+// @ts-ignore: Type assertion.
 const _: Record<string, TimingFunc> = timingFunctions;

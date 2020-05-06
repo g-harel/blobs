@@ -21,6 +21,12 @@ const bundles = [
         types: "public/blobs.d.ts",
         output: "v2",
     },
+    {
+        name: "blobs2Animate",
+        entry: "public/animate.ts",
+        types: "public/animate.d.ts",
+        output: "v2/animate",
+    },
 ];
 
 export default bundles.map((bundle) => ({

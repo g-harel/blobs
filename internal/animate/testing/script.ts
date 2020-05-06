@@ -259,53 +259,93 @@ const loopBetween = (percentage: number, a: Point[], b: Point[]): Point[] => {
     }
 };
 
-const animation = blobs2Animate.canvasPath();
+const genAnimation = (speed: number): blobs2Animate.CanvasAnimation => {
+    const animation = blobs2Animate.canvasPath();
 
-const loopAnimation = () => {
+    const loopAnimation = () => {
+        animation.transition(
+            {
+                duration: speed,
+                delay: speed,
+                timingFunction: "easeInOut",
+                blobOptions: {
+                    extraPoints: 3,
+                    randomness: 4,
+                    seed: Math.random(),
+                    size: 200,
+                },
+            },
+            {
+                duration: speed,
+                timingFunction: "easeInOut",
+                blobOptions: {
+                    extraPoints: 3,
+                    randomness: 4,
+                    seed: Math.random(),
+                    size: 200,
+                },
+            },
+            {
+                duration: speed,
+                delay: speed,
+                timingFunction: "easeInOut",
+                blobOptions: {
+                    extraPoints: 3,
+                    randomness: 4,
+                    seed: Math.random(),
+                    size: 200,
+                },
+            },
+            {
+                duration: speed,
+                callback: loopAnimation,
+                timingFunction: "easeInOut",
+                blobOptions: {
+                    extraPoints: 39,
+                    randomness: 2,
+                    seed: Math.random(),
+                    size: 200,
+                },
+            },
+        );
+    };
+
     animation.transition({
-        duration: 2000 + 1000 * Math.random(),
+        duration: 0,
         callback: loopAnimation,
-        timingFunction: "easeInOut",
         blobOptions: {
-            extraPoints: 3,
-            randomness: 4,
-            seed: Math.random(),
+            extraPoints: 1,
+            randomness: 0,
+            seed: 0,
             size: 200,
         },
     });
-};
 
-animation.transition({
-    duration: 0,
-    callback: loopAnimation,
-    blobOptions: {
-        extraPoints: 1,
-        randomness: 0,
-        seed: 0,
-        size: 200,
-    },
-});
+    interact.onclick = () => {
+        animation.transition({
+            duration: 400,
+            callback: loopAnimation,
+            timingFunction: "elasticIn0",
+            blobOptions: {
+                extraPoints: 3,
+                randomness: 8,
+                seed: Math.random(),
+                size: 180,
+            },
+            canvasOptions: {
+                offsetX: 10,
+                offsetY: 10,
+            },
+        });
+    };
 
-interact.onclick = () => {
-    animation.transition({
-        duration: 400,
-        callback: loopAnimation,
-        timingFunction: "elasticIn0",
-        blobOptions: {
-            extraPoints: 3,
-            randomness: 8,
-            seed: Math.random(),
-            size: 180,
-        },
-        canvasOptions: {
-            offsetX: 10,
-            offsetY: 10,
-        }
-    });
+    return animation;
 };
 
 (() => {
     let percentage = animationStart;
+
+    const animation = genAnimation(1000);
 
     const renderFrame = () => {
         clear(ctx);
@@ -327,7 +367,6 @@ interact.onclick = () => {
         percentage += animationSpeed / 1000;
         percentage = mod(percentage, 1);
         if (animationSpeed > 0) requestAnimationFrame(renderFrame);
-
     };
     renderFrame();
 })();
