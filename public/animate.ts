@@ -1,4 +1,3 @@
-import {CanvasOptions, BlobOptions} from "./blobs";
 import {Point} from "../internal/types";
 import {renderPath2D} from "../internal/render/canvas";
 import {genFromOptions} from "../internal/gen";
@@ -7,18 +6,38 @@ import {
     InternalKeyframe,
     renderFramesAt,
     transitionFrames,
-    Keyframe,
     RenderCache,
 } from "../internal/animate/state";
 
 // TODO make sure recursive callbacks don't fill up the stack.
-interface CallbackKeyframe extends Keyframe {
-    callback?: () => void;
-}
 
-export interface CanvasKeyframe extends CallbackKeyframe {
-    blobOptions: BlobOptions;
-    canvasOptions?: CanvasOptions;
+export interface CanvasKeyframe {
+    delay?: number;
+    duration: number;
+    timingFunction?:
+        | "linear"
+        | "easeIn"
+        | "easeOut"
+        | "easeInOut"
+        | "elasticIn0"
+        | "elasticIn1"
+        | "elasticIn2"
+        | "elasticIn3"
+        | "elasticOut0"
+        | "elasticOut1"
+        | "elasticOut2"
+        | "elasticOut3";
+    callback?: () => void;
+    blobOptions: {
+        seed: number | string;
+        randomness: number;
+        extraPoints: number;
+        size: number;
+    };
+    canvasOptions?: {
+        offsetX?: number;
+        offsetY?: number;
+    };
 }
 
 export type CanvasAnimationKeyframe = CanvasKeyframe;
