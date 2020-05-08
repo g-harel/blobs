@@ -3,6 +3,7 @@ import {mapPoints} from "../internal/util";
 import {BlobOptions} from "../public/blobs";
 import {Point} from "./types";
 import {smooth} from "./util";
+import {typeCheck} from "./errors";
 
 export const genBlob = (pointCount: number, offset: () => number): Point[] => {
     const angle = (Math.PI * 2) / pointCount;
@@ -24,13 +25,6 @@ export const genBlob = (pointCount: number, offset: () => number): Point[] => {
     const smoothingStrength = ((4 / 3) * Math.tan(angle / 4)) / Math.sin(angle / 2) / 2;
 
     return smooth(points, smoothingStrength);
-};
-
-const typeCheck = (name: string, val: any, expected: string[]) => {
-    const actual = typeof val;
-    if (!expected.includes(actual)) {
-        throw `(blobs2) "${name}" should have type "${expected.join("|")}" but was "${actual}".`;
-    }
 };
 
 export const genFromOptions = (blobOptions: BlobOptions): Point[] => {

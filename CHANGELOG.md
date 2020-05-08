@@ -1,3 +1,8 @@
+# 2.1.0
+
+-   Add animation API.
+-   More type checks.
+
 # 2.0.1
 
 -   Fix typo in code example of README

@@ -2,6 +2,7 @@ import {genFromOptions} from "../internal/gen";
 import {renderPath} from "../internal/render/svg";
 import {renderPath2D} from "../internal/render/canvas";
 import {mapPoints} from "../internal/util";
+import {typeCheck} from "../internal/errors";
 
 export interface BlobOptions {
     seed: string | number;
@@ -22,6 +23,12 @@ export interface SvgOptions {
 }
 
 export const canvasPath = (blobOptions: BlobOptions, canvasOptions: CanvasOptions = {}): Path2D => {
+    typeCheck("canvasOptions", canvasOptions, ["object", "undefined"]);
+    if (canvasOptions) {
+        typeCheck("canvasOptions.offsetX", canvasOptions.offsetX, ["number", "undefined"]);
+        typeCheck("canvasOptions.offsetY", canvasOptions.offsetY, ["number", "undefined"]);
+    }
+
     return renderPath2D(
         mapPoints(genFromOptions(blobOptions), ({curr}) => {
             curr.x += canvasOptions.offsetX || 0;
@@ -32,6 +39,13 @@ export const canvasPath = (blobOptions: BlobOptions, canvasOptions: CanvasOption
 };
 
 export const svg = (blobOptions: BlobOptions, svgOptions: SvgOptions = {}): string => {
+    typeCheck("svgOptions", svgOptions, ["object", "undefined"]);
+    if (svgOptions) {
+        typeCheck("svgOptions.fill", svgOptions.fill, ["string", "undefined"]);
+        typeCheck("svgOptions.stroke", svgOptions.stroke, ["number", "undefined"]);
+        typeCheck("svgOptions.strokeWidth", svgOptions.strokeWidth, ["number", "undefined"]);
+    }
+
     const path = svgPath(blobOptions);
     const size = Math.floor(blobOptions.size);
     const fill = svgOptions.fill === undefined ? "#ec576b" : svgOptions.fill;
