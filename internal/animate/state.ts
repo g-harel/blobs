@@ -3,8 +3,6 @@ import {RenderCache, InternalKeyframe, renderFramesAt, transitionFrames, Keyfram
 import {typeCheck, error} from "../errors";
 import {timingFunctions} from "./timing";
 
-// TODO make sure recursive callbacks don't fill up the stack.
-
 interface CallbackKeyframe extends Keyframe {
     callback?: () => void;
 }

@@ -259,7 +259,7 @@ const loopBetween = (percentage: number, a: Point[], b: Point[]): Point[] => {
     }
 };
 
-const genAnimation = (speed: number): blobs2Animate.CanvasAnimation => {
+const genAnimation = (speed: number, offset: number, timing: blobs2Animate.CanvasKeyframe["timingFunction"]) => {
     const animation = blobs2Animate.canvasPath();
 
     const loopAnimation = () => {
@@ -267,44 +267,56 @@ const genAnimation = (speed: number): blobs2Animate.CanvasAnimation => {
             {
                 duration: speed,
                 delay: speed,
-                timingFunction: "easeInOut",
+                timingFunction: "ease",
                 blobOptions: {
                     extraPoints: 3,
                     randomness: 4,
                     seed: Math.random(),
                     size: 200,
                 },
+                canvasOptions: {
+                    offsetX: offset,
+                },
             },
             {
                 duration: speed,
-                timingFunction: "easeInOut",
+                timingFunction: "ease",
                 blobOptions: {
                     extraPoints: 3,
                     randomness: 4,
                     seed: Math.random(),
                     size: 200,
+                },
+                canvasOptions: {
+                    offsetX: offset,
                 },
             },
             {
                 duration: speed,
                 delay: speed,
-                timingFunction: "easeInOut",
+                timingFunction: "ease",
                 blobOptions: {
                     extraPoints: 3,
                     randomness: 4,
                     seed: Math.random(),
                     size: 200,
                 },
+                canvasOptions: {
+                    offsetX: offset,
+                },
             },
             {
                 duration: speed,
                 callback: loopAnimation,
-                timingFunction: "easeInOut",
+                timingFunction: "ease",
                 blobOptions: {
                     extraPoints: 39,
                     randomness: 2,
                     seed: Math.random(),
                     size: 200,
+                },
+                canvasOptions: {
+                    offsetX: offset,
                 },
             },
         );
@@ -319,21 +331,26 @@ const genAnimation = (speed: number): blobs2Animate.CanvasAnimation => {
             seed: 0,
             size: 200,
         },
+        canvasOptions: {
+            offsetX: offset,
+        },
     });
 
+    const oldOnclick = interact.onclick || (() => 0);
     interact.onclick = () => {
+        oldOnclick();
         animation.transition({
-            duration: 400,
+            duration: speed,
             callback: loopAnimation,
-            timingFunction: "elasticIn0",
+            timingFunction: timing,
             blobOptions: {
-                extraPoints: 3,
+                extraPoints: 30,
                 randomness: 8,
                 seed: Math.random(),
                 size: 180,
             },
             canvasOptions: {
-                offsetX: 10,
+                offsetX: 10 + offset,
                 offsetY: 10,
             },
         });
@@ -345,7 +362,12 @@ const genAnimation = (speed: number): blobs2Animate.CanvasAnimation => {
 (() => {
     let percentage = animationStart;
 
-    const animation = genAnimation(1000);
+    const animations = [
+        genAnimation(1000, 0, "elasticEnd0"),
+        genAnimation(1000, 200, "elasticEnd1"),
+        genAnimation(1000, 400, "elasticEnd2"),
+        genAnimation(1000, 600, "elasticEnd3"),
+    ];
 
     const renderFrame = () => {
         clear(ctx);
@@ -362,7 +384,9 @@ const genAnimation = (speed: number): blobs2Animate.CanvasAnimation => {
         testPrepPointsD(percentage);
         testPrepLetters(percentage);
 
-        ctx.fill(animation.renderFrame());
+        for (const animation of animations) {
+            ctx.fill(animation.renderFrame());
+        }
 
         percentage += animationSpeed / 1000;
         percentage = mod(percentage, 1);

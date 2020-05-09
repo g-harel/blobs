@@ -100,7 +100,7 @@
             // Generate a keyframe with overridable default values.
             const genFrame = (overrides) => ({
                 duration: 4000,
-                timingFunction: "easeInOut",
+                timingFunction: "ease",
                 callback: loopAnimation,
                 blobOptions: {
                     extraPoints: 3,
@@ -119,7 +119,7 @@
 
             // Quickly animate to a new frame when canvas is clicked.
             canvas.onclick = () => {
-                animation.transition(genFrame({duration: 400, timingFunction: "elasticIn0"}));
+                animation.transition(genFrame({duration: 400, timingFunction: "elasticEnd0"}));
             };
         </script>
     </body>

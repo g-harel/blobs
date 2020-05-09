@@ -10,17 +10,13 @@ export interface CanvasKeyframe {
     duration: number;
     timingFunction?:
         | "linear"
-        | "easeIn"
-        | "easeOut"
-        | "easeInOut"
-        | "elasticIn0"
-        | "elasticIn1"
-        | "elasticIn2"
-        | "elasticIn3"
-        | "elasticOut0"
-        | "elasticOut1"
-        | "elasticOut2"
-        | "elasticOut3";
+        | "easeEnd"
+        | "easeStart"
+        | "ease"
+        | "elasticEnd0"
+        | "elasticEnd1"
+        | "elasticEnd2"
+        | "elasticEnd3";
     callback?: () => void;
     blobOptions: {
         seed: number | string;
@@ -43,6 +39,7 @@ const canvasBlobGenerator = (keyframe: CanvasKeyframe): Point[] => {
 };
 
 // Only need to check properties unique to the canvas animation generator.
+// TODO test bad inputs.
 const canvasKeyframeChecker = (keyframe: CanvasKeyframe, index: number) => {
     typeCheck(`keyframe[${index}].canvasOptions`, keyframe.canvasOptions, ["object", "undefined"]);
     if (keyframe.canvasOptions) {
