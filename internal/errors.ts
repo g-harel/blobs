@@ -3,7 +3,8 @@ export const error = (message: string) => {
 };
 
 export const typeCheck = (name: string, val: any, expected: string[]) => {
-    const actual = typeof val;
+    let actual: string = typeof val;
+    if (actual === "number" && isNaN(val)) actual = "NaN";
     if (!expected.includes(actual)) {
         error(`"${name}" should have type "${expected.join("|")}" but was "${actual}".`);
     }

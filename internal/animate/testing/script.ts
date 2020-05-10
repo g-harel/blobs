@@ -259,7 +259,11 @@ const loopBetween = (percentage: number, a: Point[], b: Point[]): Point[] => {
     }
 };
 
-const genAnimation = (speed: number, offset: number, timing: blobs2Animate.CanvasKeyframe["timingFunction"]) => {
+const genAnimation = (
+    speed: number,
+    offset: number,
+    timing: blobs2Animate.CanvasKeyframe["timingFunction"],
+) => {
     const animation = blobs2Animate.canvasPath();
 
     const loopAnimation = () => {

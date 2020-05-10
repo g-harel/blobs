@@ -28,13 +28,13 @@ export const genBlob = (pointCount: number, offset: () => number): Point[] => {
 };
 
 export const genFromOptions = (blobOptions: BlobOptions): Point[] => {
-    const rgen = rand(String(blobOptions.seed));
-
     typeCheck("blobOptions", blobOptions, ["object"]);
     typeCheck("seed", blobOptions.seed, ["string", "number"]);
     typeCheck("extraPoints", blobOptions.extraPoints, ["number"]);
     typeCheck("randomness", blobOptions.randomness, ["number"]);
     typeCheck("size", blobOptions.size, ["number"]);
+
+    const rgen = rand(String(blobOptions.seed));
 
     // Scale of random movement increases as randomness approaches infinity.
     // randomness = 0   -> rangeStart = 1

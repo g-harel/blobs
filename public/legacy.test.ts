@@ -7,7 +7,7 @@ const genMinimalOptions = (): BlobOptions => ({
     color: "#fff",
 });
 
-describe("blobs", () => {
+describe("legacy", () => {
     it("should return a different result when seed is not provided", () => {
         const options = genMinimalOptions();
 

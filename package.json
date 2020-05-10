@@ -42,7 +42,8 @@
     "blob",
     "svg",
     "path",
-    "canvas"
+    "canvas",
+    "animation"
   ],
   "prettier": {
     "tabWidth": 4,

@@ -39,7 +39,6 @@ const canvasBlobGenerator = (keyframe: CanvasKeyframe): Point[] => {
 };
 
 // Only need to check properties unique to the canvas animation generator.
-// TODO test bad inputs.
 const canvasKeyframeChecker = (keyframe: CanvasKeyframe, index: number) => {
     typeCheck(`keyframe[${index}].canvasOptions`, keyframe.canvasOptions, ["object", "undefined"]);
     if (keyframe.canvasOptions) {
