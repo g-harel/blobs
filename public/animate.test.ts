@@ -21,7 +21,6 @@ describe("animate", () => {
     describe("canvasPath", () => {
         describe("transition", () => {
             describe("keyframe", () => {
-                // TODO test for errors in the nth keyframe.
                 it("should accept minimal generated keyframe", () => {
                     const animation = canvasPath();
                     const keyframe = genKeyframe();
@@ -29,145 +28,184 @@ describe("animate", () => {
                     expect(() => animation.transition(keyframe)).not.toThrow();
                 });
 
+                it("should indicate the rejected frame index", () => {
+                    const animation = canvasPath();
+                    const keyframes = [genKeyframe(), null as any, genKeyframe()];
+
+                    expect(() => animation.transition(...keyframes)).toThrow(/keyframes.*1/g);
+                });
+
                 interface TestCase {
-                    test: string;
+                    name: string;
                     edit: (keyframe: CanvasKeyframe) => void;
                     error?: RegExp;
                 }
 
                 const testCases: Array<TestCase> = [
                     {
-                        test: "should accept valid duration",
+                        name: "should accept valid duration",
                         edit: (keyframe) => (keyframe.duration = 100),
                     },
                     {
-                        test: "should accept zero duration",
+                        name: "should accept zero duration",
                         edit: (keyframe) => (keyframe.duration = 0),
                     },
                     {
-                        test: "should reject undefined duration",
+                        name: "should reject undefined duration",
                         edit: (keyframe) => delete keyframe.duration,
                         error: /duration.*number.*undefined/g,
                     },
                     {
-                        test: "should reject negative duration",
+                        name: "should reject negative duration",
                         edit: (keyframe) => (keyframe.duration = -10),
                         error: /duration.*invalid/g,
                     },
                     {
-                        test: "should reject broken duration",
+                        name: "should reject broken duration",
                         edit: (keyframe) => (keyframe.duration = NaN),
                         error: /duration.*number.*NaN/g,
                     },
                     {
-                        test: "should reject invalid duration",
+                        name: "should reject invalid duration",
                         edit: (keyframe) => (keyframe.duration = "123" as any),
                         error: /duration.*number.*string/g,
                     },
                     {
-                        test: "should accept valid delay",
+                        name: "should accept valid delay",
                         edit: (keyframe) => (keyframe.delay = 200),
                     },
                     {
-                        test: "should accept zero delay",
+                        name: "should accept zero delay",
                         edit: (keyframe) => (keyframe.delay = 0),
                     },
                     {
-                        test: "should accept undefined delay",
+                        name: "should accept undefined delay",
                         edit: (keyframe) => delete keyframe.delay,
                     },
                     {
-                        test: "should reject negative delay",
+                        name: "should reject negative delay",
                         edit: (keyframe) => (keyframe.delay = -10),
                         error: /delay.*invalid/g,
                     },
                     {
-                        test: "should reject broken delay",
+                        name: "should reject broken delay",
                         edit: (keyframe) => (keyframe.delay = NaN),
                         error: /delay.*number.*NaN/g,
                     },
                     {
-                        test: "should reject invalid delay",
+                        name: "should reject invalid delay",
                         edit: (keyframe) => (keyframe.delay = "123" as any),
                         error: /delay.*number.*string/g,
                     },
                     {
-                        test: "should accept known timingFunction",
+                        name: "should accept known timingFunction",
                         edit: (keyframe) => (keyframe.timingFunction = "ease"),
                     },
                     {
-                        test: "should accept undefined timingFunction",
+                        name: "should accept undefined timingFunction",
                         edit: (keyframe) => delete keyframe.timingFunction,
                     },
                     {
-                        test: "should reject invalid timingFunction",
+                        name: "should reject invalid timingFunction",
                         edit: (keyframe) => (keyframe.timingFunction = (() => 0) as any),
                         error: /timingFunction.*string.*function/g,
                     },
                     {
-                        test: "should reject unknown timingFunction",
+                        name: "should reject unknown timingFunction",
                         edit: (keyframe) => (keyframe.timingFunction = "unknown" as any),
                         error: /timingFunction.*not recognized.*unknown/g,
                     },
                     {
-                        test: "should accept valid callback",
+                        name: "should accept valid callback",
                         edit: (keyframe) => (keyframe.callback = () => console.log("test")),
                     },
                     {
-                        test: "should accept undefined callback",
+                        name: "should accept undefined callback",
                         edit: (keyframe) => delete keyframe.callback,
                     },
                     {
-                        test: "should reject invalid callback",
+                        name: "should reject invalid callback",
                         edit: (keyframe) => (keyframe.callback = {} as any),
                         error: /callback.*function.*object/g,
                     },
                     // TODO complete blobOptions type tests, should be the same as non-animated.
                     {
-                        test: "should reject undefined blobOptions",
+                        name: "should reject undefined blobOptions",
                         edit: (keyframe) => delete keyframe.blobOptions,
                         error: /blobOptions.*object.*undefined/g,
                     },
                     {
-                        test: "should accept empty canvasOptions",
+                        name: "should accept empty canvasOptions",
                         edit: (keyframe) => (keyframe.canvasOptions = {}),
                     },
                     {
-                        test: "should accept undefined canvasOptions",
+                        name: "should accept undefined canvasOptions",
                         edit: (keyframe) => delete keyframe.canvasOptions,
                     },
                     {
-                        test: "should accept undefined canvasOptions offsetX",
+                        name: "should reject invalid canvasOptions",
+                        edit: (keyframe) => keyframe.canvasOptions = null as any,
+                        error: /canvasOptions.*object.*null/g
+                    },
+                    {
+                        name: "should accept undefined canvasOptions offsetX",
                         edit: (keyframe) => delete keyframe.canvasOptions?.offsetX,
                     },
                     {
-                        test: "should reject broken canvasOptions offsetX",
+                        name: "should reject broken canvasOptions offsetX",
                         edit: (keyframe) => (keyframe.canvasOptions = {offsetX: NaN}),
                         error: /canvasOptions.*offsetX.*number.*NaN/g,
                     },
                     {
-                        test: "should accept undefined canvasOptions offsetY",
+                        name: "should accept undefined canvasOptions offsetY",
                         edit: (keyframe) => delete keyframe.canvasOptions?.offsetY,
                     },
                     {
-                        test: "should reject broken canvasOptions offsetY",
+                        name: "should reject broken canvasOptions offsetY",
                         edit: (keyframe) => (keyframe.canvasOptions = {offsetY: NaN}),
                         error: /canvasOptions.*offsetY.*number.*NaN/g,
                     },
                 ];
 
-                for (const testCase of testCases) {
-                    it(testCase.test, () => {
-                        const animation = canvasPath();
-                        const keyframe = genKeyframe();
-                        testCase.edit(keyframe);
-                        if (testCase.error) {
-                            expect(() => animation.transition(keyframe)).toThrow(testCase.error);
-                        } else {
-                            expect(() => animation.transition(keyframe)).not.toThrow();
-                        }
-                    });
-                }
+                // Run all test cases with a configurable amount of keyframes
+                // and index of the keyframe being edited for the tests.
+                const runSuite = (keyframeCount: number, editIndex: number) => {
+                    for (const testCase of testCases) {
+                        it(testCase.name, () => {
+                            // Create blank animation.
+                            const animation = canvasPath();
+
+                            // Create keyframes to call transition with.
+                            const keyframes: CanvasKeyframe[] = [];
+                            for (let i = 0; i < keyframeCount; i++) {
+                                keyframes.push(genKeyframe());
+                            }
+
+                            // Modify selected keyframe.
+                            testCase.edit(keyframes[editIndex]);
+
+                            if (testCase.error) {
+                                // Copy regexp because they are stateful.
+                                const pattern = new RegExp(testCase.error);
+                                expect(() => animation.transition(...keyframes)).toThrow(pattern);
+                            } else {
+                                expect(() => animation.transition(...keyframes)).not.toThrow();
+                            }
+                        });
+                    }
+                };
+
+                // Run all cases when given a single test frame and asserting on it.
+                describe("first", () => runSuite(1, 0));
+
+                // Run all cases when given more than one frame, asserting on last one.
+                const lastLength = 2 + Math.floor(4 * Math.random());
+                describe("last", () => runSuite(lastLength, lastLength - 1));
+
+                // Run all cases when given more than one frame, asserting on a random one.
+                const nthLength = 2 + Math.floor(16 * Math.random());
+                const nthIndex = Math.floor(nthLength * Math.random());
+                describe("nth", () => runSuite(nthLength, nthIndex));
             });
         });
     });

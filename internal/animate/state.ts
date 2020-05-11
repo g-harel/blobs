@@ -42,18 +42,18 @@ export const statefulAnimationGenerator = <K extends CallbackKeyframe, T>(
     const transition = (...keyframes: K[]) => {
         // Make sure frame info is valid.
         for (let i = 0; i < keyframes.length; i++) {
-            typeCheck(`keyframe[${i}]`, keyframes[i], ["object"]);
+            typeCheck(`keyframes[${i}]`, keyframes[i], ["object"]);
             const {delay, duration, timingFunction, callback} = keyframes[i];
-            typeCheck(`keyframe[${i}].delay`, delay, ["number", "undefined"]);
-            if (delay && delay < 0) error(`keyframe[${i}].delay is invalid "${delay}".`);
-            typeCheck(`keyframe[${i}].duration`, duration, ["number"]);
+            typeCheck(`keyframes[${i}].delay`, delay, ["number", "undefined"]);
+            if (delay && delay < 0) error(`keyframes[${i}].delay is invalid "${delay}".`);
+            typeCheck(`keyframes[${i}].duration`, duration, ["number"]);
             if (duration && duration < 0)
-                error(`keyframe[${i}].duration is invalid "${duration}".`);
-            typeCheck(`keyframe[${i}].timingFunction`, timingFunction, ["string", "undefined"]);
+                error(`keyframes[${i}].duration is invalid "${duration}".`);
+            typeCheck(`keyframes[${i}].timingFunction`, timingFunction, ["string", "undefined"]);
             if (timingFunctions[timingFunction || "linear"] === undefined) {
-                error(`"keyframe[${i}].timingFunction" is not recognized "${timingFunction}".`);
+                error(`"keyframes[${i}].timingFunction" is not recognized "${timingFunction}".`);
             }
-            typeCheck(`keyframe[${i}].callback`, callback, ["function", "undefined"]);
+            typeCheck(`keyframes[${i}].callback`, callback, ["function", "undefined"]);
             checker(keyframes[i], i);
         }
 

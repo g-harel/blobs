@@ -40,11 +40,11 @@ const canvasBlobGenerator = (keyframe: CanvasKeyframe): Point[] => {
 
 // Only need to check properties unique to the canvas animation generator.
 const canvasKeyframeChecker = (keyframe: CanvasKeyframe, index: number) => {
-    typeCheck(`keyframe[${index}].canvasOptions`, keyframe.canvasOptions, ["object", "undefined"]);
+    typeCheck(`keyframes[${index}].canvasOptions`, keyframe.canvasOptions, ["object", "undefined"]);
     if (keyframe.canvasOptions) {
         const {offsetX, offsetY} = keyframe.canvasOptions;
-        typeCheck(`keyframe[${index}].canvasOptions.offsetX`, offsetX, ["number", "undefined"]);
-        typeCheck(`keyframe[${index}].canvasOptions.offsetY`, offsetY, ["number", "undefined"]);
+        typeCheck(`keyframes[${index}].canvasOptions.offsetX`, offsetX, ["number", "undefined"]);
+        typeCheck(`keyframes[${index}].canvasOptions.offsetY`, offsetY, ["number", "undefined"]);
     }
 };
 

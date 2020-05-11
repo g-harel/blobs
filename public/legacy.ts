@@ -52,7 +52,7 @@ blobs.editable = (options: BlobOptions): XmlElement => {
     }
 
     // Random number generator.
-    const rgen = rand(options.seed || String(Date.now()));
+    const rgen = rand(options.seed || String(Math.random()));
 
     if (!options.size) {
         throw new Error("no size specified");
