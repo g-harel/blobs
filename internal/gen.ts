@@ -3,7 +3,6 @@ import {mapPoints} from "../internal/util";
 import {BlobOptions} from "../public/blobs";
 import {Point} from "./types";
 import {smooth} from "./util";
-import {typeCheck} from "./errors";
 
 export const genBlob = (pointCount: number, offset: () => number): Point[] => {
     const angle = (Math.PI * 2) / pointCount;
@@ -28,12 +27,6 @@ export const genBlob = (pointCount: number, offset: () => number): Point[] => {
 };
 
 export const genFromOptions = (blobOptions: BlobOptions): Point[] => {
-    typeCheck("blobOptions", blobOptions, ["object"]);
-    typeCheck("seed", blobOptions.seed, ["string", "number"]);
-    typeCheck("extraPoints", blobOptions.extraPoints, ["number"]);
-    typeCheck("randomness", blobOptions.randomness, ["number"]);
-    typeCheck("size", blobOptions.size, ["number"]);
-
     const rgen = rand(String(blobOptions.seed));
 
     // Scale of random movement increases as randomness approaches infinity.
@@ -44,14 +37,14 @@ export const genFromOptions = (blobOptions: BlobOptions): Point[] => {
     // randomness = 20  -> rangeStart = 0.3333
     // randomness = 50  -> rangeStart = 0.1667
     // randomness = 100 -> rangeStart = 0.0909
-    const rangeStart = 1 / (1 + Math.abs(blobOptions.randomness) / 10);
+    const rangeStart = 1 / (1 + blobOptions.randomness / 10);
 
     const points = genBlob(
-        3 + Math.abs(blobOptions.extraPoints),
+        3 + blobOptions.extraPoints,
         () => (rangeStart + rgen() * (1 - rangeStart)) / 2,
     );
 
-    const size = Math.abs(blobOptions.size);
+    const size = blobOptions.size;
     return mapPoints(points, ({curr}) => {
         curr.x *= size;
         curr.y *= size;

@@ -1,7 +1,5 @@
 import {Point} from "../types";
 import {RenderCache, InternalKeyframe, renderFramesAt, transitionFrames, Keyframe} from "./frames";
-import {typeCheck, error} from "../errors";
-import {timingFunctions} from "./timing";
 
 interface CallbackKeyframe extends Keyframe {
     callback?: () => void;
@@ -42,18 +40,6 @@ export const statefulAnimationGenerator = <K extends CallbackKeyframe, T>(
     const transition = (...keyframes: K[]) => {
         // Make sure frame info is valid.
         for (let i = 0; i < keyframes.length; i++) {
-            typeCheck(`keyframes[${i}]`, keyframes[i], ["object"]);
-            const {delay, duration, timingFunction, callback} = keyframes[i];
-            typeCheck(`keyframes[${i}].delay`, delay, ["number", "undefined"]);
-            if (delay && delay < 0) error(`keyframes[${i}].delay is invalid "${delay}".`);
-            typeCheck(`keyframes[${i}].duration`, duration, ["number"]);
-            if (duration && duration < 0)
-                error(`keyframes[${i}].duration is invalid "${duration}".`);
-            typeCheck(`keyframes[${i}].timingFunction`, timingFunction, ["string", "undefined"]);
-            if (timingFunctions[timingFunction || "linear"] === undefined) {
-                error(`"keyframes[${i}].timingFunction" is not recognized "${timingFunction}".`);
-            }
-            typeCheck(`keyframes[${i}].callback`, callback, ["function", "undefined"]);
             checker(keyframes[i], i);
         }
 

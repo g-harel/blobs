@@ -1,4 +1,4 @@
-export const error = (message: string) => {
+export const err = (message: string) => {
     throw `(blobs2) ${message}`;
 };
 
@@ -7,6 +7,6 @@ export const typeCheck = (name: string, val: any, expected: string[]) => {
     if (actual === "number" && isNaN(val)) actual = "NaN";
     if (actual === "object" && val === null) actual = "null";
     if (!expected.includes(actual)) {
-        error(`"${name}" should have type "${expected.join("|")}" but was "${actual}".`);
+        err(`"${name}" should have type "${expected.join("|")}" but was "${actual}".`);
     }
 };
