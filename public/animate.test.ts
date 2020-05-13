@@ -21,7 +21,7 @@ describe("animate", () => {
     describe("canvasPath", () => {
         describe("transition", () => {
             describe("keyframe", () => {
-                it("should accept minimal generated keyframe", () => {
+                it("should accept generated keyframe", () => {
                     const animation = canvasPath();
                     const keyframe = genKeyframe();
 
@@ -32,7 +32,7 @@ describe("animate", () => {
                     const animation = canvasPath();
                     const keyframes = [genKeyframe(), null as any, genKeyframe()];
 
-                    expect(() => animation.transition(...keyframes)).toThrow(/keyframes.*1/g);
+                    expect(() => animation.transition(...keyframes)).toThrow(/keyframe.*1/g);
                 });
 
                 interface TestCase {
