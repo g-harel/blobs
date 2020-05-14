@@ -42,3 +42,7 @@ export const checkCanvasOptions = (canvasOptions: any) => {
         typeCheck(`canvasOptions.offsetY`, offsetY, ["number", "undefined"]);
     }
 };
+
+export const checkSvgOptions = (svgOptions: any) => {
+    typeCheck(`svgOptions`, svgOptions, ["object", "undefined"]);
+};
