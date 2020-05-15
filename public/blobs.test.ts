@@ -148,11 +148,77 @@ describe("blobs", () => {
         describe("blobOptions", () => {
             testBlobOptions((blobOptions) => canvasPath(blobOptions, genCanvasOptions()));
         });
+
+        describe("canvasOptions", () => {
+            it("should accept generated canvasOptions", () => {
+                expect(() => canvasPath(genBlobOptions(), genCanvasOptions())).not.toThrow();
+            });
+
+            it("should accept undefined canvasOptions", () => {
+                expect(() => canvasPath(genBlobOptions(), undefined as any)).not.toThrow();
+            });
+
+            it("should reject invalid canvasOptions", () => {
+                expect(() => canvasPath(genBlobOptions(), null as any)).toThrow(
+                    /canvasOptions.*object.*null/g,
+                );
+            });
+
+            runSuite<CanvasOptions>({
+                functionBeingTested: (canvasOptions) => canvasPath(genBlobOptions(), canvasOptions),
+                optionsGenerator: genCanvasOptions,
+            })([
+                // offsetX
+                {
+                    name: "should accept valid canvasOptions offsetX",
+                    edit: (canvasOptions) => (canvasOptions.offsetX = 100),
+                },
+                {
+                    name: "should accept undefined canvasOptions offsetX",
+                    edit: (canvasOptions) => delete canvasOptions?.offsetX,
+                },
+                {
+                    name: "should reject broken canvasOptions offsetX",
+                    edit: (canvasOptions) => (canvasOptions.offsetX = NaN),
+                    error: /canvasOptions.*offsetX.*number.*NaN/g,
+                },
+                // offsetY
+                {
+                    name: "should accept valid canvasOptions offsetY",
+                    edit: (canvasOptions) => (canvasOptions.offsetY = 222),
+                },
+                {
+                    name: "should accept undefined canvasOptions offsetY",
+                    edit: (canvasOptions) => delete canvasOptions?.offsetY,
+                },
+                {
+                    name: "should reject broken canvasOptions offsetY",
+                    edit: (canvasOptions) => (canvasOptions.offsetY = NaN),
+                    error: /canvasOptions.*offsetY.*number.*NaN/g,
+                },
+            ]);
+        });
     });
 
     describe("svg", () => {
         describe("blobOptions", () => {
             testBlobOptions((blobOptions) => svg(blobOptions, genSvgOptions()));
+        });
+
+        describe("svgOptions", () => {
+            it("should accept generated svgOptions", () => {
+                expect(() => svg(genBlobOptions(), genSvgOptions())).not.toThrow();
+            });
+
+            it("should accept undefined svgOptions", () => {
+                expect(() => svg(genBlobOptions(), undefined as any)).not.toThrow();
+            });
+
+            it("should reject invalid svgOptions", () => {
+                expect(() => svg(genBlobOptions(), null as any)).toThrow(
+                    /svgOptions.*object.*null/g,
+                );
+            });
         });
     });
 
