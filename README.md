@@ -3,12 +3,12 @@
 </p>
 
 <p align="center">
-    <a href="https://www.npmjs.com/package/blobs">
-        <img src="https://img.shields.io/npm/v/blobs.svg">
-    </a>
-    <a href="https://github.com/g-harel/blobs/actions?query=workflow%3Aon-push">
-        <img src="https://img.shields.io/github/workflow/status/g-harel/blobs/on-push">
-    </a>
+    <a href="https://www.npmjs.com/package/blobs"><!--
+     --><img src="https://img.shields.io/npm/v/blobs.svg"><!--
+ --></a>
+    <a href="https://github.com/g-harel/blobs/actions?query=workflow%3Aon-push"><!--
+     --><img src="https://img.shields.io/github/workflow/status/g-harel/blobs/on-push"><!--
+ --></a>
 </p>
 
 <p align="center">
@@ -19,8 +19,11 @@
 
 ## Install
 
+```bash
+$ npm install blobs
+```
+
 ```ts
-// $ npm install blobs
 import * as blobs2 from "blobs/v2";
 ```
 

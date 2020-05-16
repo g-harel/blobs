@@ -45,4 +45,10 @@ export const checkCanvasOptions = (canvasOptions: any) => {
 
 export const checkSvgOptions = (svgOptions: any) => {
     typeCheck(`svgOptions`, svgOptions, ["object", "undefined"]);
+    if (svgOptions) {
+        const {fill, stroke, strokeWidth} = svgOptions;
+        typeCheck(`svgOptions.fill`, fill, ["string", "undefined"]);
+        typeCheck(`svgOptions.stroke`, stroke, ["string", "undefined"]);
+        typeCheck(`svgOptions.strokeWidth`, strokeWidth, ["number", "undefined"]);
+    }
 };

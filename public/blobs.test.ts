@@ -219,6 +219,54 @@ describe("blobs", () => {
                     /svgOptions.*object.*null/g,
                 );
             });
+
+            runSuite<SvgOptions>({
+                functionBeingTested: (svgOptions) => svg(genBlobOptions(), svgOptions),
+                optionsGenerator: genSvgOptions,
+            })([
+                // fill
+                {
+                    name: "should accept valid svgOptions fill",
+                    edit: (svgOptions) => (svgOptions.fill = "red"),
+                },
+                {
+                    name: "should accept undefined svgOptions fill",
+                    edit: (svgOptions) => delete svgOptions?.fill,
+                },
+                {
+                    name: "should reject broken svgOptions fill",
+                    edit: (svgOptions) => (svgOptions.fill = null as any),
+                    error: /svgOptions.*fill.*string.*null/g,
+                },
+                // stroke
+                {
+                    name: "should accept valid svgOptions stroke",
+                    edit: (svgOptions) => (svgOptions.stroke = "red"),
+                },
+                {
+                    name: "should accept undefined svgOptions stroke",
+                    edit: (svgOptions) => delete svgOptions?.stroke,
+                },
+                {
+                    name: "should reject broken svgOptions stroke",
+                    edit: (svgOptions) => (svgOptions.stroke = null as any),
+                    error: /svgOptions.*stroke.*string.*null/g,
+                },
+                // strokeWidth
+                {
+                    name: "should accept valid svgOptions strokeWidth",
+                    edit: (svgOptions) => (svgOptions.strokeWidth = 222),
+                },
+                {
+                    name: "should accept undefined svgOptions strokeWidth",
+                    edit: (svgOptions) => delete svgOptions?.strokeWidth,
+                },
+                {
+                    name: "should reject broken svgOptions strokeWidth",
+                    edit: (svgOptions) => (svgOptions.strokeWidth = NaN),
+                    error: /svgOptions.*strokeWidth.*number.*NaN/g,
+                },
+            ]);
         });
     });
 
