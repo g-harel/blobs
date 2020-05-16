@@ -110,8 +110,3 @@ export const svgPath: (blobOptions: BlobOptions) => string;
 ## License
 
 [MIT](./LICENSE)
-
-<p align="center">
-    <br><br>
-    <img width="100" src="./assets/logo-grey.svg?sanitize=true" />
-</p>
