@@ -2,32 +2,35 @@
     <a href="https://github.com/g-harel/blobs/blob/master/README.legacy.md"><b>Legacy documentation</b></a>
 </p>
 
-<br>
+<p align="center">
+    <a href="https://www.npmjs.com/package/blobs">
+        <img src="https://img.shields.io/npm/v/blobs.svg">
+    </a>
+    <a href="https://github.com/g-harel/blobs/actions?query=workflow%3Aon-push">
+        <img src="https://img.shields.io/github/workflow/status/g-harel/blobs/on-push">
+    </a>
+</p>
 
-<a href="https://blobs.dev">
-    <img align="left" width="360" height="300" src="./assets/logo-color.svg?sanitize=true">
-</a>
+<p align="center">
+    <a href="https://blobs.dev">
+        <img src="./assets/logo.svg?sanitize=true">
+    </a>
+</p>
 
-<br>
-<br>
-
-[![](https://img.shields.io/npm/v/blobs.svg)](https://www.npmjs.com/package/blobs)
-
-<!-- TODO make sure these don't look broken on npm-rendered markdown -->
+## Install
 
 ```ts
 // $ npm install blobs
 import * as blobs2 from "blobs/v2";
 ```
 
+<p align="center">
+    OR
+</p>
+
 ```html
 <script src="https://unpkg.com/blobs/v2"></script>
 ```
-
-<br>
-<br>
-<br>
-<br>
 
 ## SVG Path
 
