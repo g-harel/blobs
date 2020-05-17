@@ -100,7 +100,7 @@ const animation = blobs2Animate.canvasPath();
 
 // Set up "requestAnimationFrame" rendering loop.
 const renderAnimation = () => {
-    ctx.clearRect(0, 0, size, size);
+    ctx.clearRect(0, 0, width, height);
     ctx.fill(animation.renderFrame());
     requestAnimationFrame(renderAnimation);
 };
