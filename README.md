@@ -27,12 +27,20 @@ $ npm install blobs
 import * as blobs2 from "blobs/v2";
 ```
 
+```ts
+import * as blobs2Animate from "blobs/v2/animate";
+```
+
 <p align="center">
     OR
 </p>
 
 ```html
 <script src="https://unpkg.com/blobs/v2"></script>
+```
+
+```html
+<script src="https://unpkg.com/blobs/v2/animate"></script>
 ```
 
 ## SVG Path
@@ -84,7 +92,41 @@ const path = blobs2.canvasPath(
 ctx.stroke(path);
 ```
 
+## Canvas Animation
+
+```js
+const ctx = /* ... */;
+const animation = blobs2Animate.canvasPath();
+
+// Set up "requestAnimationFrame" rendering loop.
+const renderAnimation = () => {
+    ctx.clearRect(0, 0, size, size);
+    ctx.fill(animation.renderFrame());
+    requestAnimationFrame(renderAnimation);
+};
+requestAnimationFrame(renderAnimation);
+
+// Initial frame.
+animation.transition({
+    duration: 0, // Render immediately.
+    callback: loopAnimation,
+    blobOptions: {...},
+});
+
+// Loop between random blobs every 4s.
+const loopAnimation = () => {
+    animation.transition({
+        duration: 4000,
+        timingFunction: "ease",
+        callback: loopAnimation,
+        blobOptions: {...},
+    });
+};
+```
+
 ## Complete API
+
+### `"blobs/v2"`
 
 ```ts
 export interface BlobOptions {
@@ -111,6 +153,52 @@ export interface SvgOptions {
 export const canvasPath: (blobOptions: BlobOptions, canvasOptions?: CanvasOptions) => Path2D;
 export const svg: (blobOptions: BlobOptions, svgOptions?: SvgOptions) => string;
 export const svgPath: (blobOptions: BlobOptions) => string;
+```
+
+### `"blobs/v2/animate"`
+
+```ts
+export interface CanvasKeyframe {
+    // Duration of the keyframe animation in milliseconds.
+    duration: number;
+    // Delay before animation begins in milliseconds.
+    // Default: 0.
+    delay?: number;
+    // Controls the speed of the animation over time.
+    // Default: "linear".
+    timingFunction?:
+        | "linear"
+        | "easeEnd"
+        | "easeStart"
+        | "ease"
+        | "elasticEnd0"
+        | "elasticEnd1"
+        | "elasticEnd2"
+        | "elasticEnd3";
+    // Called after keyframe end-state is reached or passed.
+    // Called exactly once when the keyframe end-state is rendered.
+    // Not called if the keyframe is preempted by a new transition.
+    callback?: () => void;
+    // Standard options, refer to "blobs/v2" documentation.
+    blobOptions: {
+        seed: number | string;
+        randomness: number;
+        extraPoints: number;
+        size: number;
+    };
+    // Standard options, refer to "blobs/v2" documentation.
+    canvasOptions?: {
+        offsetX?: number;
+        offsetY?: number;
+    };
+}
+export const canvasPath: () => {
+    // Renders the current state of the animation.
+    renderFrame: () => Path2D;
+    // Immediately begin animating through the given keyframes.
+    // Non-rendered keyframes from previous transitions are cancelled.
+    transition: (...keyframes: CanvasKeyframe[]) => void;
+};
 ```
 
 ## License
