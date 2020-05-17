@@ -1,7 +1,11 @@
 # 2.1.0
 
--   Add animation API.
--   More type checks.
+-   Improved type checks on user-provided data
+-   Added `"blobs/v2/animate"`
+    -   Animate between arbitrary blob keyframes
+    -   Separate import to keep main bundle small
+    -   New demo website with animated blob transitions
+    -   Supports only canvas rendering
 
 # 2.0.1
 
