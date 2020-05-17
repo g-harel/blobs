@@ -5,6 +5,11 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
         <title>blobs</title>
         <script src="https://unpkg.com/blobs/v2"></script>
+        <meta property="og:url" content="https://blobs.dev" />
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="blobs" />
+        <meta property="og:description" content="Random blob generator" />
+        <meta property="og:image" content="https://blobs.dev/assets/logo.png" />
     </head>
     <body>
         <style>
@@ -66,18 +71,12 @@
                 if (!mobileElem) return;
                 console.log(window.innerWidth);
 
-                mobileElem.innerHTML = blobs2.svg(
-                    {
-                        seed: Math.random(),
-                        extraPoints: 4,
-                        randomness: 6,
-                        size: Math.min(600, window.innerWidth - 100),
-                    },
-                    {
-                        stroke: "black",
-                        strokeWidth: -10,
-                    },
-                );
+                mobileElem.innerHTML = blobs2.svg({
+                    seed: Math.random(),
+                    extraPoints: 4,
+                    randomness: 6,
+                    size: Math.min(600, window.innerWidth - 100),
+                });
             }
 
             refresh();
