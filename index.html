@@ -4,7 +4,7 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
         <title>blobs</title>
-        <script src="https://unpkg.com/blobs@2.1.0-beta.1/v2/animate/index.js"></script>
+        <script src="https://unpkg.com/blobs/v2/animate/index.js"></script>
         <meta property="og:url" content="https://blobs.dev" />
         <meta property="og:type" content="website" />
         <meta property="og:title" content="blobs" />
@@ -44,6 +44,14 @@
                 align-items: center;
                 display: flex;
                 justify-content: center;
+
+                -webkit-tap-highlight-color: transparent;
+                -webkit-touch-callout: none;
+                -webkit-user-select: none;
+                -khtml-user-select: none;
+                -moz-user-select: none;
+                -ms-user-select: none;
+                user-select: none;
             }
 
             main canvas {
@@ -53,9 +61,9 @@
 
         <header>
             <a
-                href="mailto:gabrielj.harel@gmail.com"
+                href="https://github.com/g-harel/blobs"
                 style="transform: rotate(1deg) translateY(3px);"
-                >CONTACT</a
+                >GITHUB</a
             >
             <a
                 href="https://npmjs.com/package/blobs"
@@ -63,9 +71,9 @@
                 >NPM</a
             >
             <a
-                href="https://github.com/g-harel/blobs"
+                href="mailto:gabrielj.harel@gmail.com"
                 style="transform: rotate(4deg) translateY(1px);"
-                >GITHUB</a
+                >CONTACT</a
             >
         </header>
 
@@ -74,13 +82,24 @@
         </main>
 
         <script>
+            // Fetch reference to canvas.
+            const canvas = document.getElementById("canvas");
+
             // Set blob size relative to window, but limit to 600.
             const size = Math.min(600, window.innerWidth - 64);
+            canvas.style.width = `${size}px`;
+            canvas.style.height = `${size}px`;
 
-            // Fetch reference to canvas and resize dynamically.
-            const canvas = document.getElementById("canvas");
-            canvas.width = size;
-            canvas.height = size;
+            // Scale resolution to take into account device pixel ratio.
+            const resolution = size * (window.devicePixelRatio || 1);
+            canvas.width = resolution;
+            canvas.height = resolution;
+
+            // Compute logo size and position.
+            const logoWidth = resolution * 0.8;
+            const logoHeight = logoWidth * 0.4;
+            const logoOffsetX = (resolution - logoWidth)/2;
+            const logoOffsetY = (resolution - logoHeight)/2;
 
             // Set blob color and set context to erase intersection of content.
             const ctx = canvas.getContext("2d");
@@ -94,8 +113,8 @@
             // Create animation and draw its frames in `requestAnimationFrame` callbacks.
             const animation = blobs2Animate.canvasPath();
             const renderFrame = () => {
-                ctx.clearRect(0, 0, size, size);
-                ctx.drawImage(logoWord, size / 10, size / 10, (size * 4) / 5, (size * 4) / 5);
+                ctx.clearRect(0, 0, resolution, resolution);
+                ctx.drawImage(logoWord, logoOffsetX, logoOffsetY, logoWidth, logoHeight);
                 ctx.fill(animation.renderFrame());
                 requestAnimationFrame(renderFrame);
             };
@@ -110,7 +129,7 @@
                     extraPoints: 3,
                     randomness: 4,
                     seed: Math.random(),
-                    size: size,
+                    size: resolution,
                 },
                 ...overrides,
             });
