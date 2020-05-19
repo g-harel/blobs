@@ -106,14 +106,7 @@ const renderAnimation = () => {
 };
 requestAnimationFrame(renderAnimation);
 
-// Initial frame.
-animation.transition({
-    duration: 0, // Render immediately.
-    callback: loopAnimation,
-    blobOptions: {...},
-});
-
-// Loop between random blobs every 4s.
+// Keyframe loop.
 const loopAnimation = () => {
     animation.transition({
         duration: 4000,
@@ -122,6 +115,13 @@ const loopAnimation = () => {
         blobOptions: {...},
     });
 };
+
+// Initial frame.
+animation.transition({
+    duration: 0, // Render immediately.
+    callback: loopAnimation,
+    blobOptions: {...},
+});
 ```
 
 ## Complete API
