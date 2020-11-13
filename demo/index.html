@@ -1,0 +1,65 @@
+<html>
+    <head>
+        <style>
+            body {
+                margin: 0;
+            }
+
+            .slides {
+                align-items: center;
+                display: flex;
+                flex-direction: column;
+                margin-top: 10vh;
+            }
+
+            .slides .slide {
+                background-color: #e4e4e4;
+                width: 60%;
+            }
+
+            .slides .slide:nth-child(2n) {
+                background-color: #f4f4f4;
+            }
+
+            /* Preserve slide aspect ratio. */
+            .slides .slide::before {
+                content: "";
+                width: 1px;
+                margin-left: -1px;
+                float: left;
+                height: 0;
+                padding-top: 60%;
+            }
+            .slides .slide::after { /* to clear float */
+                content: "";
+                display: table;
+                clear: both;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="slides">
+            <div class="slide"></div>
+            <div class="slide"></div>
+            <div class="slide"></div>
+            <div class="slide"></div>
+            <div class="slide"></div>
+        </div>
+        <script src="./script.ts"></script>
+    </body>
+</html>
+
+<!--
+
+slides
+    raster vs pixel
+    bezier curves
+        demo
+        how to drawn
+    shape smoothing
+        handle angle
+        handle length
+    shape morphing
+        path splitting
+
+ -->

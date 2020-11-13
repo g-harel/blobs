@@ -13,6 +13,7 @@
     "clean": "trash '**/*.js' '**/*.js.map' '**/*.d.ts' '!**/node_modules/**/*' '!rollup.config.js'",
     "fmt": "prettier --list-different --write --ignore-path .gitignore '**/*.{js,ts,md,html}'",
     "anim": "parcel internal/animate/testing/index.html --open",
+    "demo": "parcel demo/index.html --open",
     "test": "jest"
   },
   "devDependencies": {
