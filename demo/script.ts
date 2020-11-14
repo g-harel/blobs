@@ -1,12 +1,32 @@
-import {newSlide} from "./slides";
+import {newSlide, SlidePainter} from "./slides";
 
-for (let i = 0; i < 6; i++) {
-    const {canvas, ctx} = newSlide();
-    if (i % 2 == 0) {
-        ctx.fillStyle = "#e4e4e4";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-    } else {
-        ctx.fillStyle = "#f4f4f4";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-    }
-}
+// slides
+//     raster vs pixel
+//     bezier curves
+//         demo
+//         how to drawn
+//     shape smoothing
+//         handle angle
+//         handle length
+//     shape morphing
+//         path splitting
+
+const gridPainter = (slices: number, a: string, b: string): SlidePainter => {
+    return (ctx, size) => {
+        const s = size / slices;
+        for (let i = 0; i < slices; i++) {
+            for (let j = 0; j < slices; j++) {
+                if ((i + j) % 2 == 0) {
+                    ctx.fillStyle = a;
+                } else {
+                    ctx.fillStyle = b;
+                }
+                ctx.fillRect(i * s, j * s, (i + 1) * s, (j + 1) * s);
+            }
+        }
+    };
+};
+
+newSlide(gridPainter(8, "red", "white"));
+newSlide(gridPainter(80, "blue", "white"));
+newSlide(gridPainter(16, "grey", "white"));
