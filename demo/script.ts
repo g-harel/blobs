@@ -27,6 +27,33 @@ const gridPainter = (slices: number, a: string, b: string): SlidePainter => {
     };
 };
 
+newSlide((ctx, size) => {
+    // Draw pixelated circle.
+    const posX = size * 0.05;
+    const posY = size * 0.5;
+    const shapeSize = size * 0.4;
+    const cx = posX + shapeSize / 2;
+    const cy = posY + shapeSize / 2;
+    const quadrant = [0, 1, 2, 3, 4, 5, 6, 7, 7, 8, 8, 9, 9, 9];
+    const gridCount = 2 * quadrant.length;
+    const pixels = shapeSize / gridCount;
+    for (let i = 0; i < quadrant.length; i++) {
+        const gridX = quadrant[i];
+        const gridY = quadrant[quadrant.length - 1 - i];
+        ctx.fillRect(cx + gridX * pixels, cy + gridY * pixels, pixels + 1, pixels + 1);
+        ctx.fillRect(cx - (gridX + 1) * pixels, cy + gridY * pixels, pixels + 1, pixels + 1);
+        ctx.fillRect(cx + gridX * pixels, cy - (gridY + 1) * pixels, pixels + 1, pixels + 1);
+        ctx.fillRect(cx - (gridX + 1) * pixels, cy - (gridY + 1) * pixels, pixels + 1, pixels + 1);
+    }
+
+    // Draw smooth circle.
+    ctx.beginPath();
+    ctx.arc(size * 0.7, posY + shapeSize / 2, shapeSize / 3, 0, 2 * Math.PI);
+    ctx.lineWidth = pixels;
+    ctx.strokeStyle = "black";
+    ctx.stroke();
+});
+
 newSlide(gridPainter(8, "red", "white"));
 newSlide(gridPainter(80, "blue", "white"));
 newSlide(gridPainter(16, "grey", "white"));
