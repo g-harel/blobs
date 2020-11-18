@@ -27,6 +27,35 @@ const gridPainter = (slices: number, a: string, b: string): SlidePainter => {
     };
 };
 
+const paintText = (ctx: CanvasRenderingContext2D, size: number, text: string, angle: number) => {
+    const fontSize = size * 0.04;
+    const lineHeight = fontSize * 1.3;
+    ctx.fillStyle = "black";
+    ctx.font = `${fontSize}px -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen,Ubuntu,Cantarell,Open Sans,Helvetica Neue,sans-serif`;
+
+    const lines: string[] = [];
+    const lineWidth = size * 0.8;
+    const words = text.split(" ");
+    let currentLine = "";
+    while (words.length > 0) {
+        const {width} = ctx.measureText(currentLine + " " + words[0]);
+        if (width < lineWidth) {
+            currentLine += words[0] + " ";
+        } else {
+            lines.push(currentLine);
+            currentLine = words[0];
+        }
+        words.shift();
+    }
+
+    const startY = size * 0.1;
+    const startX = size * 0.15;
+    ctx.rotate(angle);
+    for (let i = 0; i < lines.length; i++) {
+        ctx.fillText(lines[i], startX, startY + lineHeight * i);
+    }
+};
+
 newSlide((ctx, size) => {
     // Draw pixelated circle.
     const posX = size * 0.25;
@@ -58,17 +87,7 @@ newSlide((ctx, size) => {
     ctx.strokeStyle = "#ec576b";
     ctx.stroke();
 
-    // Draw text.
-    const fontSize = size * 0.04;
-    const lineHeight = 1.3 * fontSize;
-    const startY = size * 0.2;
-    const startX = size * 0.2;
-    ctx.rotate(Math.PI / 64);
-    ctx.fillStyle = "black";
-    ctx.font = `${fontSize}px -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen,Ubuntu,Cantarell,Open Sans,Helvetica Neue,sans-serif`;
-    ctx.fillText("Lorem ipsum, this is the text I'm going to", startX, startY);
-    ctx.fillText("be putting on the screen, don't mind me,", startX, startY + lineHeight);
-    ctx.fillText("just making it really long.", startX, startY + 2 * lineHeight);
+    paintText(ctx, size, "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.", Math.PI / 64);
 });
 
 newSlide(gridPainter(8, "#ec576b", "white"));
