@@ -1,6 +1,6 @@
-import {newSlide, SlidePainter} from "./slides";
+import {newRow, CellPainter} from "./painter";
 
-// slides
+// content
 //     raster vs pixel
 //     bezier curves
 //         demo
@@ -11,7 +11,7 @@ import {newSlide, SlidePainter} from "./slides";
 //     shape morphing
 //         path splitting
 
-const gridPainter = (slices: number, a: string, b: string): SlidePainter => {
+const gridPainter = (slices: number, a: string, b: string): CellPainter => {
     return (ctx, size) => {
         const s = size / slices;
         for (let i = 0; i < slices; i++) {
@@ -56,7 +56,7 @@ const paintText = (ctx: CanvasRenderingContext2D, size: number, text: string, an
     }
 };
 
-newSlide((ctx, size) => {
+newRow((ctx, size) => {
     // Draw pixelated circle.
     const posX = size * 0.25;
     const posY = size * 0.45;
@@ -90,6 +90,5 @@ newSlide((ctx, size) => {
     paintText(ctx, size, "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.", Math.PI / 64);
 });
 
-newSlide(gridPainter(8, "#ec576b", "white"));
-newSlide(gridPainter(80, "#ec576b", "white"));
-newSlide(gridPainter(16, "#ec576b", "white"));
+newRow(gridPainter(4, "#ec576b", "white"), gridPainter(80, "#ec576b", "white"));
+newRow(gridPainter(16, "#ec576b", "white"));
