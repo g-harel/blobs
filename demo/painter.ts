@@ -20,8 +20,12 @@ export const newRow = (...painters: CellPainter[]) => {
 
     const cells: Cell[] = [];
     for (const painter of painters) {
+        const cellElement = document.createElement("div");
+        cellElement.classList.add("cell");
+        rowElement.appendChild(cellElement);
+
         const canvas = document.createElement("canvas");
-        rowElement.appendChild(canvas);
+        cellElement.appendChild(canvas);
 
         const ctx = canvas.getContext("2d");
         if (!ctx) throw "missing canvas context";
@@ -41,12 +45,13 @@ const redraw = () => {
     redrawTimeout = window.setTimeout(() => {
         for (const row of rows) {
             // Compute new size from width;
-            const rowStyle = window.getComputedStyle(row[0].canvas.parentElement || document.body);
+            const rowStyle = window.getComputedStyle(
+                row[0].canvas.parentElement?.parentElement || document.body,
+            );
             const rowWidth = Number(rowStyle.getPropertyValue("width").slice(0, -2));
             const rowSize = rowWidth * window.devicePixelRatio;
 
             const cellSize = rowSize / row.length;
-            console.log(cellSize);
             for (const cell of row) {
                 // Resize canvas;
                 cell.canvas.width = cellSize;

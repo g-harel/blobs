@@ -14,13 +14,18 @@
             }
 
             .container .row {
+                display: flex;
                 width: 100%;
                 max-width: 1000px;
-                border: 1px solid #ec576b;
             }
 
-            .container .row canvas {
-                display: inline-block;
+            .container .row .cell {
+                flex-grow: 1;
+                flex-shrink: 1;
+            }
+
+            .container .row .cell canvas {
+                width: 100%;
             }
         </style>
     </head>
