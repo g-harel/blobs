@@ -1,11 +1,12 @@
 interface Cell {
+    aspectRatio: number;
     canvas: HTMLCanvasElement;
     ctx: CanvasRenderingContext2D;
     painter: CellPainter;
 }
 
 export interface CellPainter {
-    (ctx: CanvasRenderingContext2D, size: number): void;
+    (ctx: CanvasRenderingContext2D, width: number, height: number): void | number;
 }
 
 const rows: Cell[][] = [];
@@ -13,7 +14,7 @@ const containerElement = document.querySelector(".container");
 if (!containerElement) throw "missing container";
 
 // Adds a new row of cells to the bottom of the stack.
-export const newRow = (...painters: CellPainter[]) => {
+export const newRow = (aspectRatio: number, ...painters: CellPainter[]) => {
     const rowElement = document.createElement("div");
     rowElement.classList.add("row");
     containerElement.appendChild(rowElement);
@@ -30,7 +31,7 @@ export const newRow = (...painters: CellPainter[]) => {
         const ctx = canvas.getContext("2d");
         if (!ctx) throw "missing canvas context";
 
-        const cell = {canvas, ctx, painter};
+        const cell = {aspectRatio, canvas, ctx, painter};
         cells.push(cell);
     }
     rows.push(cells);
@@ -44,21 +45,23 @@ const redraw = () => {
     window.clearTimeout(redrawTimeout);
     redrawTimeout = window.setTimeout(() => {
         for (const row of rows) {
-            // Compute new size from width;
+            // Compute new size from element width width;
             const rowStyle = window.getComputedStyle(
                 row[0].canvas.parentElement?.parentElement || document.body,
             );
             const rowWidth = Number(rowStyle.getPropertyValue("width").slice(0, -2));
-            const rowSize = rowWidth * window.devicePixelRatio;
+            const actualRowWidth = rowWidth * window.devicePixelRatio;
 
-            const cellSize = rowSize / row.length;
+            const cellWidth = actualRowWidth / row.length;
             for (const cell of row) {
+                const cellHeight = cellWidth / cell.aspectRatio;
+
                 // Resize canvas;
-                cell.canvas.width = cellSize;
-                cell.canvas.height = cellSize;
+                cell.canvas.width = cellWidth;
+                cell.canvas.height = cellHeight;
 
                 // Redraw canvas contents.
-                cell.painter(cell.ctx, cellSize);
+                cell.painter(cell.ctx, cellWidth, cellHeight);
             }
         }
     }, 100);
