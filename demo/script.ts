@@ -11,8 +11,15 @@ import {newRow, CellPainter} from "./painter";
 //     shape morphing
 //         path splitting
 
+const resetStyles = (ctx: CanvasRenderingContext2D) => {
+    ctx.fillStyle = "black";
+    ctx.setTransform(1,0,0,1,0,0);
+};
+
 const gridPainter = (slices: number, a: string, b: string): CellPainter => {
     return (ctx, width, height) => {
+        resetStyles(ctx);
+
         const w = width / slices;
         const h = height / slices;
         for (let i = 0; i < slices; i++) {
@@ -30,9 +37,10 @@ const gridPainter = (slices: number, a: string, b: string): CellPainter => {
 
 const textPainter = (text: string, angle: number): CellPainter => {
     return (ctx, width, height) => {
+        resetStyles(ctx);
+
         const fontSize = width * 0.04;
         const lineHeight = fontSize * 1.3;
-        ctx.fillStyle = "black";
         ctx.font = `${fontSize}px -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen,Ubuntu,Cantarell,Open Sans,Helvetica Neue,sans-serif`;
 
         const lines: string[] = [];
@@ -51,14 +59,18 @@ const textPainter = (text: string, angle: number): CellPainter => {
         }
         lines.push(currentLine);
 
-        // TODO move start pos according to rotation.
-        const startX = (width - lineWidth) / 2;
-        const startY = (height - lineHeight * lines.length) / 2;
-        console.log(width, height, startX, startY);
+        // Rotate text around center of cell.
+        const centerX = 0 || width / 2;
+        const centerY = 0 || height / 2;
+        const startX = (lineWidth) / 2;
+        const startY = (lineHeight * lines.length) / 2;
+        ctx.translate(centerX, centerY);
         ctx.rotate(angle);
         for (let i = 0; i < lines.length; i++) {
-            ctx.fillText(lines[i], startX, startY + lineHeight * i);
+            ctx.fillText(lines[i], -startX, -startY + lineHeight * (i + 1));
         }
+        ctx.translate(-centerX, -centerY);
+        ctx.setTransform(1,0,0,1,0,0);
     };
 };
 
