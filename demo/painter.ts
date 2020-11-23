@@ -1,3 +1,5 @@
+import {debug, debugColor} from "./debug";
+
 interface Cell {
     aspectRatio: number;
     canvas: HTMLCanvasElement;
@@ -59,6 +61,14 @@ const redraw = () => {
                 // Resize canvas;
                 cell.canvas.width = cellWidth;
                 cell.canvas.height = cellHeight;
+
+                // Draw canvas outline.
+                if (debug) {
+                    const backup = cell.ctx.strokeStyle;
+                    cell.ctx.strokeStyle = debugColor;
+                    cell.ctx.strokeRect(0, 0, cellWidth, cellHeight);
+                    cell.ctx.strokeStyle = backup;
+                }
 
                 // Redraw canvas contents.
                 cell.painter(cell.ctx, cellWidth, cellHeight);

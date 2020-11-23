@@ -1,6 +1,5 @@
+import {debugColor} from "./debug";
 import {newRow, CellPainter} from "./painter";
-
-// TODO debug flag.
 
 // content
 //     raster vs pixel
@@ -13,28 +12,40 @@ import {newRow, CellPainter} from "./painter";
 //     shape morphing
 //         path splitting
 
+const tempStyles = (ctx: CanvasRenderingContext2D, fn: () => void) => {
+    const backup: Partial<CanvasRenderingContext2D> = {
+        strokeStyle: ctx.strokeStyle,
+        fillStyle: ctx.fillStyle,
+    };
+    fn();
+    Object.assign(ctx, backup);
+};
+
 const rotateAround = (
     options: {ctx: CanvasRenderingContext2D; angle: number; cx: number; cy: number},
     fn: () => void,
 ) => {
     options.ctx.translate(options.cx, options.cy);
     options.ctx.rotate(options.angle);
+    tempStyles(options.ctx, () => {
+        options.ctx.fillStyle = debugColor;
+        options.ctx.fillRect(-3, -3, 6, 6);
+        options.ctx.fillRect(-32, -1, 64, 2);
+    });
     fn();
     options.ctx.setTransform(1, 0, 0, 1, 0, 0);
 };
 
-const gridPainter = (slices: number, a: string, b: string): CellPainter => {
+const gridPainter = (slices: number, color: string): CellPainter => {
     return (ctx, width, height) => {
         const w = width / slices;
         const h = height / slices;
         for (let i = 0; i < slices; i++) {
             for (let j = 0; j < slices; j++) {
                 if ((i + j) % 2 == 0) {
-                    ctx.fillStyle = a;
-                } else {
-                    ctx.fillStyle = b;
+                    ctx.fillStyle = color;
+                    ctx.fillRect(i * w, j * h, w, h);
                 }
-                ctx.fillRect(i * w, j * h, (i + 1) * w, (j + 1) * h);
             }
         }
     };
@@ -121,5 +132,5 @@ newRow(
     },
 );
 
-newRow(2, gridPainter(4, "#ec576b", "white"), gridPainter(80, "#ec576b", "white"));
-newRow(2, gridPainter(16, "#ec576b", "white"));
+newRow(2, gridPainter(4, "#ec576b"), gridPainter(80, "#ec576b"));
+newRow(2, gridPainter(16, "#ec576b"));
