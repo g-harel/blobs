@@ -29,8 +29,8 @@ const rotateAround = (
     options.ctx.rotate(options.angle);
     tempStyles(options.ctx, () => {
         options.ctx.fillStyle = debugColor;
-        options.ctx.fillRect(-3, -3, 6, 6);
-        options.ctx.fillRect(-32, -1, 64, 2);
+        options.ctx.fillRect(0, -4, 1, 8);
+        options.ctx.fillRect(-32, 0, 64, 1);
     });
     fn();
     options.ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -57,10 +57,12 @@ const textPainter = (text: string, angle: number): CellPainter => {
         const lineHeight = fontSize * 1.3;
         ctx.font = `${fontSize}px -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen,Ubuntu,Cantarell,Open Sans,Helvetica Neue,sans-serif`;
 
+        text = text.replace("\n", " ").replace(/\s+/g, " ").trim();
+
         // Break up text into lines.
         const lines: string[] = [];
         const lineWidth = width * 0.8;
-        const words = text.trim().split(" ");
+        const words = text.split(" ");
         let currentLine = "";
         while (words.length > 0) {
             const {width} = ctx.measureText(currentLine + " " + words[0]);
@@ -68,7 +70,7 @@ const textPainter = (text: string, angle: number): CellPainter => {
                 currentLine += words[0] + " ";
             } else {
                 lines.push(currentLine);
-                currentLine = words[0];
+                currentLine = words[0] + " ";
             }
             words.shift();
         }
@@ -88,22 +90,25 @@ const textPainter = (text: string, angle: number): CellPainter => {
 };
 
 newRow(
-    2,
+    2.6,
     textPainter(
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
+        `Raster images (left) are made up of pixels and have a fixed
+        resolution. Vector formats (right) instead use math equations to draw
+        the image at any scale. This makes it ideal for artwork that has sharp
+        lines and will be viewed at varying scales like logos and fonts.`,
         Math.PI / 64,
     ),
 );
 
 newRow(
-    1,
+    1.3,
     // Pixelated circle.
     (ctx, width, height) => {
         const angle = Math.PI / 16;
-        const pt = width * 0.04;
+        const pt = width * 0.03;
         const quadrant = [0, 1, 2, 3, 4, 5, 6, 7, 7, 8, 8, 9, 9, 9];
-        const cx = width / 2;
-        const cy = height / 2;
+        const cx = width * 0.55;
+        const cy = height * 0.5;
 
         rotateAround({ctx, cx, cy, angle}, () => {
             for (let i = 0; i < quadrant.length; i++) {
@@ -119,10 +124,10 @@ newRow(
     },
     // Smooth circle.
     (ctx, width, height) => {
-        const pt = width * 0.04;
-        const shapeSize = width * 0.8;
-        const cx = width / 2;
-        const cy = height / 2;
+        const pt = width * 0.03;
+        const shapeSize = width * 0.6;
+        const cx = width * 0.35;
+        const cy = height * 0.45;
 
         ctx.beginPath();
         ctx.arc(cx, cy, shapeSize / 2, 0, 2 * Math.PI);
