@@ -1,4 +1,4 @@
-import {debug, debugColor} from "./debug";
+import {debug, debugColor, onDebugStateChange} from "./debug";
 
 interface Cell {
     aspectRatio: number;
@@ -79,3 +79,4 @@ const redraw = () => {
 
 window.addEventListener("load", redraw);
 window.addEventListener("resize", redraw);
+onDebugStateChange(redraw);

@@ -1,4 +1,4 @@
-import {debugColor} from "./debug";
+import {debug, debugColor} from "./debug";
 import {newRow, CellPainter} from "./painter";
 
 // content
@@ -13,11 +13,13 @@ import {newRow, CellPainter} from "./painter";
 //         path splitting
 
 const tempStyles = (ctx: CanvasRenderingContext2D, fn: () => void) => {
+    const backupTransform = ctx.getTransform();
     const backup: Partial<CanvasRenderingContext2D> = {
         strokeStyle: ctx.strokeStyle,
         fillStyle: ctx.fillStyle,
     };
     fn();
+    ctx.setTransform(backupTransform);
     Object.assign(ctx, backup);
 };
 
@@ -25,15 +27,18 @@ const rotateAround = (
     options: {ctx: CanvasRenderingContext2D; angle: number; cx: number; cy: number},
     fn: () => void,
 ) => {
-    options.ctx.translate(options.cx, options.cy);
-    options.ctx.rotate(options.angle);
     tempStyles(options.ctx, () => {
-        options.ctx.fillStyle = debugColor;
-        options.ctx.fillRect(0, -4, 1, 8);
-        options.ctx.fillRect(-32, 0, 64, 1);
+        options.ctx.translate(options.cx, options.cy);
+        options.ctx.rotate(options.angle);
+        if (debug) {
+            tempStyles(options.ctx, () => {
+                options.ctx.fillStyle = debugColor;
+                options.ctx.fillRect(0, -4, 1, 8);
+                options.ctx.fillRect(-32, 0, 64, 1);
+            });
+        }
+        fn();
     });
-    fn();
-    options.ctx.setTransform(1, 0, 0, 1, 0, 0);
 };
 
 const gridPainter = (slices: number, color: string): CellPainter => {
@@ -95,7 +100,7 @@ newRow(
         `Raster images (left) are made up of pixels and have a fixed
         resolution. Vector formats (right) instead use math equations to draw
         the image at any scale. This makes it ideal for artwork that has sharp
-        lines and will be viewed at varying scales like logos and fonts.`,
+        lines and will be viewed at varying sizes like logos and fonts.`,
         Math.PI / 64,
     ),
 );
@@ -135,6 +140,17 @@ newRow(
         ctx.strokeStyle = "#ec576b";
         ctx.stroke();
     },
+);
+
+newRow(
+    2.6,
+    textPainter(
+        `Raster images (left) are made up of pixels and have a fixed
+        resolution. Vector formats (right) instead use math equations to draw
+        the image at any scale. This makes it ideal for artwork that has sharp
+        lines and will be viewed at varying sizes like logos and fonts.`,
+        -Math.PI / 128,
+    ),
 );
 
 newRow(2, gridPainter(4, "#ec576b"), gridPainter(80, "#ec576b"));
