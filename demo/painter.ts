@@ -48,7 +48,6 @@ export const newRow = (aspectRatio: number, ...painters: CellPainter[]) => {
 // Lazily redraw canvas to match window resolution.
 let redrawTimeout: undefined | number = undefined;
 const redraw = () => {
-    console.log(rows);
     window.clearTimeout(redrawTimeout);
     redrawTimeout = window.setTimeout(() => {
         for (const row of rows) {

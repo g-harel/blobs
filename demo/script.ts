@@ -1,18 +1,14 @@
-import {drawClosed} from "../internal/render/canvas";
 import {Point} from "../internal/types";
 import {expandHandle, rad} from "../internal/util";
 import {debug, debugColor} from "./debug";
 import {newRow, CellPainter} from "./painter";
 
+const highlightColor = "#ec576b";
+
 const tempStyles = (ctx: CanvasRenderingContext2D, fn: () => void) => {
-    const backupTransform = ctx.getTransform();
-    const backup: Partial<CanvasRenderingContext2D> = {
-        strokeStyle: ctx.strokeStyle,
-        fillStyle: ctx.fillStyle,
-    };
+    ctx.save();
     fn();
-    ctx.setTransform(backupTransform);
-    Object.assign(ctx, backup);
+    ctx.restore();
 };
 
 const rotateAround = (
@@ -35,10 +31,10 @@ const rotateAround = (
 
 const point = (x: number, y: number, ia: number, il: number, oa: number, ol: number): Point => {
     return {
-        x: x ,
-        y: y ,
-        handleIn: {angle: rad(ia), length: il },
-        handleOut: {angle: rad(oa), length: ol },
+        x: x,
+        y: y,
+        handleIn: {angle: rad(ia), length: il},
+        handleOut: {angle: rad(oa), length: ol},
     };
 };
 
@@ -138,24 +134,70 @@ newRow(
     ),
 );
 
-newRow(
-    2,
-    (ctx, width, height) => {
-        const start = point(width * 0.2, height * 0.5, 45, width * 0.25, 225, width * 0.25);
-        const end = point(width * 0.8, height * 0.5, 45, width * 0.25, 225, width * 0.25);
+newRow(2, (ctx, width, height) => {
+    const start = point(width * 0.2, height * 0.5, 0, 0, -45, width * 0.25);
+    const end = point(width * 0.8, height * 0.5, 135, width * 0.25, 0, 0);
 
-        const startHandle = expandHandle(start, start.handleOut);
-        const endHandle = expandHandle(end, end.handleIn);
+    const startHandle = expandHandle(start, start.handleOut);
+    const endHandle = expandHandle(end, end.handleIn);
 
-        const path = new Path2D();
-        path.moveTo(start.x, start.y);
-        path.bezierCurveTo(startHandle.x, startHandle.y, endHandle.x, endHandle.y, end.x, end.y);
+    // Draw handles.
+    tempStyles(ctx, () => {
+        const lineWidth = width * 0.001;
+        ctx.lineWidth = lineWidth;
+        ctx.setLineDash([lineWidth * 2]);
 
-        // TODO draw handles.
+        const startHandleLine = new Path2D();
+        startHandleLine.moveTo(start.x, start.y);
+        startHandleLine.lineTo(startHandle.x, startHandle.y);
+        ctx.stroke(startHandleLine);
 
-        ctx.stroke(path);
-    },
-)
+        const startHandlePoint = new Path2D();
+        startHandlePoint.arc(startHandle.x, startHandle.y, lineWidth * 1.4, 0, 2 * Math.PI);
+        ctx.fill(startHandlePoint);
+
+        const endHandleLine = new Path2D();
+        endHandleLine.moveTo(end.x, end.y);
+        endHandleLine.lineTo(endHandle.x, endHandle.y);
+        ctx.stroke(endHandleLine);
+
+        const endHandlePoint = new Path2D();
+        endHandlePoint.arc(endHandle.x, endHandle.y, lineWidth * 1.4, 0, 2 * Math.PI);
+        ctx.fill(endHandlePoint);
+    });
+
+    // Draw curve.
+    tempStyles(ctx, () => {
+        const lineWidth = width * 0.002;
+        ctx.lineWidth = lineWidth;
+
+        const curve = new Path2D();
+        curve.moveTo(start.x, start.y);
+        curve.bezierCurveTo(startHandle.x, startHandle.y, endHandle.x, endHandle.y, end.x, end.y);
+
+        // White outline so handles have some space.
+        tempStyles(ctx, () => {
+            ctx.strokeStyle = "white";
+            ctx.lineWidth = lineWidth * 2;
+            ctx.stroke(curve);
+        });
+
+        tempStyles(ctx, () => {
+            ctx.strokeStyle = highlightColor;
+            ctx.stroke(curve);
+        });
+
+        ctx.fillStyle = highlightColor;
+
+        const startPoint = new Path2D();
+        startPoint.arc(start.x, start.y, lineWidth * 2, 0, 2 * Math.PI);
+        ctx.fill(startPoint);
+
+        const endPoint = new Path2D();
+        endPoint.arc(end.x, end.y, lineWidth * 2, 0, 2 * Math.PI);
+        ctx.fill(endPoint);
+    });
+});
 
 // content
 //     raster vs pixel-
