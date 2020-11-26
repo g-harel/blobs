@@ -21,6 +21,10 @@ export const newRow = (aspectRatio: number, ...painters: CellPainter[]) => {
     rowElement.classList.add("row");
     containerElement.appendChild(rowElement);
 
+    if (painters.length == 0) {
+        painters = [() => {}];
+    }
+
     const cells: Cell[] = [];
     for (const painter of painters) {
         const cellElement = document.createElement("div");
@@ -44,10 +48,11 @@ export const newRow = (aspectRatio: number, ...painters: CellPainter[]) => {
 // Lazily redraw canvas to match window resolution.
 let redrawTimeout: undefined | number = undefined;
 const redraw = () => {
+    console.log(rows);
     window.clearTimeout(redrawTimeout);
     redrawTimeout = window.setTimeout(() => {
         for (const row of rows) {
-            // Compute new size from element width width;
+            // Compute new size from element width.
             const rowStyle = window.getComputedStyle(
                 row[0].canvas.parentElement?.parentElement || document.body,
             );
@@ -66,7 +71,7 @@ const redraw = () => {
                 if (debug) {
                     const backup = cell.ctx.strokeStyle;
                     cell.ctx.strokeStyle = debugColor;
-                    cell.ctx.strokeRect(0, 0, cellWidth, cellHeight);
+                    cell.ctx.strokeRect(0, 0, cellWidth, cellHeight - 1);
                     cell.ctx.strokeStyle = backup;
                 }
 

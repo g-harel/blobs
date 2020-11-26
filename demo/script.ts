@@ -1,16 +1,8 @@
+import {drawClosed} from "../internal/render/canvas";
+import {Point} from "../internal/types";
+import {expandHandle, rad} from "../internal/util";
 import {debug, debugColor} from "./debug";
 import {newRow, CellPainter} from "./painter";
-
-// content
-//     raster vs pixel
-//     bezier curves
-//         demo
-//         how to drawn
-//     shape smoothing
-//         handle angle
-//         handle length
-//     shape morphing
-//         path splitting
 
 const tempStyles = (ctx: CanvasRenderingContext2D, fn: () => void) => {
     const backupTransform = ctx.getTransform();
@@ -41,18 +33,12 @@ const rotateAround = (
     });
 };
 
-const gridPainter = (slices: number, color: string): CellPainter => {
-    return (ctx, width, height) => {
-        const w = width / slices;
-        const h = height / slices;
-        for (let i = 0; i < slices; i++) {
-            for (let j = 0; j < slices; j++) {
-                if ((i + j) % 2 == 0) {
-                    ctx.fillStyle = color;
-                    ctx.fillRect(i * w, j * h, w, h);
-                }
-            }
-        }
+const point = (x: number, y: number, ia: number, il: number, oa: number, ol: number): Point => {
+    return {
+        x: x ,
+        y: y ,
+        handleIn: {angle: rad(ia), length: il },
+        handleOut: {angle: rad(oa), length: ol },
     };
 };
 
@@ -88,7 +74,7 @@ const textPainter = (text: string, angle: number): CellPainter => {
             const x = lineWidth / 2;
             const y = (lineHeight * lines.length) / 2;
             for (let i = 0; i < lines.length; i++) {
-                ctx.fillText(lines[i], -x, -y + lineHeight * (i + 1));
+                ctx.fillText(lines[i], -x, -y + lineHeight * (i + 0.75));
             }
         });
     };
@@ -143,15 +129,41 @@ newRow(
 );
 
 newRow(
-    2.6,
+    3.6,
     textPainter(
-        `Raster images (left) are made up of pixels and have a fixed
-        resolution. Vector formats (right) instead use math equations to draw
-        the image at any scale. This makes it ideal for artwork that has sharp
-        lines and will be viewed at varying sizes like logos and fonts.`,
+        `A common way to define these vector shapes is using Bezier curves.
+        These curves are made up of two point coordinates, and handle
+        coordinates. The handles define the direction and momentum of the line.`,
         -Math.PI / 128,
     ),
 );
 
-newRow(2, gridPainter(4, "#ec576b"), gridPainter(80, "#ec576b"));
-newRow(2, gridPainter(16, "#ec576b"));
+newRow(
+    2,
+    (ctx, width, height) => {
+        const start = point(width * 0.2, height * 0.5, 45, width * 0.25, 225, width * 0.25);
+        const end = point(width * 0.8, height * 0.5, 45, width * 0.25, 225, width * 0.25);
+
+        const startHandle = expandHandle(start, start.handleOut);
+        const endHandle = expandHandle(end, end.handleIn);
+
+        const path = new Path2D();
+        path.moveTo(start.x, start.y);
+        path.bezierCurveTo(startHandle.x, startHandle.y, endHandle.x, endHandle.y, end.x, end.y);
+
+        // TODO draw handles.
+
+        ctx.stroke(path);
+    },
+)
+
+// content
+//     raster vs pixel-
+//     bezier curves
+//         demo
+//         how to drawn
+//     shape smoothing
+//         handle angle
+//         handle length
+//     shape morphing
+//         path splitting
