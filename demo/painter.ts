@@ -45,20 +45,22 @@ export const newRow = (aspectRatio: number, ...painters: CellPainter[]) => {
     redraw();
 };
 
+export const getTotalWidth = () => {
+    // Compute new size from element width.
+    const rowStyle = window.getComputedStyle(
+        rows[0]?.[0]?.canvas?.parentElement?.parentElement || document.body,
+    );
+    const rowWidth = Number(rowStyle.getPropertyValue("width").slice(0, -2));
+    return rowWidth * window.devicePixelRatio;
+};
+
 // Lazily redraw canvas to match window resolution.
 let redrawTimeout: undefined | number = undefined;
 const redraw = () => {
     window.clearTimeout(redrawTimeout);
     redrawTimeout = window.setTimeout(() => {
         for (const row of rows) {
-            // Compute new size from element width.
-            const rowStyle = window.getComputedStyle(
-                row[0].canvas.parentElement?.parentElement || document.body,
-            );
-            const rowWidth = Number(rowStyle.getPropertyValue("width").slice(0, -2));
-            const actualRowWidth = rowWidth * window.devicePixelRatio;
-
-            const cellWidth = actualRowWidth / row.length;
+            const cellWidth = getTotalWidth() / row.length;
             for (const cell of row) {
                 const cellHeight = cellWidth / cell.aspectRatio;
 

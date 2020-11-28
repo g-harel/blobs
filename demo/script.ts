@@ -1,7 +1,7 @@
 import {Point} from "../internal/types";
-import {expandHandle, rad} from "../internal/util";
+import {expandHandle, forPoints, rad} from "../internal/util";
 import {debug, debugColor} from "./debug";
-import {newRow, CellPainter} from "./painter";
+import {newRow, CellPainter, getTotalWidth} from "./painter";
 
 const highlightColor = "#ec576b";
 
@@ -137,15 +137,30 @@ newRow(
 newRow(2, (ctx, width, height) => {
     const start = point(width * 0.2, height * 0.5, 0, 0, -45, width * 0.25);
     const end = point(width * 0.8, height * 0.5, 135, width * 0.25, 0, 0);
+    drawCurve(ctx, start, end);
 
+    drawClosed(ctx, [
+        point(200, 400, 90, 200, -90, 100),
+        point(400, 200, 135, 200, -45, 100),
+        point(400, 400, 0, 200, 180, 100),
+    ]);
+});
+
+const drawClosed = (ctx: CanvasRenderingContext2D, points: Point[]) => {
+    forPoints(points, ({curr, next}) => {
+        drawCurve(ctx, curr, next());
+    });
+};
+
+const drawCurve = (ctx: CanvasRenderingContext2D, start: Point, end: Point) => {
+    const width = getTotalWidth();
     const startHandle = expandHandle(start, start.handleOut);
     const endHandle = expandHandle(end, end.handleIn);
 
     // Draw handles.
     tempStyles(ctx, () => {
-        const lineWidth = width * 0.001;
+        const lineWidth = width * 0.002;
         ctx.lineWidth = lineWidth;
-        ctx.setLineDash([lineWidth * 2]);
 
         const startHandleLine = new Path2D();
         startHandleLine.moveTo(start.x, start.y);
@@ -159,6 +174,7 @@ newRow(2, (ctx, width, height) => {
         const endHandleLine = new Path2D();
         endHandleLine.moveTo(end.x, end.y);
         endHandleLine.lineTo(endHandle.x, endHandle.y);
+        ctx.setLineDash([lineWidth * 2]);
         ctx.stroke(endHandleLine);
 
         const endHandlePoint = new Path2D();
@@ -168,36 +184,30 @@ newRow(2, (ctx, width, height) => {
 
     // Draw curve.
     tempStyles(ctx, () => {
-        const lineWidth = width * 0.002;
+        const lineWidth = width * 0.003;
         ctx.lineWidth = lineWidth;
 
         const curve = new Path2D();
         curve.moveTo(start.x, start.y);
         curve.bezierCurveTo(startHandle.x, startHandle.y, endHandle.x, endHandle.y, end.x, end.y);
 
-        // White outline so handles have some space.
-        tempStyles(ctx, () => {
-            ctx.strokeStyle = "white";
-            ctx.lineWidth = lineWidth * 2;
-            ctx.stroke(curve);
-        });
-
         tempStyles(ctx, () => {
             ctx.strokeStyle = highlightColor;
             ctx.stroke(curve);
         });
 
-        ctx.fillStyle = highlightColor;
-
         const startPoint = new Path2D();
         startPoint.arc(start.x, start.y, lineWidth * 2, 0, 2 * Math.PI);
-        ctx.fill(startPoint);
-
         const endPoint = new Path2D();
         endPoint.arc(end.x, end.y, lineWidth * 2, 0, 2 * Math.PI);
-        ctx.fill(endPoint);
+
+        tempStyles(ctx, () => {
+            ctx.fillStyle = highlightColor;
+            ctx.fill(startPoint);
+            ctx.fill(endPoint);
+        });
     });
-});
+};
 
 // content
 //     raster vs pixel-
