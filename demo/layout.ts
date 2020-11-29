@@ -1,5 +1,15 @@
 import {debug, debugColor, onDebugStateChange} from "./debug";
 
+enum RowType {
+    CANVAS,
+    TEXT,
+}
+
+interface Text {
+    text: string;
+    title: boolean;
+}
+
 interface Cell {
     aspectRatio: number;
     canvas: HTMLCanvasElement;
@@ -7,16 +17,43 @@ interface Cell {
     painter: CellPainter;
 }
 
+interface Row {
+    type: RowType;
+    cells?: Cell[];
+    text?: Text;
+}
+
 export interface CellPainter {
     (ctx: CanvasRenderingContext2D, width: number, height: number): void | number;
 }
 
-const rows: Cell[][] = [];
+const rows: Row[] = [];
 const containerElement = document.querySelector(".container");
 if (!containerElement) throw "missing container";
 
+export const getTotalWidth = () => {
+    const rowStyle = window.getComputedStyle((containerElement.firstChild as any) || document.body);
+    const rowWidth = Number(rowStyle.getPropertyValue("width").slice(0, -2));
+    return rowWidth * window.devicePixelRatio;
+};
+
+// Adds a new row of text to the bottom of the stack.
+export const addTextRow = (title: boolean, text: string) => {
+    const rowElement = document.createElement("div");
+    rowElement.classList.add("row", "text");
+    containerElement.appendChild(rowElement);
+
+    const textElement = document.createTextNode(text);
+    rowElement.appendChild(textElement);
+
+    rows.push({
+        type: RowType.TEXT,
+        text:{text, title},
+    });
+};
+
 // Adds a new row of cells to the bottom of the stack.
-export const newRow = (aspectRatio: number, ...painters: CellPainter[]) => {
+export const addCanvasRow = (aspectRatio: number, ...painters: CellPainter[]) => {
     const rowElement = document.createElement("div");
     rowElement.classList.add("row");
     containerElement.appendChild(rowElement);
@@ -40,28 +77,23 @@ export const newRow = (aspectRatio: number, ...painters: CellPainter[]) => {
         const cell = {aspectRatio, canvas, ctx, painter};
         cells.push(cell);
     }
-    rows.push(cells);
+    rows.push({
+        type: RowType.CANVAS,
+        cells,
+    });
 
     redraw();
 };
 
-export const getTotalWidth = () => {
-    // Compute new size from element width.
-    const rowStyle = window.getComputedStyle(
-        rows[0]?.[0]?.canvas?.parentElement?.parentElement || document.body,
-    );
-    const rowWidth = Number(rowStyle.getPropertyValue("width").slice(0, -2));
-    return rowWidth * window.devicePixelRatio;
-};
-
-// Lazily redraw canvas to match window resolution.
+// Lazily redraw canvas cells to match window resolution.
 let redrawTimeout: undefined | number = undefined;
 const redraw = () => {
     window.clearTimeout(redrawTimeout);
     redrawTimeout = window.setTimeout(() => {
         for (const row of rows) {
-            const cellWidth = getTotalWidth() / row.length;
-            for (const cell of row) {
+            if (row.type !== RowType.CANVAS || !row.cells) continue;
+            const cellWidth = getTotalWidth() / row.cells.length;
+            for (const cell of row.cells) {
                 const cellHeight = cellWidth / cell.aspectRatio;
 
                 // Resize canvas;

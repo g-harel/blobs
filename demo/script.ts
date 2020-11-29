@@ -1,7 +1,7 @@
 import {Point} from "../internal/types";
 import {expandHandle, forPoints, rad} from "../internal/util";
 import {debug, debugColor} from "./debug";
-import {newRow, CellPainter, getTotalWidth} from "./painter";
+import {addCanvasRow, addTextRow, CellPainter, getTotalWidth} from "./layout";
 
 const highlightColor = "#ec576b";
 
@@ -76,7 +76,12 @@ const textPainter = (text: string, angle: number): CellPainter => {
     };
 };
 
-newRow(
+// TODO style
+// TODO replace current text rows
+// TODO implement title styles
+addTextRow(false, "test");
+
+addCanvasRow(
     2.6,
     textPainter(
         `Raster images (left) are made up of pixels and have a fixed
@@ -87,7 +92,7 @@ newRow(
     ),
 );
 
-newRow(
+addCanvasRow(
     1.3,
     // Pixelated circle.
     (ctx, width, height) => {
@@ -124,7 +129,7 @@ newRow(
     },
 );
 
-newRow(
+addCanvasRow(
     3.6,
     textPainter(
         `A common way to define these vector shapes is using Bezier curves.
@@ -134,7 +139,7 @@ newRow(
     ),
 );
 
-newRow(2, (ctx, width, height) => {
+addCanvasRow(2, (ctx, width, height) => {
     const start = point(width * 0.2, height * 0.5, 0, 0, -45, width * 0.25);
     const end = point(width * 0.8, height * 0.5, 135, width * 0.25, 0, 0);
     drawCurve(ctx, start, end);
