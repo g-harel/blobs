@@ -11,6 +11,9 @@ export const onDebugStateChange = (fn: (debug: boolean) => void) => {
 if (debug && document.body) {
     const toggleButton = document.createElement("button");
     toggleButton.innerHTML = "debug";
+    toggleButton.style.padding = "2rem";
+    toggleButton.style.position = "fixed";
+    toggleButton.style.top = "0";
     toggleButton.onclick = () => {
         debug = !debug;
         for (const listener of debugListeners) {

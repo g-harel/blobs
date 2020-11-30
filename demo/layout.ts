@@ -38,22 +38,23 @@ export const getTotalWidth = () => {
 };
 
 // Adds a new row of text to the bottom of the stack.
-export const addTextRow = (title: boolean, text: string) => {
+export const addText = (text: string) => {
     const rowElement = document.createElement("div");
     rowElement.classList.add("row", "text");
     containerElement.appendChild(rowElement);
 
+    text = text.replace("\n", " ").replace(/\s+/g, " ").trim();
     const textElement = document.createTextNode(text);
     rowElement.appendChild(textElement);
 
     rows.push({
         type: RowType.TEXT,
-        text:{text, title},
+        text: {text, title: false},
     });
 };
 
 // Adds a new row of cells to the bottom of the stack.
-export const addCanvasRow = (aspectRatio: number, ...painters: CellPainter[]) => {
+export const addCanvas = (aspectRatio: number, ...painters: CellPainter[]) => {
     const rowElement = document.createElement("div");
     rowElement.classList.add("row");
     containerElement.appendChild(rowElement);

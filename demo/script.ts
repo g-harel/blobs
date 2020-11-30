@@ -1,7 +1,7 @@
 import {Point} from "../internal/types";
 import {expandHandle, forPoints, rad} from "../internal/util";
 import {debug, debugColor} from "./debug";
-import {addCanvasRow, addTextRow, CellPainter, getTotalWidth} from "./layout";
+import {addCanvas, addText, CellPainter, getTotalWidth} from "./layout";
 
 const highlightColor = "#ec576b";
 
@@ -38,61 +38,13 @@ const point = (x: number, y: number, ia: number, il: number, oa: number, ol: num
     };
 };
 
-const textPainter = (text: string, angle: number): CellPainter => {
-    return (ctx, width, height) => {
-        const fontSize = width * 0.04;
-        const lineHeight = fontSize * 1.3;
-        ctx.font = `${fontSize}px -apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen,Ubuntu,Cantarell,Open Sans,Helvetica Neue,sans-serif`;
-
-        text = text.replace("\n", " ").replace(/\s+/g, " ").trim();
-
-        // Break up text into lines.
-        const lines: string[] = [];
-        const lineWidth = width * 0.8;
-        const words = text.split(" ");
-        let currentLine = "";
-        while (words.length > 0) {
-            const {width} = ctx.measureText(currentLine + " " + words[0]);
-            if (width < lineWidth) {
-                currentLine += words[0] + " ";
-            } else {
-                lines.push(currentLine);
-                currentLine = words[0] + " ";
-            }
-            words.shift();
-        }
-        lines.push(currentLine);
-
-        // Draw lines.
-        const cx = width / 2;
-        const cy = height / 2;
-        rotateAround({ctx, cx, cy, angle}, () => {
-            const x = lineWidth / 2;
-            const y = (lineHeight * lines.length) / 2;
-            for (let i = 0; i < lines.length; i++) {
-                ctx.fillText(lines[i], -x, -y + lineHeight * (i + 0.75));
-            }
-        });
-    };
-};
-
-// TODO style
-// TODO replace current text rows
 // TODO implement title styles
-addTextRow(false, "test");
+addText(`Raster images (left) are made up of pixels and have a fixed
+resolution. Vector formats (right) instead use math equations to draw
+the image at any scale. This makes it ideal for artwork that has sharp
+lines and will be viewed at varying sizes like logos and fonts.`);
 
-addCanvasRow(
-    2.6,
-    textPainter(
-        `Raster images (left) are made up of pixels and have a fixed
-        resolution. Vector formats (right) instead use math equations to draw
-        the image at any scale. This makes it ideal for artwork that has sharp
-        lines and will be viewed at varying sizes like logos and fonts.`,
-        Math.PI / 64,
-    ),
-);
-
-addCanvasRow(
+addCanvas(
     1.3,
     // Pixelated circle.
     (ctx, width, height) => {
@@ -129,17 +81,13 @@ addCanvasRow(
     },
 );
 
-addCanvasRow(
-    3.6,
-    textPainter(
-        `A common way to define these vector shapes is using Bezier curves.
+addText(
+    `A common way to define these vector shapes is using Bezier curves.
         These curves are made up of two point coordinates, and handle
         coordinates. The handles define the direction and momentum of the line.`,
-        -Math.PI / 128,
-    ),
 );
 
-addCanvasRow(2, (ctx, width, height) => {
+addCanvas(2, (ctx, width, height) => {
     const start = point(width * 0.2, height * 0.5, 0, 0, -45, width * 0.25);
     const end = point(width * 0.8, height * 0.5, 135, width * 0.25, 0, 0);
     drawCurve(ctx, start, end);
