@@ -1,5 +1,7 @@
 import {debug, debugColor, onDebugStateChange} from "./debug";
 
+export const highlightColor = "#ec576b";
+
 enum RowType {
     CANVAS,
     TEXT,
