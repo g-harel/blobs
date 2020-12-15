@@ -50,16 +50,14 @@ addText(
         coordinates. The handles define the direction and momentum of the line.`,
 );
 
-addCanvas(2, (ctx, width, height) => {
-    const start = point(width * 0.2, height * 0.5, 0, 0, -45, width * 0.25);
-    const end = point(width * 0.8, height * 0.5, 135, width * 0.25, 0, 0);
-    drawOpen(ctx, start, end);
-
-    drawClosed(ctx, [
-        point(200, 400, 90, 200, -90, 100),
-        point(400, 200, 135, 200, -45, 100),
-        point(400, 400, 0, 200, 180, 100),
-    ]);
+addCanvas(2, (ctx, width, height, animate) => {
+    animate((frameTime) => {
+        const turnSpeed = 5000;
+        const turn = 360 * (frameTime % turnSpeed) / turnSpeed;
+        const start = point(width * 0.2, height * 0.5, 0, 0, -45 + turn, width * 0.25);
+        const end = point(width * 0.8, height * 0.5, 135 + turn, width * 0.25, 0, 0);
+        drawOpen(ctx, start, end);
+    });
 });
 
 // content

@@ -17,6 +17,7 @@ interface Cell {
     canvas: HTMLCanvasElement;
     ctx: CanvasRenderingContext2D;
     painter: CellPainter;
+    animationID: number;
 }
 
 interface Row {
@@ -26,7 +27,16 @@ interface Row {
 }
 
 export interface CellPainter {
-    (ctx: CanvasRenderingContext2D, width: number, height: number): void | number;
+    (
+        ctx: CanvasRenderingContext2D,
+        width: number,
+        height: number,
+        animate: (painter: AnimationPainter) => void,
+    ): void;
+}
+
+export interface AnimationPainter {
+    (timestamp: number): void;
 }
 
 const rows: Row[] = [];
@@ -77,7 +87,7 @@ export const addCanvas = (aspectRatio: number, ...painters: CellPainter[]) => {
         const ctx = canvas.getContext("2d");
         if (!ctx) throw "missing canvas context";
 
-        const cell = {aspectRatio, canvas, ctx, painter};
+        const cell = {aspectRatio, canvas, ctx, painter, animationID: -1};
         cells.push(cell);
     }
     rows.push({
@@ -111,8 +121,25 @@ const redraw = () => {
                     cell.ctx.strokeStyle = backup;
                 }
 
+                const animate = (painter: AnimationPainter) => {
+                    const animationID = Math.random();
+                    const startTime = Date.now();
+                    cell.animationID = animationID;
+
+                    const drawFrame = () => {
+                        if (cell.animationID !== animationID) {
+                            console.log(cell.animationID, animationID);
+                            return;
+                        };
+                        cell.ctx.clearRect(0, 0, cellWidth, cellHeight);
+                        painter(Date.now() - startTime);
+                        requestAnimationFrame(drawFrame);
+                    };
+                    drawFrame();
+                };
+
                 // Redraw canvas contents.
-                cell.painter(cell.ctx, cellWidth, cellHeight);
+                cell.painter(cell.ctx, cellWidth, cellHeight, animate);
             }
         }
     }, 100);
