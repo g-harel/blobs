@@ -1,3 +1,4 @@
+import {tempStyles} from "./canvas";
 import {debug, debugColor, onDebugStateChange} from "./debug";
 
 export const highlightColor = "#ec576b";
@@ -114,12 +115,15 @@ const redraw = () => {
                 cell.canvas.height = cellHeight;
 
                 // Draw canvas outline.
-                if (debug) {
-                    const backup = cell.ctx.strokeStyle;
-                    cell.ctx.strokeStyle = debugColor;
-                    cell.ctx.strokeRect(0, 0, cellWidth, cellHeight - 1);
-                    cell.ctx.strokeStyle = backup;
-                }
+                const drawDebug = () => {
+                    if (debug) {
+                        tempStyles(cell.ctx, () => {
+                            cell.ctx.strokeStyle = debugColor;
+                            cell.ctx.strokeRect(0, 0, cellWidth, cellHeight - 1);
+                        });
+                    }
+                };
+                drawDebug();
 
                 const animate = (painter: AnimationPainter) => {
                     const animationID = Math.random();
@@ -127,12 +131,22 @@ const redraw = () => {
                     cell.animationID = animationID;
 
                     const drawFrame = () => {
+                        // Stop animating if cell is redrawn.
                         if (cell.animationID !== animationID) {
-                            console.log(cell.animationID, animationID);
                             return;
-                        };
+                        }
+
+                        const frameTime = Date.now() - startTime;
                         cell.ctx.clearRect(0, 0, cellWidth, cellHeight);
-                        painter(Date.now() - startTime);
+                        drawDebug();
+                        if (debug) {
+                            tempStyles(cell.ctx, () => {
+                                cell.ctx.fillStyle = debugColor;
+                                cell.ctx.fillText(String(frameTime), 10, 15);
+                            });
+                        }
+
+                        painter(frameTime);
                         requestAnimationFrame(drawFrame);
                     };
                     drawFrame();
