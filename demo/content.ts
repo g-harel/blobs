@@ -1,5 +1,7 @@
 import {addCanvas, addText, highlightColor} from "./internal/layout";
 import {rotateAround, point, drawClosed, drawOpen} from "./internal/canvas";
+import {mod, split} from "../internal/util";
+import {timingFunctions} from "../internal/animate/timing";
 
 // TODO implement title styles
 addText(`Raster images (left) are made up of pixels and have a fixed
@@ -51,11 +53,28 @@ addText(
 );
 
 addCanvas(2, (ctx, width, height, animate) => {
+    const cycleSpeedStart = Math.E * 1000;
+    const cycleSpeedEnd = Math.PI * 1000;
+
+    const calcBouncePercentage = (speed: number, frameTime: number) => {
+        const halfPeriod = speed / 2;
+        const animationTime = mod(frameTime, speed);
+        if (animationTime <= halfPeriod) {
+            return timingFunctions.ease(animationTime / halfPeriod);
+        } else {
+            return timingFunctions.ease(1 - (animationTime - halfPeriod) / halfPeriod);
+        }
+    };
+
     animate((frameTime) => {
-        const turnSpeed = 5000;
-        const turn = 360 * (frameTime % turnSpeed) / turnSpeed;
-        const start = point(width * 0.2, height * 0.5, 0, 0, -45 + turn, width * 0.25);
-        const end = point(width * 0.8, height * 0.5, 135 + turn, width * 0.25, 0, 0);
+        const startPercentage = calcBouncePercentage(cycleSpeedStart, frameTime);
+        const startAngle = split(startPercentage, -45, +45);
+        const start = point(width * 0.2, height * 0.5, 0, 0, startAngle, width * 0.25);
+
+        const endPercentage = calcBouncePercentage(cycleSpeedEnd, frameTime);
+        const endAngle = split(endPercentage, 135, 225);
+        const end = point(width * 0.8, height * 0.5, endAngle, width * 0.25, 0, 0);
+
         drawOpen(ctx, start, end);
     });
 });
