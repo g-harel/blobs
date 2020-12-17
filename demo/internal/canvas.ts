@@ -1,5 +1,6 @@
-import {Point} from "../../internal/types";
-import {expandHandle, forPoints, rad} from "../../internal/util";
+import {TimingFunc} from "../../internal/animate/timing";
+import {Coord, Point} from "../../internal/types";
+import {expandHandle, forPoints, mod, rad} from "../../internal/util";
 import {debug, debugColor} from "../internal/debug";
 import {getTotalWidth, highlightColor} from "../internal/layout";
 
@@ -43,6 +44,30 @@ export const point = (
     };
 };
 
+// TODO optional label.
+export const drawPoint = (ctx: CanvasRenderingContext2D, coord: Coord, width: number) => {
+    const pointPath = new Path2D();
+    pointPath.arc(coord.x, coord.y, width, 0, 2 * Math.PI);
+    ctx.fill(pointPath);
+};
+
+export const drawLine = (
+    ctx: CanvasRenderingContext2D,
+    a: Coord,
+    b: Coord,
+    width: number,
+    dash?: number,
+) => {
+    tempStyles(ctx, () => {
+        const linePath = new Path2D();
+        linePath.moveTo(a.x, a.y);
+        linePath.lineTo(b.x, b.y);
+        if (dash) ctx.setLineDash([dash]);
+        ctx.lineWidth = width;
+        ctx.stroke(linePath);
+    });
+};
+
 export const drawClosed = (ctx: CanvasRenderingContext2D, points: Point[]) => {
     forPoints(points, ({curr, next}) => {
         drawOpen(ctx, curr, next());
@@ -57,26 +82,12 @@ export const drawOpen = (ctx: CanvasRenderingContext2D, start: Point, end: Point
     // Draw handles.
     tempStyles(ctx, () => {
         const lineWidth = width * 0.002;
-        ctx.lineWidth = lineWidth;
 
-        const startHandleLine = new Path2D();
-        startHandleLine.moveTo(start.x, start.y);
-        startHandleLine.lineTo(startHandle.x, startHandle.y);
-        ctx.stroke(startHandleLine);
+        drawLine(ctx, start, startHandle, lineWidth);
+        drawLine(ctx, end, endHandle, lineWidth, lineWidth * 2);
 
-        const startHandlePoint = new Path2D();
-        startHandlePoint.arc(startHandle.x, startHandle.y, lineWidth * 1.4, 0, 2 * Math.PI);
-        ctx.fill(startHandlePoint);
-
-        const endHandleLine = new Path2D();
-        endHandleLine.moveTo(end.x, end.y);
-        endHandleLine.lineTo(endHandle.x, endHandle.y);
-        ctx.setLineDash([lineWidth * 2]);
-        ctx.stroke(endHandleLine);
-
-        const endHandlePoint = new Path2D();
-        endHandlePoint.arc(endHandle.x, endHandle.y, lineWidth * 1.4, 0, 2 * Math.PI);
-        ctx.fill(endHandlePoint);
+        drawPoint(ctx, startHandle, lineWidth * 1.4);
+        drawPoint(ctx, endHandle, lineWidth * 1.4);
     });
 
     // Draw curve.
@@ -93,15 +104,20 @@ export const drawOpen = (ctx: CanvasRenderingContext2D, start: Point, end: Point
             ctx.stroke(curve);
         });
 
-        const startPoint = new Path2D();
-        startPoint.arc(start.x, start.y, lineWidth * 2, 0, 2 * Math.PI);
-        const endPoint = new Path2D();
-        endPoint.arc(end.x, end.y, lineWidth * 2, 0, 2 * Math.PI);
-
         tempStyles(ctx, () => {
             ctx.fillStyle = highlightColor;
-            ctx.fill(startPoint);
-            ctx.fill(endPoint);
+            drawPoint(ctx, start, lineWidth * 2);
+            drawPoint(ctx, end, lineWidth * 2);
         });
     });
+};
+
+export const calcBouncePercentage = (period: number, timingFunc: TimingFunc, frameTime: number) => {
+    const halfPeriod = period / 2;
+    const animationTime = mod(frameTime, period);
+    if (animationTime <= halfPeriod) {
+        return timingFunc(animationTime / halfPeriod);
+    } else {
+        return timingFunc(1 - (animationTime - halfPeriod) / halfPeriod);
+    }
 };

@@ -40,6 +40,7 @@ export interface AnimationPainter {
     (timestamp: number): void;
 }
 
+// TODO slide labels/numbers.
 const rows: Row[] = [];
 const containerElement = document.querySelector(".container");
 if (!containerElement) throw "missing container";

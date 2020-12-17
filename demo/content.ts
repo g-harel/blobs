@@ -1,7 +1,8 @@
 import {addCanvas, addText, highlightColor} from "./internal/layout";
-import {rotateAround, point, drawClosed, drawOpen} from "./internal/canvas";
-import {mod, split} from "../internal/util";
+import {rotateAround, point, drawOpen, calcBouncePercentage, drawLine, drawPoint, tempStyles} from "./internal/canvas";
+import {split, expandHandle, splitLine} from "../internal/util";
 import {timingFunctions} from "../internal/animate/timing";
+import {Coord} from "../internal/types";
 
 // TODO implement title styles
 addText(`Raster images (left) are made up of pixels and have a fixed
@@ -47,35 +48,73 @@ addCanvas(
 );
 
 addText(
-    `A common way to define these vector shapes is using Bezier curves.
-        These curves are made up of two point coordinates, and handle
-        coordinates. The handles define the direction and momentum of the line.`,
+    `A common way to define these vector shapes is using Bezier curves. The cubic bezier below
+        is made up of four coordinates: the start/end points and the corresponding "handles".
+        These handles can be thought of as defining the direction and momentum of the line.`,
 );
 
 addCanvas(2, (ctx, width, height, animate) => {
-    const cycleSpeedStart = Math.E * 1000;
-    const cycleSpeedEnd = Math.PI * 1000;
-
-    const calcBouncePercentage = (speed: number, frameTime: number) => {
-        const halfPeriod = speed / 2;
-        const animationTime = mod(frameTime, speed);
-        if (animationTime <= halfPeriod) {
-            return timingFunctions.ease(animationTime / halfPeriod);
-        } else {
-            return timingFunctions.ease(1 - (animationTime - halfPeriod) / halfPeriod);
-        }
-    };
+    const startPeriod = Math.E * 1000;
+    const endPeriod = Math.PI * 1000;
 
     animate((frameTime) => {
-        const startPercentage = calcBouncePercentage(cycleSpeedStart, frameTime);
+        const startPercentage = calcBouncePercentage(startPeriod, timingFunctions.ease, frameTime);
         const startAngle = split(startPercentage, -45, +45);
         const start = point(width * 0.2, height * 0.5, 0, 0, startAngle, width * 0.25);
 
-        const endPercentage = calcBouncePercentage(cycleSpeedEnd, frameTime);
+        const endPercentage = calcBouncePercentage(endPeriod, timingFunctions.ease, frameTime);
         const endAngle = split(endPercentage, 135, 225);
         const end = point(width * 0.8, height * 0.5, endAngle, width * 0.25, 0, 0);
 
         drawOpen(ctx, start, end);
+    });
+});
+
+addCanvas(2, (ctx, width, height, animate) => {
+    const period = Math.PI * Math.E * 1000;
+    const start = point(width * 0.3, height * 0.8, 0, 0, -105, width * 0.32);
+    const end = point(width * 0.7, height * 0.8, -75, width * 0.25, 0, 0);
+    const lineWidth = width * 0.002;
+
+    const a0: Coord = start;
+    const a1 = expandHandle(start, start.handleOut);
+    const a2 = expandHandle(end, end.handleIn);
+    const a3: Coord = end;
+
+    animate((frameTime) => {
+        const percentage = calcBouncePercentage(period, timingFunctions.ease, frameTime);
+
+        const b0 = splitLine(percentage, a0, a1);
+        const b1 = splitLine(percentage, a1, a2);
+        const b2 = splitLine(percentage, a2, a3);
+        const c0 = splitLine(percentage, b0, b1);
+        const c1 = splitLine(percentage, b1, b2);
+        const d0 = splitLine(percentage, c0, c1);
+
+        drawLine(ctx, a0, a1, lineWidth);
+        drawLine(ctx, a1, a2, lineWidth);
+        drawLine(ctx, a2, a3, lineWidth);
+        drawLine(ctx, b0, b1, lineWidth);
+        drawLine(ctx, b1, b2, lineWidth);
+        drawLine(ctx, c0, c1, lineWidth);
+
+        drawPoint(ctx, a0, lineWidth * 1.3);
+        drawPoint(ctx, a1, lineWidth * 1.3);
+        drawPoint(ctx, a2, lineWidth * 1.3);
+        drawPoint(ctx, a3, lineWidth * 1.3);
+        drawPoint(ctx, b0, lineWidth * 1.3);
+        drawPoint(ctx, b1, lineWidth * 1.3);
+        drawPoint(ctx, b2, lineWidth * 1.3);
+        drawPoint(ctx, c0, lineWidth * 1.3);
+        drawPoint(ctx, c1, lineWidth * 1.3);
+
+        // TODO make handles optional.
+        drawOpen(ctx, start, end);
+
+        tempStyles(ctx, () => {
+            ctx.fillStyle = highlightColor;
+            drawPoint(ctx, d0, lineWidth * 3);
+        });
     });
 });
 
