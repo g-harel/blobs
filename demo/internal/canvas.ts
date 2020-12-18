@@ -1,8 +1,8 @@
 import {TimingFunc} from "../../internal/animate/timing";
 import {Coord, Point} from "../../internal/types";
 import {expandHandle, forPoints, mod, rad} from "../../internal/util";
-import {debug, debugColor} from "../internal/debug";
-import {getTotalWidth, highlightColor} from "../internal/layout";
+import {debug} from "../internal/debug";
+import {getTotalWidth, colors} from "../internal/layout";
 
 export const tempStyles = (ctx: CanvasRenderingContext2D, fn: () => void) => {
     ctx.save();
@@ -19,7 +19,7 @@ export const rotateAround = (
         options.ctx.rotate(options.angle);
         if (debug) {
             tempStyles(options.ctx, () => {
-                options.ctx.fillStyle = debugColor;
+                options.ctx.fillStyle = colors.debug;
                 options.ctx.fillRect(0, -4, 1, 8);
                 options.ctx.fillRect(-32, 0, 64, 1);
             });
@@ -74,21 +74,25 @@ export const drawClosed = (ctx: CanvasRenderingContext2D, points: Point[]) => {
     });
 };
 
-export const drawOpen = (ctx: CanvasRenderingContext2D, start: Point, end: Point) => {
+export const drawOpen = (ctx: CanvasRenderingContext2D, start: Point, end: Point, handles?: boolean) => {
     const width = getTotalWidth();
     const startHandle = expandHandle(start, start.handleOut);
     const endHandle = expandHandle(end, end.handleIn);
 
     // Draw handles.
-    tempStyles(ctx, () => {
-        const lineWidth = width * 0.002;
+    if (handles) {
+        tempStyles(ctx, () => {
+            const lineWidth = width * 0.002;
+            ctx.fillStyle = colors.secondary;
+            ctx.strokeStyle = colors.secondary;
 
-        drawLine(ctx, start, startHandle, lineWidth);
-        drawLine(ctx, end, endHandle, lineWidth, lineWidth * 2);
+            drawLine(ctx, start, startHandle, lineWidth);
+            drawLine(ctx, end, endHandle, lineWidth, lineWidth * 2);
 
-        drawPoint(ctx, startHandle, lineWidth * 1.4);
-        drawPoint(ctx, endHandle, lineWidth * 1.4);
-    });
+            drawPoint(ctx, startHandle, lineWidth * 1.4);
+            drawPoint(ctx, endHandle, lineWidth * 1.4);
+        });
+    }
 
     // Draw curve.
     tempStyles(ctx, () => {
@@ -100,12 +104,12 @@ export const drawOpen = (ctx: CanvasRenderingContext2D, start: Point, end: Point
         curve.bezierCurveTo(startHandle.x, startHandle.y, endHandle.x, endHandle.y, end.x, end.y);
 
         tempStyles(ctx, () => {
-            ctx.strokeStyle = highlightColor;
+            ctx.strokeStyle = colors.highlight;
             ctx.stroke(curve);
         });
 
         tempStyles(ctx, () => {
-            ctx.fillStyle = highlightColor;
+            ctx.fillStyle = colors.highlight;
             drawPoint(ctx, start, lineWidth * 2);
             drawPoint(ctx, end, lineWidth * 2);
         });

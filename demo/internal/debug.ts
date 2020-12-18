@@ -1,6 +1,5 @@
 // If debug is initially set to false it will not be toggleable.
 export let debug = true;
-export const debugColor = "green";
 
 const debugListeners: ((debug: boolean) => void)[] = [];
 export const onDebugStateChange = (fn: (debug: boolean) => void) => {

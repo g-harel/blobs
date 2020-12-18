@@ -1,4 +1,4 @@
-import {addCanvas, addText, highlightColor} from "./internal/layout";
+import {addCanvas, addText, colors} from "./internal/layout";
 import {rotateAround, point, drawOpen, calcBouncePercentage, drawLine, drawPoint, tempStyles} from "./internal/canvas";
 import {split, expandHandle, splitLine} from "../internal/util";
 import {timingFunctions} from "../internal/animate/timing";
@@ -24,7 +24,7 @@ addCanvas(
             for (let i = 0; i < quadrant.length; i++) {
                 const gridX = quadrant[i];
                 const gridY = quadrant[quadrant.length - 1 - i];
-                ctx.fillStyle = highlightColor;
+                ctx.fillStyle = colors.highlight;
                 ctx.fillRect(gridX * pt, gridY * pt, pt + 1, pt + 1);
                 ctx.fillRect(-(gridX + 1) * pt, gridY * pt, pt + 1, pt + 1);
                 ctx.fillRect(gridX * pt, -(gridY + 1) * pt, pt + 1, pt + 1);
@@ -42,7 +42,7 @@ addCanvas(
         ctx.beginPath();
         ctx.arc(cx, cy, shapeSize / 2, 0, 2 * Math.PI);
         ctx.lineWidth = pt;
-        ctx.strokeStyle = highlightColor;
+        ctx.strokeStyle = colors.highlight;
         ctx.stroke();
     },
 );
@@ -66,7 +66,7 @@ addCanvas(2, (ctx, width, height, animate) => {
         const endAngle = split(endPercentage, 135, 225);
         const end = point(width * 0.8, height * 0.5, endAngle, width * 0.25, 0, 0);
 
-        drawOpen(ctx, start, end);
+        drawOpen(ctx, start, end, true);
     });
 });
 
@@ -91,28 +91,33 @@ addCanvas(2, (ctx, width, height, animate) => {
         const c1 = splitLine(percentage, b1, b2);
         const d0 = splitLine(percentage, c0, c1);
 
-        drawLine(ctx, a0, a1, lineWidth);
-        drawLine(ctx, a1, a2, lineWidth);
-        drawLine(ctx, a2, a3, lineWidth);
-        drawLine(ctx, b0, b1, lineWidth);
-        drawLine(ctx, b1, b2, lineWidth);
-        drawLine(ctx, c0, c1, lineWidth);
+        tempStyles(ctx, () => {
+            ctx.fillStyle = colors.secondary;
+            ctx.strokeStyle = colors.secondary;
 
-        drawPoint(ctx, a0, lineWidth * 1.3);
-        drawPoint(ctx, a1, lineWidth * 1.3);
-        drawPoint(ctx, a2, lineWidth * 1.3);
-        drawPoint(ctx, a3, lineWidth * 1.3);
-        drawPoint(ctx, b0, lineWidth * 1.3);
-        drawPoint(ctx, b1, lineWidth * 1.3);
-        drawPoint(ctx, b2, lineWidth * 1.3);
-        drawPoint(ctx, c0, lineWidth * 1.3);
-        drawPoint(ctx, c1, lineWidth * 1.3);
+            drawLine(ctx, a0, a1, lineWidth);
+            drawLine(ctx, a1, a2, lineWidth);
+            drawLine(ctx, a2, a3, lineWidth);
+            drawLine(ctx, b0, b1, lineWidth);
+            drawLine(ctx, b1, b2, lineWidth);
+            drawLine(ctx, c0, c1, lineWidth);
+
+            drawPoint(ctx, a0, lineWidth * 1.3);
+            drawPoint(ctx, a1, lineWidth * 1.3);
+            drawPoint(ctx, a2, lineWidth * 1.3);
+            drawPoint(ctx, a3, lineWidth * 1.3);
+            drawPoint(ctx, b0, lineWidth * 1.3);
+            drawPoint(ctx, b1, lineWidth * 1.3);
+            drawPoint(ctx, b2, lineWidth * 1.3);
+            drawPoint(ctx, c0, lineWidth * 1.3);
+            drawPoint(ctx, c1, lineWidth * 1.3);
+        });
 
         // TODO make handles optional.
-        drawOpen(ctx, start, end);
+        drawOpen(ctx, start, end, false);
 
         tempStyles(ctx, () => {
-            ctx.fillStyle = highlightColor;
+            ctx.fillStyle = colors.highlight;
             drawPoint(ctx, d0, lineWidth * 3);
         });
     });

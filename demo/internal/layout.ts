@@ -1,7 +1,11 @@
 import {tempStyles} from "./canvas";
-import {debug, debugColor, onDebugStateChange} from "./debug";
+import {debug, onDebugStateChange} from "./debug";
 
-export const highlightColor = "#ec576b";
+export const colors = {
+    debug: "green",
+    highlight: "#ec576b",
+    secondary: "#555",
+}
 
 enum RowType {
     CANVAS,
@@ -119,7 +123,7 @@ const redraw = () => {
                 const drawDebug = () => {
                     if (debug) {
                         tempStyles(cell.ctx, () => {
-                            cell.ctx.strokeStyle = debugColor;
+                            cell.ctx.strokeStyle = colors.debug;
                             cell.ctx.strokeRect(0, 0, cellWidth, cellHeight - 1);
                         });
                     }
@@ -142,7 +146,7 @@ const redraw = () => {
                         drawDebug();
                         if (debug) {
                             tempStyles(cell.ctx, () => {
-                                cell.ctx.fillStyle = debugColor;
+                                cell.ctx.fillStyle = colors.debug;
                                 cell.ctx.fillText(String(frameTime), 10, 15);
                             });
                         }
