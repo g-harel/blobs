@@ -5,7 +5,7 @@ export const colors = {
     debug: "green",
     highlight: "#ec576b",
     secondary: "#555",
-}
+};
 
 enum RowType {
     CANVAS,
@@ -27,6 +27,7 @@ interface Cell {
 
 interface Row {
     type: RowType;
+    element: HTMLElement;
     cells?: Cell[];
     text?: Text;
 }
@@ -55,27 +56,41 @@ export const getTotalWidth = () => {
     return rowWidth * window.devicePixelRatio;
 };
 
+const createRow = (classes: string[] = []): HTMLElement => {
+    const rowElement = document.createElement("div");
+    rowElement.classList.add("row", ...classes);
+    containerElement.appendChild(rowElement);
+
+    const numberElement = document.createElement("div");
+    numberElement.classList.add("number");
+    numberElement.appendChild(document.createTextNode(("000" + rows.length).substr(-3)));
+    rowElement.appendChild(numberElement);
+
+    return rowElement;
+};
+
 // Adds a new row of text to the bottom of the stack.
 export const addText = (text: string) => {
-    const rowElement = document.createElement("div");
-    rowElement.classList.add("row", "text");
-    containerElement.appendChild(rowElement);
+    const rowElement = createRow();
+
+    const textWrapperElement = document.createElement("div");
+    textWrapperElement.classList.add("text");
+    rowElement.appendChild(textWrapperElement);
 
     text = text.replace("\n", " ").replace(/\s+/g, " ").trim();
     const textElement = document.createTextNode(text);
-    rowElement.appendChild(textElement);
+    textWrapperElement.appendChild(textElement);
 
     rows.push({
         type: RowType.TEXT,
+        element: rowElement,
         text: {text, title: false},
     });
 };
 
 // Adds a new row of cells to the bottom of the stack.
 export const addCanvas = (aspectRatio: number, ...painters: CellPainter[]) => {
-    const rowElement = document.createElement("div");
-    rowElement.classList.add("row");
-    containerElement.appendChild(rowElement);
+    const rowElement = createRow();
 
     if (painters.length == 0) {
         painters = [() => {}];
@@ -98,6 +113,7 @@ export const addCanvas = (aspectRatio: number, ...painters: CellPainter[]) => {
     }
     rows.push({
         type: RowType.CANVAS,
+        element: rowElement,
         cells,
     });
 

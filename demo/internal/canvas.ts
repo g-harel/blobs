@@ -74,7 +74,12 @@ export const drawClosed = (ctx: CanvasRenderingContext2D, points: Point[]) => {
     });
 };
 
-export const drawOpen = (ctx: CanvasRenderingContext2D, start: Point, end: Point, handles?: boolean) => {
+export const drawOpen = (
+    ctx: CanvasRenderingContext2D,
+    start: Point,
+    end: Point,
+    handles?: boolean,
+) => {
     const width = getTotalWidth();
     const startHandle = expandHandle(start, start.handleOut);
     const endHandle = expandHandle(end, end.handleIn);

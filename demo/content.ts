@@ -1,5 +1,13 @@
 import {addCanvas, addText, colors} from "./internal/layout";
-import {rotateAround, point, drawOpen, calcBouncePercentage, drawLine, drawPoint, tempStyles} from "./internal/canvas";
+import {
+    rotateAround,
+    point,
+    drawOpen,
+    calcBouncePercentage,
+    drawLine,
+    drawPoint,
+    tempStyles,
+} from "./internal/canvas";
 import {split, expandHandle, splitLine} from "../internal/util";
 import {timingFunctions} from "../internal/animate/timing";
 import {Coord} from "../internal/types";
