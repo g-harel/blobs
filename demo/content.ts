@@ -110,15 +110,15 @@ addCanvas(2, (ctx, width, height, animate) => {
             drawLine(ctx, b1, b2, lineWidth);
             drawLine(ctx, c0, c1, lineWidth);
 
-            drawPoint(ctx, a0, lineWidth * 1.3);
-            drawPoint(ctx, a1, lineWidth * 1.3);
-            drawPoint(ctx, a2, lineWidth * 1.3);
-            drawPoint(ctx, a3, lineWidth * 1.3);
-            drawPoint(ctx, b0, lineWidth * 1.3);
-            drawPoint(ctx, b1, lineWidth * 1.3);
-            drawPoint(ctx, b2, lineWidth * 1.3);
-            drawPoint(ctx, c0, lineWidth * 1.3);
-            drawPoint(ctx, c1, lineWidth * 1.3);
+            drawPoint(ctx, a0, lineWidth * 1.3, "a0");
+            drawPoint(ctx, a1, lineWidth * 1.3, "a1");
+            drawPoint(ctx, a2, lineWidth * 1.3, "a2");
+            drawPoint(ctx, a3, lineWidth * 1.3, "a3");
+            drawPoint(ctx, b0, lineWidth * 1.3, "b0");
+            drawPoint(ctx, b1, lineWidth * 1.3, "b1");
+            drawPoint(ctx, b2, lineWidth * 1.3, "b2");
+            drawPoint(ctx, c0, lineWidth * 1.3, "c0");
+            drawPoint(ctx, c1, lineWidth * 1.3, "c1");
         });
 
         // TODO make handles optional.

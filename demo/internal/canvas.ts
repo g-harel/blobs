@@ -44,11 +44,22 @@ export const point = (
     };
 };
 
-// TODO optional label.
-export const drawPoint = (ctx: CanvasRenderingContext2D, coord: Coord, width: number) => {
+export const drawPoint = (
+    ctx: CanvasRenderingContext2D,
+    coord: Coord,
+    radius: number,
+    label?: string,
+) => {
     const pointPath = new Path2D();
-    pointPath.arc(coord.x, coord.y, width, 0, 2 * Math.PI);
+    pointPath.arc(coord.x, coord.y, radius, 0, 2 * Math.PI);
     ctx.fill(pointPath);
+
+    if (label) {
+        tempStyles(ctx, () => {
+            ctx.font = `${5 * radius}px monospace`;
+            ctx.fillText(label, coord.x + 2 * radius, coord.y - radius);
+        });
+    }
 };
 
 export const drawLine = (
