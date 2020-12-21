@@ -49,20 +49,25 @@ const rows: Row[] = [];
 const containerElement = document.querySelector(".container");
 if (!containerElement) throw "missing container";
 
-export const getTotalWidth = () => {
+export const sizes = (): {width: number, pt: number} => {
     const rowStyle = window.getComputedStyle((containerElement.firstChild as any) || document.body);
     const rowWidth = Number(rowStyle.getPropertyValue("width").slice(0, -2));
-    return rowWidth * window.devicePixelRatio;
+    const width = rowWidth * window.devicePixelRatio;
+    return {width, pt: width * 0.002};
 };
 
 const createRow = (classes: string[] = []): HTMLElement => {
+    const numberLabel = ("000" + rows.length).substr(-3);
+
     const rowElement = document.createElement("div");
     rowElement.classList.add("row", ...classes);
+    rowElement.setAttribute("id", numberLabel);
     containerElement.appendChild(rowElement);
 
-    const numberElement = document.createElement("div");
+    const numberElement = document.createElement("a");
     numberElement.classList.add("number");
-    numberElement.appendChild(document.createTextNode(("000" + rows.length).substr(-3)));
+    numberElement.setAttribute("href", "#" + numberLabel);
+    numberElement.appendChild(document.createTextNode(numberLabel));
     rowElement.appendChild(numberElement);
 
     return rowElement;
@@ -126,7 +131,7 @@ const redraw = () => {
     redrawTimeout = window.setTimeout(() => {
         for (const row of rows) {
             if (row.type !== RowType.CANVAS || !row.cells) continue;
-            const cellWidth = getTotalWidth() / row.cells.length;
+            const cellWidth = sizes().width / row.cells.length;
             for (const cell of row.cells) {
                 const cellHeight = cellWidth / cell.aspectRatio;
 
