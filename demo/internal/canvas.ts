@@ -2,7 +2,7 @@ import {TimingFunc} from "../../internal/animate/timing";
 import {Coord, Point} from "../../internal/types";
 import {expandHandle, forPoints, mod, rad} from "../../internal/util";
 import {debug} from "../internal/debug";
-import {getTotalWidth, colors} from "../internal/layout";
+import {sizes, colors} from "../internal/layout";
 
 export const tempStyles = (ctx: CanvasRenderingContext2D, fn: () => void) => {
     ctx.save();
@@ -47,9 +47,10 @@ export const point = (
 export const drawPoint = (
     ctx: CanvasRenderingContext2D,
     coord: Coord,
-    radius: number,
+    size: number,
     label?: string,
 ) => {
+    const radius = sizes().pt * size;
     const pointPath = new Path2D();
     pointPath.arc(coord.x, coord.y, radius, 0, 2 * Math.PI);
     ctx.fill(pointPath);
@@ -66,22 +67,23 @@ export const drawLine = (
     ctx: CanvasRenderingContext2D,
     a: Coord,
     b: Coord,
-    width: number,
+    size: number,
     dash?: number,
 ) => {
     tempStyles(ctx, () => {
+        const width = sizes().pt * size;
         const linePath = new Path2D();
         linePath.moveTo(a.x, a.y);
         linePath.lineTo(b.x, b.y);
-        if (dash) ctx.setLineDash([dash]);
+        if (dash) ctx.setLineDash([dash*width]);
         ctx.lineWidth = width;
         ctx.stroke(linePath);
     });
 };
 
-export const drawClosed = (ctx: CanvasRenderingContext2D, points: Point[]) => {
+export const drawClosed = (ctx: CanvasRenderingContext2D, points: Point[], handles?: boolean) => {
     forPoints(points, ({curr, next}) => {
-        drawOpen(ctx, curr, next());
+        drawOpen(ctx, curr, next(), handles);
     });
 };
 
@@ -91,22 +93,21 @@ export const drawOpen = (
     end: Point,
     handles?: boolean,
 ) => {
-    const width = getTotalWidth();
+    const width = sizes().width;
     const startHandle = expandHandle(start, start.handleOut);
     const endHandle = expandHandle(end, end.handleIn);
 
     // Draw handles.
     if (handles) {
         tempStyles(ctx, () => {
-            const lineWidth = width * 0.002;
             ctx.fillStyle = colors.secondary;
             ctx.strokeStyle = colors.secondary;
 
-            drawLine(ctx, start, startHandle, lineWidth);
-            drawLine(ctx, end, endHandle, lineWidth, lineWidth * 2);
+            drawLine(ctx, start, startHandle, 1);
+            drawLine(ctx, end, endHandle, 1, 2);
 
-            drawPoint(ctx, startHandle, lineWidth * 1.4);
-            drawPoint(ctx, endHandle, lineWidth * 1.4);
+            drawPoint(ctx, startHandle, 1.4);
+            drawPoint(ctx, endHandle, 1.4);
         });
     }
 
@@ -126,8 +127,8 @@ export const drawOpen = (
 
         tempStyles(ctx, () => {
             ctx.fillStyle = colors.highlight;
-            drawPoint(ctx, start, lineWidth * 2);
-            drawPoint(ctx, end, lineWidth * 2);
+            drawPoint(ctx, start, 2);
+            drawPoint(ctx, end, 2);
         });
     });
 };
