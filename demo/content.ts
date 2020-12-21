@@ -7,10 +7,11 @@ import {
     drawLine,
     drawPoint,
     tempStyles,
+    drawClosed,
 } from "./internal/canvas";
-import {split, expandHandle, splitLine} from "../internal/util";
+import {split, expandHandle, splitLine, smooth} from "../internal/util";
 import {timingFunctions} from "../internal/animate/timing";
-import {Coord} from "../internal/types";
+import {Coord, Point} from "../internal/types";
 
 // TODO implement title styles
 addText(`Raster images (left) are made up of pixels and have a fixed
@@ -82,7 +83,6 @@ addCanvas(2, (ctx, width, height, animate) => {
     const period = Math.PI * Math.E * 1000;
     const start = point(width * 0.3, height * 0.8, 0, 0, -105, width * 0.32);
     const end = point(width * 0.7, height * 0.8, -75, width * 0.25, 0, 0);
-    const lineWidth = width * 0.002;
 
     const a0: Coord = start;
     const a1 = expandHandle(start, start.handleOut);
@@ -103,22 +103,22 @@ addCanvas(2, (ctx, width, height, animate) => {
             ctx.fillStyle = colors.secondary;
             ctx.strokeStyle = colors.secondary;
 
-            drawLine(ctx, a0, a1, lineWidth);
-            drawLine(ctx, a1, a2, lineWidth);
-            drawLine(ctx, a2, a3, lineWidth);
-            drawLine(ctx, b0, b1, lineWidth);
-            drawLine(ctx, b1, b2, lineWidth);
-            drawLine(ctx, c0, c1, lineWidth);
+            drawLine(ctx, a0, a1, 1);
+            drawLine(ctx, a1, a2, 1);
+            drawLine(ctx, a2, a3, 1);
+            drawLine(ctx, b0, b1, 1);
+            drawLine(ctx, b1, b2, 1);
+            drawLine(ctx, c0, c1, 1);
 
-            drawPoint(ctx, a0, lineWidth * 1.3, "a0");
-            drawPoint(ctx, a1, lineWidth * 1.3, "a1");
-            drawPoint(ctx, a2, lineWidth * 1.3, "a2");
-            drawPoint(ctx, a3, lineWidth * 1.3, "a3");
-            drawPoint(ctx, b0, lineWidth * 1.3, "b0");
-            drawPoint(ctx, b1, lineWidth * 1.3, "b1");
-            drawPoint(ctx, b2, lineWidth * 1.3, "b2");
-            drawPoint(ctx, c0, lineWidth * 1.3, "c0");
-            drawPoint(ctx, c1, lineWidth * 1.3, "c1");
+            drawPoint(ctx, a0, 1.3, "a0");
+            drawPoint(ctx, a1, 1.3, "a1");
+            drawPoint(ctx, a2, 1.3, "a2");
+            drawPoint(ctx, a3, 1.3, "a3");
+            drawPoint(ctx, b0, 1.3, "b0");
+            drawPoint(ctx, b1, 1.3, "b1");
+            drawPoint(ctx, b2, 1.3, "b2");
+            drawPoint(ctx, c0, 1.3, "c0");
+            drawPoint(ctx, c1, 1.3, "c1");
         });
 
         // TODO make handles optional.
@@ -126,9 +126,46 @@ addCanvas(2, (ctx, width, height, animate) => {
 
         tempStyles(ctx, () => {
             ctx.fillStyle = colors.highlight;
-            drawPoint(ctx, d0, lineWidth * 3);
+            drawPoint(ctx, d0, 3);
         });
     });
+});
+
+addCanvas(2, (ctx, width, height) => {
+    const pointCount = 5;
+    const angle = 2 * Math.PI / pointCount;
+    const radius = width * 0.15;
+    const center: Coord = {x: width * 0.3, y: height * 0.5};
+    const smoothedCenter = {x: width * 0.7, y: height * 0.5};
+
+    // Make array of points rotated around center.
+    const points: Point[] = [];
+    const nullHandle = {angle: 0, length: 0};
+    for (let i = 0; i < pointCount; i++) {
+        const coord = expandHandle(center, {angle: i * angle, length: radius});
+        points.push({...coord, handleIn: nullHandle, handleOut: nullHandle});
+    }
+
+    // Draw original polygon.
+    tempStyles(ctx, () => {
+        ctx.fillStyle = colors.secondary;
+        ctx.strokeStyle = colors.secondary;
+
+        drawPoint(ctx, center, 2);
+        points.forEach((p) => {
+            drawLine(ctx, center, p, 1, 2);
+        });
+    });
+    drawClosed(ctx, points, false);
+
+    // Draw smoothed polygon.
+    // https://math.stackexchange.com/a/873589/235756
+    const smoothingStrength = ((4 / 3) * Math.tan(angle / 4)) / Math.sin(angle / 2) / 2;
+    const smoothedPoints = smooth(points, smoothingStrength).map((p) => {
+        p.x += smoothedCenter.x - center.x;
+        return p;
+    });
+    drawClosed(ctx, smoothedPoints, true);
 });
 
 // content
