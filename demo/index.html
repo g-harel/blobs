@@ -23,6 +23,7 @@
             .container .row {
                 border: 1px solid #eee;
                 display: flex;
+                flex-direction: column;
                 margin-bottom: 1rem;
                 max-width: 1000px;
                 width: 100%;
@@ -32,6 +33,7 @@
                 color: #ccc;
                 font-size: 0.8rem;
                 font-weight: 100;
+                height: 0;
                 position: relative;
                 text-decoration: none;
                 transform: translate(3rem, 0.5rem);
@@ -43,13 +45,23 @@
                 padding: 2rem 3rem 1.5rem;
             }
 
-            .container .row .cell {
+            .container .row .canvas-container {
+                display: flex;
+            }
+
+            .container .row .canvas-container .cell {
                 flex-grow: 1;
                 flex-shrink: 1;
             }
 
-            .container .row .cell canvas {
+            .container .row .canvas-container .cell canvas {
                 width: 100%;
+            }
+
+            .container .row .label {
+                font-size: 0.8rem;
+                margin: 0;
+                padding: 1rem;
             }
         </style>
     </head>

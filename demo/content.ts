@@ -1,4 +1,4 @@
-import {addCanvas, addText, colors} from "./internal/layout";
+import {addCanvas, colors} from "./internal/layout";
 import {
     rotateAround,
     point,
@@ -12,12 +12,6 @@ import {
 import {split, expandHandle, splitLine, smooth} from "../internal/util";
 import {timingFunctions} from "../internal/animate/timing";
 import {Coord, Point} from "../internal/types";
-
-// TODO implement title styles
-addText(`Raster images (left) are made up of pixels and have a fixed
-resolution. Vector formats (right) instead use math equations to draw
-the image at any scale. This makes it ideal for artwork that has sharp
-lines and will be viewed at varying sizes like logos and fonts.`);
 
 addCanvas(
     1.3,
@@ -54,12 +48,10 @@ addCanvas(
         ctx.strokeStyle = colors.highlight;
         ctx.stroke();
     },
-);
-
-addText(
-    `A common way to define these vector shapes is using Bezier curves. The cubic bezier below
-        is made up of four coordinates: the start/end points and the corresponding "handles".
-        These handles can be thought of as defining the direction and momentum of the line.`,
+    `Raster images (left) are made up of pixels and have a fixed
+resolution. Vector formats (right) instead use math equations to draw
+the image at any scale. This makes it ideal for artwork that has sharp
+lines and will be viewed at varying sizes like logos and fonts.`
 );
 
 addCanvas(2, (ctx, width, height, animate) => {
@@ -77,7 +69,9 @@ addCanvas(2, (ctx, width, height, animate) => {
 
         drawOpen(ctx, start, end, true);
     });
-});
+}, `A common way to define these vector shapes is using Bezier curves. The cubic bezier below
+is made up of four coordinates: the start/end points and the corresponding "handles".
+These handles can be thought of as defining the direction and momentum of the line.`);
 
 addCanvas(2, (ctx, width, height, animate) => {
     const period = Math.PI * Math.E * 1000;
@@ -121,7 +115,6 @@ addCanvas(2, (ctx, width, height, animate) => {
             drawPoint(ctx, c1, 1.3, "c1");
         });
 
-        // TODO make handles optional.
         drawOpen(ctx, start, end, false);
 
         tempStyles(ctx, () => {

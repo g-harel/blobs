@@ -17,6 +17,7 @@ interface Text {
     title: boolean;
 }
 
+// TODO remove things that don't need to be re-rendered.
 interface Cell {
     aspectRatio: number;
     canvas: HTMLCanvasElement;
@@ -32,6 +33,7 @@ interface Row {
     text?: Text;
 }
 
+// TODO make the painter return a label.
 export interface CellPainter {
     (
         ctx: CanvasRenderingContext2D,
@@ -93,18 +95,26 @@ export const addText = (text: string) => {
 };
 
 // Adds a new row of cells to the bottom of the stack.
-export const addCanvas = (aspectRatio: number, ...painters: CellPainter[]) => {
+export const addCanvas = (aspectRatio: number, ...contents: (CellPainter | string)[]) => {
     const rowElement = createRow();
 
-    if (painters.length == 0) {
-        painters = [() => {}];
+    if (contents.length == 0) {
+        contents = [() => {}];
     }
 
+    const canvasContainerElement = document.createElement("div");
+    canvasContainerElement.classList.add("canvas-container");
+    rowElement.appendChild(canvasContainerElement);
+
     const cells: Cell[] = [];
-    for (const painter of painters) {
+    for (const content of contents) {
+        // Add labels after the illustrations.
+        if (typeof content === "string") continue;
+        const painter: CellPainter = content;
+
         const cellElement = document.createElement("div");
         cellElement.classList.add("cell");
-        rowElement.appendChild(cellElement);
+        canvasContainerElement.appendChild(cellElement);
 
         const canvas = document.createElement("canvas");
         cellElement.appendChild(canvas);
@@ -114,6 +124,18 @@ export const addCanvas = (aspectRatio: number, ...painters: CellPainter[]) => {
 
         const cell = {aspectRatio, canvas, ctx, painter, animationID: -1};
         cells.push(cell);
+    }
+    for (const content of contents) {
+        if (typeof content !== "string") continue;
+        const label: string = content;
+
+        const labelElement = document.createElement("p");
+        labelElement.classList.add("label");
+        rowElement.appendChild(labelElement);
+
+        const textElement = document.createTextNode(label);
+        labelElement.appendChild(textElement);
+
     }
     rows.push({
         type: RowType.CANVAS,
