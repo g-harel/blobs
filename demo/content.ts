@@ -34,6 +34,9 @@ addCanvas(
                 ctx.fillRect(-(gridX + 1) * pt, -(gridY + 1) * pt, pt + 1, pt + 1);
             }
         });
+
+        return `Traditional raster images are made up of pixels and have a fixed
+        resolution.`;
     },
     // Smooth circle.
     (ctx, width, height) => {
@@ -47,11 +50,11 @@ addCanvas(
         ctx.lineWidth = pt;
         ctx.strokeStyle = colors.highlight;
         ctx.stroke();
+
+        return `Vector formats use math equations to draw
+        the image at any scale. This makes it ideal for artwork that has sharp
+        lines and will be viewed at varying sizes like logos and fonts.`;
     },
-    `Raster images (left) are made up of pixels and have a fixed
-resolution. Vector formats (right) instead use math equations to draw
-the image at any scale. This makes it ideal for artwork that has sharp
-lines and will be viewed at varying sizes like logos and fonts.`
 );
 
 addCanvas(2, (ctx, width, height, animate) => {
@@ -69,9 +72,11 @@ addCanvas(2, (ctx, width, height, animate) => {
 
         drawOpen(ctx, start, end, true);
     });
-}, `A common way to define these vector shapes is using Bezier curves. The cubic bezier below
-is made up of four coordinates: the start/end points and the corresponding "handles".
-These handles can be thought of as defining the direction and momentum of the line.`);
+
+    return `A common way to define these vector shapes is using Bezier curves. The cubic bezier below
+        is made up of four coordinates: the start/end points and the corresponding "handles".
+        These handles can be thought of as defining the direction and momentum of the line.`;
+});
 
 addCanvas(2, (ctx, width, height, animate) => {
     const period = Math.PI * Math.E * 1000;
@@ -126,7 +131,7 @@ addCanvas(2, (ctx, width, height, animate) => {
 
 addCanvas(2, (ctx, width, height) => {
     const pointCount = 5;
-    const angle = 2 * Math.PI / pointCount;
+    const angle = (2 * Math.PI) / pointCount;
     const radius = width * 0.15;
     const center: Coord = {x: width * 0.3, y: height * 0.5};
     const smoothedCenter = {x: width * 0.7, y: height * 0.5};

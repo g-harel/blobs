@@ -75,7 +75,7 @@ export const drawLine = (
         const linePath = new Path2D();
         linePath.moveTo(a.x, a.y);
         linePath.lineTo(b.x, b.y);
-        if (dash) ctx.setLineDash([dash*width]);
+        if (dash) ctx.setLineDash([dash * width]);
         ctx.lineWidth = width;
         ctx.stroke(linePath);
     });
