@@ -154,15 +154,14 @@ const redraw = () => {
                     drawFrame();
                 };
 
-                // Redraw canvas contents and label.
+                // Redraw canvas contents and replace label if changed.
                 const label = cell.painter(cell.ctx, cellWidth, cellHeight, animate);
                 if (label) {
                     const cellElement = cell.canvas.parentElement;
                     if (cellElement) {
                         cellElement.style.width = `${100 / cellRow.length}%`;
                         const labelElement = cellElement.querySelector(".label");
-                        if (labelElement) {
-                            // TODO only replace if changed.
+                        if (labelElement && labelElement.innerHTML !== label) {
                             labelElement.innerHTML = "";
                             labelElement.appendChild(document.createTextNode(label));
                         }
