@@ -7,31 +7,12 @@ export const colors = {
     secondary: "#555",
 };
 
-enum RowType {
-    CANVAS,
-    TEXT,
-}
-
-interface Text {
-    text: string;
-    title: boolean;
-}
-
-// TODO remove things that don't need to be re-rendered.
 interface Cell {
     aspectRatio: number;
     canvas: HTMLCanvasElement;
     ctx: CanvasRenderingContext2D;
     painter: CellPainter;
     animationID: number;
-}
-
-interface Row {
-    type: RowType;
-    element: HTMLElement;
-    cells?: Cell[];
-    // TODO rename to title
-    text?: Text;
 }
 
 export interface CellPainter {
@@ -47,66 +28,60 @@ export interface AnimationPainter {
     (timestamp: number): void;
 }
 
-const rows: Row[] = [];
+const cells: Cell[][] = [];
 const containerElement = document.querySelector(".container");
 if (!containerElement) throw "missing container";
 
 export const sizes = (): {width: number; pt: number} => {
-    const rowStyle = window.getComputedStyle((containerElement.firstChild as any) || document.body);
-    const rowWidth = Number(rowStyle.getPropertyValue("width").slice(0, -2));
-    const width = rowWidth * window.devicePixelRatio;
+    const sectionStyle = window.getComputedStyle((containerElement.firstChild as any) || document.body);
+    const sectionWidth = Number(sectionStyle.getPropertyValue("width").slice(0, -2));
+    const width = sectionWidth * window.devicePixelRatio;
     return {width, pt: width * 0.002};
 };
 
-const createRow = (classes: string[] = []): HTMLElement => {
-    const numberLabel = ("000" + rows.length).substr(-3);
+const createSection = (): HTMLElement => {
+    const numberLabel = ("000" + cells.length).substr(-3);
 
-    const rowElement = document.createElement("div");
-    rowElement.classList.add("row", ...classes);
-    rowElement.setAttribute("id", numberLabel);
-    containerElement.appendChild(rowElement);
+    const section = document.createElement("div");
+    section.classList.add("section");
+    section.setAttribute("id", numberLabel);
+    containerElement.appendChild(section);
 
     const numberElement = document.createElement("a");
     numberElement.classList.add("number");
     numberElement.setAttribute("href", "#" + numberLabel);
     numberElement.appendChild(document.createTextNode(numberLabel));
-    rowElement.appendChild(numberElement);
+    section.appendChild(numberElement);
 
-    return rowElement;
+    return section;
 };
 
-// Adds a new row of text to the bottom of the stack.
-export const addText = (text: string) => {
-    const rowElement = createRow();
+// Adds a section of text to the bottom of the layout.
+export const addTitle = (text: string) => {
+    const sectionElement = createSection();
 
     const textWrapperElement = document.createElement("div");
     textWrapperElement.classList.add("text");
-    rowElement.appendChild(textWrapperElement);
+    sectionElement.appendChild(textWrapperElement);
 
     text = text.replace("\n", " ").replace(/\s+/g, " ").trim();
     const textElement = document.createTextNode(text);
     textWrapperElement.appendChild(textElement);
-
-    rows.push({
-        type: RowType.TEXT,
-        element: rowElement,
-        text: {text, title: false},
-    });
 };
 
-// Adds a new row of cells to the bottom of the stack.
+// Adds a row of cells to the bottom of the layout.
 export const addCanvas = (aspectRatio: number, ...painters: CellPainter[]) => {
-    const rowElement = createRow();
+    const sectionElement = createSection();
 
     if (painters.length == 0) {
         painters = [() => {}];
     }
 
-    const cells: Cell[] = [];
+    const cellRow: Cell[] = [];
     for (const painter of painters) {
         const cellElement = document.createElement("div");
         cellElement.classList.add("cell");
-        rowElement.appendChild(cellElement);
+        sectionElement.appendChild(cellElement);
 
         const canvas = document.createElement("canvas");
         cellElement.appendChild(canvas);
@@ -119,13 +94,9 @@ export const addCanvas = (aspectRatio: number, ...painters: CellPainter[]) => {
         if (!ctx) throw "missing canvas context";
 
         const cell = {aspectRatio, canvas, ctx, painter, animationID: -1};
-        cells.push(cell);
+        cellRow.push(cell);
     }
-    rows.push({
-        type: RowType.CANVAS,
-        element: rowElement,
-        cells,
-    });
+    cells.push(cellRow);
 
     redraw();
 };
@@ -135,17 +106,16 @@ let redrawTimeout: undefined | number = undefined;
 const redraw = () => {
     window.clearTimeout(redrawTimeout);
     redrawTimeout = window.setTimeout(() => {
-        for (const row of rows) {
-            if (row.type !== RowType.CANVAS || !row.cells) continue;
-            const cellWidth = sizes().width / row.cells.length;
-            for (const cell of row.cells) {
+        for (const cellRow of cells) {
+            const cellWidth = sizes().width / cellRow.length;
+            for (const cell of cellRow) {
                 const cellHeight = cellWidth / cell.aspectRatio;
 
                 // Resize canvas;
                 cell.canvas.width = cellWidth;
                 cell.canvas.height = cellHeight;
 
-                // Draw canvas outline.
+                // Draw canvas debug info.
                 const drawDebug = () => {
                     if (debug) {
                         tempStyles(cell.ctx, () => {
@@ -156,6 +126,7 @@ const redraw = () => {
                 };
                 drawDebug();
 
+                // Cell-specific callback for providing an animation painter.
                 const animate = (painter: AnimationPainter) => {
                     const animationID = Math.random();
                     const startTime = Date.now();
@@ -188,7 +159,7 @@ const redraw = () => {
                 if (label) {
                     const cellElement = cell.canvas.parentElement;
                     if (cellElement) {
-                        cellElement.style.width = `${100 / row.cells.length}%`;
+                        cellElement.style.width = `${100 / cellRow.length}%`;
                         const labelElement = cellElement.querySelector(".label");
                         if (labelElement) {
                             // TODO only replace if changed.
