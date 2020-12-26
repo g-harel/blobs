@@ -15,6 +15,14 @@ export interface PointIteratorArgs {
     next: () => Point;
 }
 
+export const coordPoint = (coord: Coord): Point => {
+    return {
+        ...coord,
+        handleIn: {angle: 0, length: 0},
+        handleOut: {angle: 0, length: 0},
+    };
+};
+
 export const forPoints = (points: Point[], callback: (args: PointIteratorArgs) => void) => {
     for (let i = 0; i < points.length; i++) {
         const sibling = (pos: number) => copyPoint(points[mod(pos, points.length)]);

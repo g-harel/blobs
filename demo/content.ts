@@ -9,9 +9,12 @@ import {
     tempStyles,
     drawClosed,
 } from "./internal/canvas";
-import {split, expandHandle, splitLine, smooth} from "../internal/util";
+import {split, expandHandle, splitLine, forPoints, mapPoints, coordPoint} from "../internal/util";
 import {timingFunctions} from "../internal/animate/timing";
 import {Coord, Point} from "../internal/types";
+import {rand} from "../internal/rand";
+import {genFromOptions} from "../internal/gen";
+import {BlobOptions} from "../public/blobs";
 
 addCanvas(
     1.3,
@@ -129,12 +132,15 @@ addCanvas(2, (ctx, width, height, animate) => {
     });
 });
 
-addCanvas(2, (ctx, width, height) => {
+addCanvas(2, (ctx, width, height, animate) => {
+    const period = Math.PI * 1000;
     const pointCount = 5;
     const angle = (2 * Math.PI) / pointCount;
     const radius = width * 0.15;
     const center: Coord = {x: width * 0.3, y: height * 0.5};
-    const smoothedCenter = {x: width * 0.7, y: height * 0.5};
+    const slidCenter = {x: width * 0.7, y: height * 0.5};
+    const randSeed = "abcd";
+    const randStrength = 0.5;
 
     // Make array of points rotated around center.
     const points: Point[] = [];
@@ -143,27 +149,109 @@ addCanvas(2, (ctx, width, height) => {
         const coord = expandHandle(center, {angle: i * angle, length: radius});
         points.push({...coord, handleIn: nullHandle, handleOut: nullHandle});
     }
+    const slidPoints = mapPoints(points, ({curr}) => {
+        curr.x += slidCenter.x - center.x;
+        return curr;
+    });
 
-    // Draw original polygon.
-    tempStyles(ctx, () => {
-        ctx.fillStyle = colors.secondary;
-        ctx.strokeStyle = colors.secondary;
+    animate((frameTime) => {
+        const percentage = calcBouncePercentage(period, timingFunctions.ease, frameTime);
+        const rgen = rand(randSeed);
 
-        drawPoint(ctx, center, 2);
-        points.forEach((p) => {
-            drawLine(ctx, center, p, 1, 2);
+        // Draw original polygon.
+        tempStyles(ctx, () => {
+            ctx.fillStyle = colors.secondary;
+            ctx.strokeStyle = colors.secondary;
+
+            drawPoint(ctx, center, 2);
+            forPoints(points, ({curr}) => {
+                drawLine(ctx, center, curr, 1, 2);
+            });
         });
-    });
-    drawClosed(ctx, points, false);
+        drawClosed(ctx, points, false);
 
-    // Draw smoothed polygon.
-    // https://math.stackexchange.com/a/873589/235756
-    const smoothingStrength = ((4 / 3) * Math.tan(angle / 4)) / Math.sin(angle / 2) / 2;
-    const smoothedPoints = smooth(points, smoothingStrength).map((p) => {
-        p.x += smoothedCenter.x - center.x;
-        return p;
+        // Draw randomized polygon.
+        const randPoints = points.map(
+            (p): Point => {
+                const x = p.x + slidCenter.x - center.x;
+                const slidPoint = {...p, x};
+                const randOffset = percentage * (randStrength * rgen() - randStrength / 2);
+                return coordPoint(splitLine(randOffset, slidPoint, slidCenter));
+            },
+        );
+        tempStyles(ctx, () => {
+            ctx.fillStyle = colors.secondary;
+            ctx.strokeStyle = colors.secondary;
+
+            drawPoint(ctx, slidCenter, 2);
+            forPoints(slidPoints, ({curr, next}) => {
+                drawLine(ctx, curr, next(), 1, 2);
+            });
+        });
+        drawClosed(ctx, randPoints, true);
     });
-    drawClosed(ctx, smoothedPoints, true);
+});
+
+addCanvas(2, (ctx, width, height, animate) => {
+    const period = Math.PI * 1000;
+    const options: BlobOptions = {
+        extraPoints: 2,
+        randomness: 6,
+        seed: "random",
+        size: width * 0.35,
+    };
+    const center: Coord = {x: width * 0.3, y: height * 0.5};
+    const slidCenter = {x: width * 0.7, y: height * 0.5};
+
+    const blob = mapPoints(genFromOptions(options), ({curr}) => {
+        curr.x += center.x - options.size / 2;
+        curr.y += center.y - options.size / 2;
+        return curr;
+    });
+    const polyBlob = mapPoints(blob, ({curr}) => {
+        return coordPoint(curr);
+    });
+    const slidBlob = mapPoints(blob, ({curr}) => {
+        curr.x += slidCenter.x - center.x;
+        return curr;
+    });
+    const slidPolyBlob = mapPoints(polyBlob, ({curr}) => {
+        curr.x += slidCenter.x - center.x;
+        return curr;
+    });
+
+    animate((frameTime) => {
+        const percentage = calcBouncePercentage(period, timingFunctions.ease, frameTime);
+
+        // Draw polygon blob.
+        tempStyles(ctx, () => {
+            ctx.fillStyle = colors.secondary;
+            ctx.strokeStyle = colors.secondary;
+
+            drawPoint(ctx, center, 2);
+            forPoints(polyBlob, ({curr}) => {
+                drawLine(ctx, center, curr, 1, 2);
+            });
+        });
+        drawClosed(ctx, polyBlob, false);
+
+        // Draw original blob.
+        tempStyles(ctx, () => {
+            ctx.fillStyle = colors.secondary;
+            ctx.strokeStyle = colors.secondary;
+
+            drawPoint(ctx, slidCenter, 2);
+            forPoints(slidPolyBlob, ({curr, next}) => {
+                drawLine(ctx, curr, next(), 1, 2);
+            });
+        });
+        const animatedSlidBlob = mapPoints(slidBlob, ({curr}) => {
+            curr.handleIn.length *= percentage;
+            curr.handleOut.length *= percentage;
+            return curr;
+        });
+        drawClosed(ctx, animatedSlidBlob, true);
+    });
 });
 
 // content
