@@ -9,7 +9,15 @@ import {
     tempStyles,
     drawClosed,
 } from "./internal/canvas";
-import {split, expandHandle, splitLine, forPoints, mapPoints, coordPoint} from "../internal/util";
+import {
+    split,
+    expandHandle,
+    splitLine,
+    forPoints,
+    mapPoints,
+    coordPoint,
+    distance,
+} from "../internal/util";
 import {timingFunctions} from "../internal/animate/timing";
 import {Coord, Point} from "../internal/types";
 import {rand} from "../internal/rand";
@@ -20,39 +28,52 @@ addCanvas(
     1.3,
     // Pixelated circle.
     (ctx, width, height) => {
-        const angle = Math.PI / 16;
-        const pt = width * 0.03;
-        const quadrant = [0, 1, 2, 3, 4, 5, 6, 7, 7, 8, 8, 9, 9, 9];
-        const cx = width * 0.55;
-        const cy = height * 0.5;
+        const center: Coord = {x: width * 0.5, y: height * 0.5};
+        const gridSize = width * 0.01;
+        const gridCountX = width / gridSize;
+        const gridCountY = height / gridSize;
 
-        rotateAround({ctx, cx, cy, angle}, () => {
-            for (let i = 0; i < quadrant.length; i++) {
-                const gridX = quadrant[i];
-                const gridY = quadrant[quadrant.length - 1 - i];
-                ctx.fillStyle = colors.highlight;
-                ctx.fillRect(gridX * pt, gridY * pt, pt + 1, pt + 1);
-                ctx.fillRect(-(gridX + 1) * pt, gridY * pt, pt + 1, pt + 1);
-                ctx.fillRect(gridX * pt, -(gridY + 1) * pt, pt + 1, pt + 1);
-                ctx.fillRect(-(gridX + 1) * pt, -(gridY + 1) * pt, pt + 1, pt + 1);
+        // https://www.desmos.com/calculator/psohl602g5
+        const radius = width * 0.3;
+        const falloff = width * 0.0015;
+        const thickness = width * 0.007;
+
+        for (let x = 0; x < gridCountX; x++) {
+            for (let y = 0; y < gridCountY; y++) {
+                const curr = {x: x * gridSize + gridSize / 2, y: y * gridSize + gridSize / 2};
+                const d = distance(curr, center);
+                const opacity = Math.max(
+                    0,
+                    Math.min(1, Math.abs(thickness / (d - radius)) - falloff),
+                );
+
+                tempStyles(ctx, () => {
+                    ctx.globalAlpha = opacity;
+                    ctx.fillStyle = colors.highlight;
+
+                    ctx.fillRect(x * gridSize, y * gridSize, gridSize, gridSize);
+                });
             }
-        });
+        }
 
         return `Traditional raster images are made up of pixels and have a fixed
         resolution.`;
     },
     // Smooth circle.
     (ctx, width, height) => {
-        const pt = width * 0.03;
+        const pt = width * 0.01;
         const shapeSize = width * 0.6;
-        const cx = width * 0.35;
-        const cy = height * 0.45;
+        const cx = width * 0.5;
+        const cy = height * 0.5;
 
-        ctx.beginPath();
-        ctx.arc(cx, cy, shapeSize / 2, 0, 2 * Math.PI);
-        ctx.lineWidth = pt;
-        ctx.strokeStyle = colors.highlight;
-        ctx.stroke();
+        tempStyles(ctx, () => {
+            ctx.lineWidth = pt;
+            ctx.strokeStyle = colors.highlight;
+
+            ctx.beginPath();
+            ctx.arc(cx, cy, shapeSize / 2, 0, 2 * Math.PI);
+            ctx.stroke();
+        });
 
         return `Vector formats use math equations to draw
         the image at any scale. This makes it ideal for artwork that has sharp
@@ -273,14 +294,3 @@ addCanvas(
         });
     },
 );
-
-// content
-//     raster vs pixel-
-//     bezier curves
-//         demo
-//         how to drawn
-//     shape smoothing
-//         handle angle
-//         handle length
-//     shape morphing
-//         path splitting
