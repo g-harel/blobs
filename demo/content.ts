@@ -132,96 +132,92 @@ addCanvas(2, (ctx, width, height, animate) => {
     });
 });
 
-addCanvas(2, (ctx, width, height, animate) => {
-    const period = Math.PI * 1000;
-    const pointCount = 5;
+const makePoly = (pointCount: number, radius: number, center: Coord): Point[] => {
     const angle = (2 * Math.PI) / pointCount;
-    const radius = width * 0.15;
-    const center: Coord = {x: width * 0.3, y: height * 0.5};
-    const slidCenter = {x: width * 0.7, y: height * 0.5};
-    const randSeed = "abcd";
-    const randStrength = 0.5;
-
-    // Make array of points rotated around center.
     const points: Point[] = [];
     const nullHandle = {angle: 0, length: 0};
     for (let i = 0; i < pointCount; i++) {
         const coord = expandHandle(center, {angle: i * angle, length: radius});
         points.push({...coord, handleIn: nullHandle, handleOut: nullHandle});
     }
-    const slidPoints = mapPoints(points, ({curr}) => {
-        curr.x += slidCenter.x - center.x;
-        return curr;
-    });
+    return points;
+};
 
-    animate((frameTime) => {
-        const percentage = calcBouncePercentage(period, timingFunctions.ease, frameTime);
-        const rgen = rand(randSeed);
+addCanvas(
+    1.3,
+    (ctx, width, height) => {
+        const center: Coord = {x: width * 0.5, y: height * 0.5};
+        const radius = width * 0.3;
+        const points = 5;
+        const shape = makePoly(points, radius, center);
 
-        // Draw original polygon.
+        // Draw lines from center to each point..
         tempStyles(ctx, () => {
             ctx.fillStyle = colors.secondary;
             ctx.strokeStyle = colors.secondary;
 
             drawPoint(ctx, center, 2);
-            forPoints(points, ({curr}) => {
+            forPoints(shape, ({curr}) => {
                 drawLine(ctx, center, curr, 1, 2);
             });
         });
-        drawClosed(ctx, points, false);
 
-        // Draw randomized polygon.
-        const randPoints = points.map(
-            (p): Point => {
-                const x = p.x + slidCenter.x - center.x;
-                const slidPoint = {...p, x};
-                const randOffset = percentage * (randStrength * rgen() - randStrength / 2);
-                return coordPoint(splitLine(randOffset, slidPoint, slidCenter));
-            },
-        );
-        tempStyles(ctx, () => {
-            ctx.fillStyle = colors.secondary;
-            ctx.strokeStyle = colors.secondary;
+        drawClosed(ctx, shape, false);
+    },
+    (ctx, width, height, animate) => {
+        const period = Math.PI * 1000;
+        const center: Coord = {x: width * 0.5, y: height * 0.5};
+        const radius = width * 0.3;
+        const points = 5;
+        const randSeed = "abcd";
+        const randStrength = 0.5;
 
-            drawPoint(ctx, slidCenter, 2);
-            forPoints(slidPoints, ({curr, next}) => {
-                drawLine(ctx, curr, next(), 1, 2);
+        const shape = makePoly(points, radius, center);
+
+        animate((frameTime) => {
+            const percentage = calcBouncePercentage(period, timingFunctions.ease, frameTime);
+            const rgen = rand(randSeed);
+
+            // Draw original shape.
+            tempStyles(ctx, () => {
+                ctx.fillStyle = colors.secondary;
+                ctx.strokeStyle = colors.secondary;
+
+                drawPoint(ctx, center, 2);
+                forPoints(shape, ({curr, next}) => {
+                    drawLine(ctx, curr, next(), 1, 2);
+                });
             });
+
+            // Draw randomly shifted shape.
+            const shiftedShape = shape.map(
+                (p): Point => {
+                    const randOffset = percentage * (randStrength * rgen() - randStrength / 2);
+                    return coordPoint(splitLine(randOffset, p, center));
+                },
+            );
+
+            drawClosed(ctx, shiftedShape, true);
         });
-        drawClosed(ctx, randPoints, true);
-    });
-});
+    },
+);
 
-addCanvas(2, (ctx, width, height, animate) => {
-    const period = Math.PI * 1000;
-    const options: BlobOptions = {
-        extraPoints: 2,
-        randomness: 6,
-        seed: "random",
-        size: width * 0.35,
-    };
-    const center: Coord = {x: width * 0.3, y: height * 0.5};
-    const slidCenter = {x: width * 0.7, y: height * 0.5};
+addCanvas(
+    1.3,
+    (ctx, width, height) => {
+        const options: BlobOptions = {
+            extraPoints: 2,
+            randomness: 6,
+            seed: "random",
+            size: width * 0.7,
+        };
+        const center: Coord = {x: width * 0.5, y: height * 0.5};
 
-    const blob = mapPoints(genFromOptions(options), ({curr}) => {
-        curr.x += center.x - options.size / 2;
-        curr.y += center.y - options.size / 2;
-        return curr;
-    });
-    const polyBlob = mapPoints(blob, ({curr}) => {
-        return coordPoint(curr);
-    });
-    const slidBlob = mapPoints(blob, ({curr}) => {
-        curr.x += slidCenter.x - center.x;
-        return curr;
-    });
-    const slidPolyBlob = mapPoints(polyBlob, ({curr}) => {
-        curr.x += slidCenter.x - center.x;
-        return curr;
-    });
-
-    animate((frameTime) => {
-        const percentage = calcBouncePercentage(period, timingFunctions.ease, frameTime);
+        const polyBlob = mapPoints(genFromOptions(options), ({curr}) => {
+            curr.x += center.x - options.size / 2;
+            curr.y += center.y - options.size / 2;
+            return coordPoint(curr);
+        });
 
         // Draw polygon blob.
         tempStyles(ctx, () => {
@@ -233,26 +229,50 @@ addCanvas(2, (ctx, width, height, animate) => {
                 drawLine(ctx, center, curr, 1, 2);
             });
         });
+
         drawClosed(ctx, polyBlob, false);
+    },
+    (ctx, width, height, animate) => {
+        const period = Math.PI * 1000;
+        const options: BlobOptions = {
+            extraPoints: 2,
+            randomness: 6,
+            seed: "random",
+            size: width * 0.7,
+        };
+        const center: Coord = {x: width * 0.5, y: height * 0.5};
 
-        // Draw original blob.
-        tempStyles(ctx, () => {
-            ctx.fillStyle = colors.secondary;
-            ctx.strokeStyle = colors.secondary;
-
-            drawPoint(ctx, slidCenter, 2);
-            forPoints(slidPolyBlob, ({curr, next}) => {
-                drawLine(ctx, curr, next(), 1, 2);
-            });
-        });
-        const animatedSlidBlob = mapPoints(slidBlob, ({curr}) => {
-            curr.handleIn.length *= percentage;
-            curr.handleOut.length *= percentage;
+        const blob = mapPoints(genFromOptions(options), ({curr}) => {
+            curr.x += center.x - options.size / 2;
+            curr.y += center.y - options.size / 2;
             return curr;
         });
-        drawClosed(ctx, animatedSlidBlob, true);
-    });
-});
+
+        animate((frameTime) => {
+            const percentage = calcBouncePercentage(period, timingFunctions.ease, frameTime);
+
+            // Draw original blob.
+            tempStyles(ctx, () => {
+                ctx.fillStyle = colors.secondary;
+                ctx.strokeStyle = colors.secondary;
+
+                drawPoint(ctx, center, 2);
+                forPoints(blob, ({curr, next}) => {
+                    drawLine(ctx, curr, next(), 1, 2);
+                });
+            });
+
+            // Draw animated blob.
+            const animatedBlob = mapPoints(blob, ({curr}) => {
+                curr.handleIn.length *= percentage;
+                curr.handleOut.length *= percentage;
+                return curr;
+            });
+
+            drawClosed(ctx, animatedBlob, true);
+        });
+    },
+);
 
 // content
 //     raster vs pixel-
