@@ -1,6 +1,5 @@
 import {addCanvas, colors} from "./internal/layout";
 import {
-    rotateAround,
     point,
     drawOpen,
     calcBouncePercentage,
@@ -56,8 +55,7 @@ addCanvas(
             }
         }
 
-        return `Traditional raster images are made up of pixels and have a fixed
-        resolution.`;
+        return `Traditional raster images are made up of pixels and have a fixed resolution.`;
     },
     // Smooth circle.
     (ctx, width, height) => {
@@ -75,9 +73,9 @@ addCanvas(
             ctx.stroke();
         });
 
-        return `Vector formats use math equations to draw
-        the image at any scale. This makes it ideal for artwork that has sharp
-        lines and will be viewed at varying sizes like logos and fonts.`;
+        return `Vector formats use math equations to draw the image at any scale. This makes it
+            ideal for artwork that has sharp lines and will be viewed at varying sizes like logos
+            and fonts.`;
     },
 );
 
@@ -97,8 +95,8 @@ addCanvas(2, (ctx, width, height, animate) => {
         drawOpen(ctx, start, end, true);
     });
 
-    return `A common way to define these vector shapes is using Bezier curves. The cubic bezier below
-        is made up of four coordinates: the start/end points and the corresponding "handles".
+    return `A common way to define these vector shapes is using Bezier curves. The cubic bezier
+        below is made up of four coordinates: the start/end points and the corresponding "handles".
         These handles can be thought of as defining the direction and momentum of the line.`;
 });
 
@@ -151,6 +149,11 @@ addCanvas(2, (ctx, width, height, animate) => {
             drawPoint(ctx, d0, 3);
         });
     });
+
+    return `The curve can be drawn geometrically by recursively splitting points by a percentage
+        until there is only one point remaining. Note there is no constant relationship between the
+        percentage that "drew" the point and the arc lengths before/after it. Uniform motion is
+        can be approximated instead.`;
 });
 
 const makePoly = (pointCount: number, radius: number, center: Coord): Point[] => {
@@ -184,6 +187,8 @@ addCanvas(
         });
 
         drawClosed(ctx, shape, false);
+
+        return `Points are evenly rotated around the center.`;
     },
     (ctx, width, height, animate) => {
         const period = Math.PI * 1000;
@@ -220,6 +225,8 @@ addCanvas(
 
             drawClosed(ctx, shiftedShape, true);
         });
+
+        return `Each point is randomly moved towards, or away from the center.`;
     },
 );
 
@@ -252,6 +259,8 @@ addCanvas(
         });
 
         drawClosed(ctx, polyBlob, false);
+
+        return `The points have handles, but they have no length and an incorrect angle.`;
     },
     (ctx, width, height, animate) => {
         const period = Math.PI * 1000;
@@ -292,5 +301,9 @@ addCanvas(
 
             drawClosed(ctx, animatedBlob, true);
         });
+
+        return `The shape is smoothed by making handles parallel to the line between the points
+            immediately before and after. The length of the handles is a function of the distance to
+            the nearest neighbor.`;
     },
 );
