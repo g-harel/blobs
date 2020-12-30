@@ -13,17 +13,40 @@
                 margin: 0;
             }
 
+            header {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                padding: 2rem 0;
+            }
+
+            header img {
+                height: 6rem;
+            }
+
+            header nav a {
+                color: #aaa;
+                display: inline-block;
+                font-size: 0.7rem;
+                font-weight: 700;
+                padding: 0.5rem;
+                text-decoration: none;
+                user-select: none;
+            }
+
             .container {
                 align-items: center;
                 display: flex;
                 flex-direction: column;
-                margin: 5vw 0;
+                margin: 0 0 20vh;
+                padding: 0 1rem;
             }
 
             .container .section {
                 border: 1px solid #eee;
+                border-radius: 0.5rem;
                 display: flex;
-                margin-bottom: 1rem;
+                margin-bottom: 3rem;
                 max-width: 1000px;
                 width: 100%;
             }
@@ -35,7 +58,7 @@
                 height: 0;
                 position: relative;
                 text-decoration: none;
-                transform: translate(3rem, 0.5rem);
+                transform: translate(1rem, 0.5rem);
                 width: 0;
             }
 
@@ -55,12 +78,32 @@
             .container .section .cell .label {
                 color: #555;
                 font-size: 0.6rem;
-                padding: 0 1rem 0.5rem;
+                padding: 0 1rem 1rem;
             }
         </style>
     </head>
     <body>
-        <div class="container"></div>
+        <header>
+            <img src="../assets/logo.svg" />
+            <nav>
+                <a
+                    href="https://github.com/g-harel/blobs"
+                    style="transform: rotate(1deg) translateY(3px);"
+                    >GITHUB</a
+                >
+                <a
+                    href="https://npmjs.com/package/blobs"
+                    style="transform: rotate(-2deg) translateY(-1px);"
+                    >NPM</a
+                >
+                <a
+                    href="mailto:gabrielj.harel@gmail.com"
+                    style="transform: rotate(4deg) translateY(1px);"
+                    >CONTACT</a
+                >
+            </nav>
+        </header>
+        <main class="container"></main>
         <script src="./content.ts"></script>
     </body>
 </html>
