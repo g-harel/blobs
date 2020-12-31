@@ -34,7 +34,7 @@ if (!containerElement) throw "missing container";
 
 export const sizes = (): {width: number; pt: number} => {
     const sectionStyle = window.getComputedStyle(
-        (containerElement.firstChild as any) || document.body,
+        (containerElement.lastChild as any) || document.body,
     );
     const sectionWidth = Number(sectionStyle.getPropertyValue("width").slice(0, -2));
     const width = sectionWidth * window.devicePixelRatio;

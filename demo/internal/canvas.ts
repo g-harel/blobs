@@ -57,7 +57,7 @@ export const drawPoint = (
 
     if (label) {
         tempStyles(ctx, () => {
-            ctx.font = `${5 * radius}px monospace`;
+            ctx.font = `${6 * radius}px monospace`;
             ctx.fillText(label, coord.x + 2 * radius, coord.y - radius);
         });
     }
