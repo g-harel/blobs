@@ -1,4 +1,4 @@
-import {addCanvas, colors} from "./internal/layout";
+import {addCanvas, colors, sizes} from "./internal/layout";
 import {
     point,
     drawOpen,
@@ -7,6 +7,7 @@ import {
     drawPoint,
     tempStyles,
     drawClosed,
+    forceStyles,
 } from "./internal/canvas";
 import {
     split,
@@ -16,12 +17,14 @@ import {
     mapPoints,
     coordPoint,
     distance,
+    mod,
 } from "../internal/util";
 import {timingFunctions} from "../internal/animate/timing";
 import {Coord, Point} from "../internal/types";
 import {rand} from "../internal/rand";
 import {genFromOptions} from "../internal/gen";
 import {BlobOptions} from "../public/blobs";
+import {interpolateBetween} from "../internal/animate/interpolate";
 
 addCanvas(
     1.3,
@@ -46,12 +49,14 @@ addCanvas(
                     Math.min(1, Math.abs(thickness / (d - radius)) - falloff),
                 );
 
-                tempStyles(ctx, () => {
-                    ctx.globalAlpha = opacity;
-                    ctx.fillStyle = colors.highlight;
-
-                    ctx.fillRect(x * gridSize, y * gridSize, gridSize, gridSize);
-                });
+                tempStyles(
+                    ctx,
+                    () => {
+                        ctx.globalAlpha = opacity;
+                        ctx.fillStyle = colors.highlight;
+                    },
+                    () => ctx.fillRect(x * gridSize, y * gridSize, gridSize, gridSize),
+                );
             }
         }
 
@@ -64,14 +69,18 @@ addCanvas(
         const cx = width * 0.5;
         const cy = height * 0.5;
 
-        tempStyles(ctx, () => {
-            ctx.lineWidth = pt;
-            ctx.strokeStyle = colors.highlight;
-
-            ctx.beginPath();
-            ctx.arc(cx, cy, shapeSize / 2, 0, 2 * Math.PI);
-            ctx.stroke();
-        });
+        tempStyles(
+            ctx,
+            () => {
+                ctx.lineWidth = pt;
+                ctx.strokeStyle = colors.highlight;
+            },
+            () => {
+                ctx.beginPath();
+                ctx.arc(cx, cy, shapeSize / 2, 0, 2 * Math.PI);
+                ctx.stroke();
+            },
+        );
 
         return `Vector formats use math equations to draw the image at any scale. This makes it
             ideal for artwork that has sharp lines and will be viewed at varying sizes like logos
@@ -120,34 +129,39 @@ addCanvas(2, (ctx, width, height, animate) => {
         const c1 = splitLine(percentage, b1, b2);
         const d0 = splitLine(percentage, c0, c1);
 
-        tempStyles(ctx, () => {
-            ctx.fillStyle = colors.secondary;
-            ctx.strokeStyle = colors.secondary;
+        tempStyles(
+            ctx,
+            () => {
+                ctx.fillStyle = colors.secondary;
+                ctx.strokeStyle = colors.secondary;
+            },
+            () => {
+                drawLine(ctx, a0, a1, 1);
+                drawLine(ctx, a1, a2, 1);
+                drawLine(ctx, a2, a3, 1);
+                drawLine(ctx, b0, b1, 1);
+                drawLine(ctx, b1, b2, 1);
+                drawLine(ctx, c0, c1, 1);
 
-            drawLine(ctx, a0, a1, 1);
-            drawLine(ctx, a1, a2, 1);
-            drawLine(ctx, a2, a3, 1);
-            drawLine(ctx, b0, b1, 1);
-            drawLine(ctx, b1, b2, 1);
-            drawLine(ctx, c0, c1, 1);
-
-            drawPoint(ctx, a0, 1.3, "a0");
-            drawPoint(ctx, a1, 1.3, "a1");
-            drawPoint(ctx, a2, 1.3, "a2");
-            drawPoint(ctx, a3, 1.3, "a3");
-            drawPoint(ctx, b0, 1.3, "b0");
-            drawPoint(ctx, b1, 1.3, "b1");
-            drawPoint(ctx, b2, 1.3, "b2");
-            drawPoint(ctx, c0, 1.3, "c0");
-            drawPoint(ctx, c1, 1.3, "c1");
-        });
+                drawPoint(ctx, a0, 1.3, "a0");
+                drawPoint(ctx, a1, 1.3, "a1");
+                drawPoint(ctx, a2, 1.3, "a2");
+                drawPoint(ctx, a3, 1.3, "a3");
+                drawPoint(ctx, b0, 1.3, "b0");
+                drawPoint(ctx, b1, 1.3, "b1");
+                drawPoint(ctx, b2, 1.3, "b2");
+                drawPoint(ctx, c0, 1.3, "c0");
+                drawPoint(ctx, c1, 1.3, "c1");
+            },
+        );
 
         drawOpen(ctx, start, end, false);
 
-        tempStyles(ctx, () => {
-            ctx.fillStyle = colors.highlight;
-            drawPoint(ctx, d0, 3);
-        });
+        tempStyles(
+            ctx,
+            () => (ctx.fillStyle = colors.highlight),
+            () => drawPoint(ctx, d0, 3),
+        );
     });
 
     return `The curve can be drawn geometrically by recursively splitting points by a percentage
@@ -176,15 +190,19 @@ addCanvas(
         const shape = makePoly(points, radius, center);
 
         // Draw lines from center to each point..
-        tempStyles(ctx, () => {
-            ctx.fillStyle = colors.secondary;
-            ctx.strokeStyle = colors.secondary;
-
-            drawPoint(ctx, center, 2);
-            forPoints(shape, ({curr}) => {
-                drawLine(ctx, center, curr, 1, 2);
-            });
-        });
+        tempStyles(
+            ctx,
+            () => {
+                ctx.fillStyle = colors.secondary;
+                ctx.strokeStyle = colors.secondary;
+            },
+            () => {
+                drawPoint(ctx, center, 2);
+                forPoints(shape, ({curr}) => {
+                    drawLine(ctx, center, curr, 1, 2);
+                });
+            },
+        );
 
         drawClosed(ctx, shape, false);
 
@@ -205,15 +223,19 @@ addCanvas(
             const rgen = rand(randSeed);
 
             // Draw original shape.
-            tempStyles(ctx, () => {
-                ctx.fillStyle = colors.secondary;
-                ctx.strokeStyle = colors.secondary;
-
-                drawPoint(ctx, center, 2);
-                forPoints(shape, ({curr, next}) => {
-                    drawLine(ctx, curr, next(), 1, 2);
-                });
-            });
+            tempStyles(
+                ctx,
+                () => {
+                    ctx.fillStyle = colors.secondary;
+                    ctx.strokeStyle = colors.secondary;
+                },
+                () => {
+                    drawPoint(ctx, center, 2);
+                    forPoints(shape, ({curr, next}) => {
+                        drawLine(ctx, curr, next(), 1, 2);
+                    });
+                },
+            );
 
             // Draw randomly shifted shape.
             const shiftedShape = shape.map(
@@ -230,6 +252,14 @@ addCanvas(
     },
 );
 
+const centeredBlob = (options: BlobOptions, center: Coord): Point[] => {
+    return mapPoints(genFromOptions(options), ({curr}) => {
+        curr.x += center.x - options.size / 2;
+        curr.y += center.y - options.size / 2;
+        return curr;
+    });
+};
+
 addCanvas(
     1.3,
     (ctx, width, height) => {
@@ -241,22 +271,22 @@ addCanvas(
         };
         const center: Coord = {x: width * 0.5, y: height * 0.5};
 
-        const polyBlob = mapPoints(genFromOptions(options), ({curr}) => {
-            curr.x += center.x - options.size / 2;
-            curr.y += center.y - options.size / 2;
-            return coordPoint(curr);
-        });
+        const polyBlob = centeredBlob(options, center).map(coordPoint);
 
         // Draw polygon blob.
-        tempStyles(ctx, () => {
-            ctx.fillStyle = colors.secondary;
-            ctx.strokeStyle = colors.secondary;
-
-            drawPoint(ctx, center, 2);
-            forPoints(polyBlob, ({curr}) => {
-                drawLine(ctx, center, curr, 1, 2);
-            });
-        });
+        tempStyles(
+            ctx,
+            () => {
+                ctx.fillStyle = colors.secondary;
+                ctx.strokeStyle = colors.secondary;
+            },
+            () => {
+                drawPoint(ctx, center, 2);
+                forPoints(polyBlob, ({curr}) => {
+                    drawLine(ctx, center, curr, 1, 2);
+                });
+            },
+        );
 
         drawClosed(ctx, polyBlob, false);
 
@@ -272,25 +302,25 @@ addCanvas(
         };
         const center: Coord = {x: width * 0.5, y: height * 0.5};
 
-        const blob = mapPoints(genFromOptions(options), ({curr}) => {
-            curr.x += center.x - options.size / 2;
-            curr.y += center.y - options.size / 2;
-            return curr;
-        });
+        const blob = centeredBlob(options, center);
 
         animate((frameTime) => {
             const percentage = calcBouncePercentage(period, timingFunctions.ease, frameTime);
 
             // Draw original blob.
-            tempStyles(ctx, () => {
-                ctx.fillStyle = colors.secondary;
-                ctx.strokeStyle = colors.secondary;
-
-                drawPoint(ctx, center, 2);
-                forPoints(blob, ({curr, next}) => {
-                    drawLine(ctx, curr, next(), 1, 2);
-                });
-            });
+            tempStyles(
+                ctx,
+                () => {
+                    ctx.fillStyle = colors.secondary;
+                    ctx.strokeStyle = colors.secondary;
+                },
+                () => {
+                    drawPoint(ctx, center, 2);
+                    forPoints(blob, ({curr, next}) => {
+                        drawLine(ctx, curr, next(), 1, 2);
+                    });
+                },
+            );
 
             // Draw animated blob.
             const animatedBlob = mapPoints(blob, ({curr}) => {
@@ -307,3 +337,59 @@ addCanvas(
             the nearest neighbor.`;
     },
 );
+
+addCanvas(2, (ctx, width, height, animate) => {
+    const period = Math.PI * 1000;
+    const center: Coord = {x: width * 0.5, y: height * 0.5};
+    const fadeSpeed = 10;
+    const fadeLead = 0.05;
+
+    const blobA = centeredBlob(
+        {
+            extraPoints: 3,
+            randomness: 6,
+            seed: "12345",
+            size: height * 0.8,
+        },
+        center,
+    );
+    const blobB = centeredBlob(
+        {
+            extraPoints: 3,
+            randomness: 6,
+            seed: "abc",
+            size: height * 0.8,
+        },
+        center,
+    );
+
+    animate((frameTime) => {
+        const percentage = calcBouncePercentage(period, timingFunctions.ease, frameTime);
+
+        const shiftedFrameTime = frameTime + period * fadeLead;
+        const shiftedPercentage = calcBouncePercentage(
+            period,
+            timingFunctions.ease,
+            shiftedFrameTime,
+        );
+        const shiftedPeriodPercentage = mod(shiftedFrameTime, period) / period;
+
+        forceStyles(ctx, () => {
+            const {pt} = sizes();
+            ctx.fillStyle = "transparent";
+            ctx.lineWidth = pt;
+            ctx.strokeStyle = colors.secondary;
+            ctx.setLineDash([2 * pt]);
+
+            if (shiftedPeriodPercentage > 0.5) {
+                ctx.globalAlpha = fadeSpeed * (1 - shiftedPercentage);
+                drawClosed(ctx, blobA, false);
+            } else {
+                ctx.globalAlpha = fadeSpeed * shiftedPercentage;
+                drawClosed(ctx, blobB, false);
+            }
+        });
+
+        drawClosed(ctx, interpolateBetween(percentage, blobA, blobB), true);
+    });
+});

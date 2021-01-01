@@ -4,28 +4,50 @@ import {expandHandle, forPoints, mod, rad} from "../../internal/util";
 import {debug} from "../internal/debug";
 import {sizes, colors} from "../internal/layout";
 
-export const tempStyles = (ctx: CanvasRenderingContext2D, fn: () => void) => {
+export const forceStyles = (ctx: CanvasRenderingContext2D, fn: () => void) => {
+    if (!(ctx as any).forcedStyles) (ctx as any).forcedStyles = 0;
+    (ctx as any).forcedStyles++;
     ctx.save();
     fn();
     ctx.restore();
+    (ctx as any).forcedStyles--;
+};
+
+export const tempStyles = (ctx: CanvasRenderingContext2D, style: () => void, fn: () => void) => {
+    if ((ctx as any).forcedStyles > 0) {
+        fn();
+    } else {
+        ctx.save();
+        style();
+        fn();
+        ctx.restore();
+    }
 };
 
 export const rotateAround = (
     options: {ctx: CanvasRenderingContext2D; angle: number; cx: number; cy: number},
     fn: () => void,
 ) => {
-    tempStyles(options.ctx, () => {
-        options.ctx.translate(options.cx, options.cy);
-        options.ctx.rotate(options.angle);
-        if (debug) {
-            tempStyles(options.ctx, () => {
-                options.ctx.fillStyle = colors.debug;
-                options.ctx.fillRect(0, -4, 1, 8);
-                options.ctx.fillRect(-32, 0, 64, 1);
-            });
-        }
-        fn();
-    });
+    tempStyles(
+        options.ctx,
+        () => {
+            options.ctx.translate(options.cx, options.cy);
+            options.ctx.rotate(options.angle);
+        },
+        () => {
+            if (debug) {
+                tempStyles(
+                    options.ctx,
+                    () => (options.ctx.fillStyle = colors.debug),
+                    () => {
+                        options.ctx.fillRect(0, -4, 1, 8);
+                        options.ctx.fillRect(-32, 0, 64, 1);
+                    },
+                );
+            }
+            fn();
+        },
+    );
 };
 
 export const point = (
@@ -56,10 +78,11 @@ export const drawPoint = (
     ctx.fill(pointPath);
 
     if (label) {
-        tempStyles(ctx, () => {
-            ctx.font = `${6 * radius}px monospace`;
-            ctx.fillText(label, coord.x + 2 * radius, coord.y - radius);
-        });
+        tempStyles(
+            ctx,
+            () => (ctx.font = `${6 * radius}px monospace`),
+            () => ctx.fillText(label, coord.x + 2 * radius, coord.y - radius),
+        );
     }
 };
 
@@ -70,15 +93,21 @@ export const drawLine = (
     size: number,
     dash?: number,
 ) => {
-    tempStyles(ctx, () => {
-        const width = sizes().pt * size;
-        const linePath = new Path2D();
-        linePath.moveTo(a.x, a.y);
-        linePath.lineTo(b.x, b.y);
-        if (dash) ctx.setLineDash([dash * width]);
-        ctx.lineWidth = width;
-        ctx.stroke(linePath);
-    });
+    tempStyles(
+        ctx,
+        () => {
+            const width = sizes().pt * size;
+            if (dash) ctx.setLineDash([dash * width]);
+        },
+        () => {
+            const width = sizes().pt * size;
+            const linePath = new Path2D();
+            linePath.moveTo(a.x, a.y);
+            linePath.lineTo(b.x, b.y);
+            ctx.lineWidth = width;
+            ctx.stroke(linePath);
+        },
+    );
 };
 
 export const drawClosed = (ctx: CanvasRenderingContext2D, points: Point[], handles?: boolean) => {
@@ -99,38 +128,57 @@ export const drawOpen = (
 
     // Draw handles.
     if (handles) {
-        tempStyles(ctx, () => {
-            ctx.fillStyle = colors.secondary;
-            ctx.strokeStyle = colors.secondary;
+        tempStyles(
+            ctx,
+            () => {
+                ctx.fillStyle = colors.secondary;
+                ctx.strokeStyle = colors.secondary;
+            },
+            () => {
+                drawLine(ctx, start, startHandle, 1);
+                drawLine(ctx, end, endHandle, 1, 2);
 
-            drawLine(ctx, start, startHandle, 1);
-            drawLine(ctx, end, endHandle, 1, 2);
-
-            drawPoint(ctx, startHandle, 1.4);
-            drawPoint(ctx, endHandle, 1.4);
-        });
+                drawPoint(ctx, startHandle, 1.4);
+                drawPoint(ctx, endHandle, 1.4);
+            },
+        );
     }
 
     // Draw curve.
-    tempStyles(ctx, () => {
-        const lineWidth = width * 0.003;
-        ctx.lineWidth = lineWidth;
+    tempStyles(
+        ctx,
+        () => {
+            const lineWidth = width * 0.003;
+            ctx.lineWidth = lineWidth;
+        },
+        () => {
+            const curve = new Path2D();
+            curve.moveTo(start.x, start.y);
+            curve.bezierCurveTo(
+                startHandle.x,
+                startHandle.y,
+                endHandle.x,
+                endHandle.y,
+                end.x,
+                end.y,
+            );
 
-        const curve = new Path2D();
-        curve.moveTo(start.x, start.y);
-        curve.bezierCurveTo(startHandle.x, startHandle.y, endHandle.x, endHandle.y, end.x, end.y);
+            tempStyles(
+                ctx,
+                () => (ctx.strokeStyle = colors.highlight),
+                () => ctx.stroke(curve),
+            );
 
-        tempStyles(ctx, () => {
-            ctx.strokeStyle = colors.highlight;
-            ctx.stroke(curve);
-        });
-
-        tempStyles(ctx, () => {
-            ctx.fillStyle = colors.highlight;
-            drawPoint(ctx, start, 2);
-            drawPoint(ctx, end, 2);
-        });
-    });
+            tempStyles(
+                ctx,
+                () => (ctx.fillStyle = colors.highlight),
+                () => {
+                    drawPoint(ctx, start, 2);
+                    drawPoint(ctx, end, 2);
+                },
+            );
+        },
+    );
 };
 
 export const calcBouncePercentage = (period: number, timingFunc: TimingFunc, frameTime: number) => {
