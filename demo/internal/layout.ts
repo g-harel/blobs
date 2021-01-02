@@ -44,27 +44,29 @@ export const sizes = (): {width: number; pt: number} => {
 const createSection = (): HTMLElement => {
     const numberLabel = ("000" + cells.length).substr(-3);
 
-    const section = document.createElement("div");
-    section.classList.add("section");
-    section.setAttribute("id", numberLabel);
-    containerElement.appendChild(section);
+    const sectionElement = document.createElement("div");
+    sectionElement.classList.add("section");
+    sectionElement.setAttribute("id", numberLabel);
+    containerElement.appendChild(sectionElement);
 
     const numberElement = document.createElement("a");
     numberElement.classList.add("number");
     numberElement.setAttribute("href", "#" + numberLabel);
     numberElement.appendChild(document.createTextNode(numberLabel));
-    section.appendChild(numberElement);
+    sectionElement.appendChild(numberElement);
 
-    return section;
+    return sectionElement;
 };
 
 // Adds a section of text to the bottom of the layout.
-export const addTitle = (text: string) => {
-    const sectionElement = createSection();
+export const addTitle = (heading: number, text: string) => {
+    const wrapperElement = document.createElement(`h${heading}`);
+    wrapperElement.classList.add("title");
+    containerElement.appendChild(wrapperElement);
 
     const textWrapperElement = document.createElement("div");
     textWrapperElement.classList.add("text");
-    sectionElement.appendChild(textWrapperElement);
+    wrapperElement.appendChild(textWrapperElement);
 
     text = text.replace("\n", " ").replace(/\s+/g, " ").trim();
     const textElement = document.createTextNode(text);
@@ -120,10 +122,11 @@ const redraw = () => {
                 // Draw canvas debug info.
                 const drawDebug = () => {
                     if (debug) {
-                        tempStyles(cell.ctx, () => {
-                            cell.ctx.strokeStyle = colors.debug;
-                            cell.ctx.strokeRect(0, 0, cellWidth, cellHeight - 1);
-                        });
+                        tempStyles(
+                            cell.ctx,
+                            () => (cell.ctx.strokeStyle = colors.debug),
+                            () => cell.ctx.strokeRect(0, 0, cellWidth, cellHeight - 1),
+                        );
                     }
                 };
                 drawDebug();
@@ -144,10 +147,11 @@ const redraw = () => {
                         cell.ctx.clearRect(0, 0, cellWidth, cellHeight);
                         drawDebug();
                         if (debug) {
-                            tempStyles(cell.ctx, () => {
-                                cell.ctx.fillStyle = colors.debug;
-                                cell.ctx.fillText(String(frameTime), 10, 15);
-                            });
+                            tempStyles(
+                                cell.ctx,
+                                () => (cell.ctx.fillStyle = colors.debug),
+                                () => cell.ctx.fillText(String(frameTime), 10, 15),
+                            );
                         }
 
                         painter(frameTime);

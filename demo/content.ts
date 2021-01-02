@@ -1,4 +1,4 @@
-import {addCanvas, colors, sizes} from "./internal/layout";
+import {addCanvas, addTitle, colors, sizes} from "./internal/layout";
 import {
     point,
     drawOpen,
@@ -25,6 +25,27 @@ import {rand} from "../internal/rand";
 import {genFromOptions} from "../internal/gen";
 import {BlobOptions} from "../public/blobs";
 import {interpolateBetween} from "../internal/animate/interpolate";
+
+const makePoly = (pointCount: number, radius: number, center: Coord): Point[] => {
+    const angle = (2 * Math.PI) / pointCount;
+    const points: Point[] = [];
+    const nullHandle = {angle: 0, length: 0};
+    for (let i = 0; i < pointCount; i++) {
+        const coord = expandHandle(center, {angle: i * angle, length: radius});
+        points.push({...coord, handleIn: nullHandle, handleOut: nullHandle});
+    }
+    return points;
+};
+
+const centeredBlob = (options: BlobOptions, center: Coord): Point[] => {
+    return mapPoints(genFromOptions(options), ({curr}) => {
+        curr.x += center.x - options.size / 2;
+        curr.y += center.y - options.size / 2;
+        return curr;
+    });
+};
+
+addTitle(4, "What are vector graphics?");
 
 addCanvas(
     1.3,
@@ -170,16 +191,7 @@ addCanvas(2, (ctx, width, height, animate) => {
         can be approximated instead.`;
 });
 
-const makePoly = (pointCount: number, radius: number, center: Coord): Point[] => {
-    const angle = (2 * Math.PI) / pointCount;
-    const points: Point[] = [];
-    const nullHandle = {angle: 0, length: 0};
-    for (let i = 0; i < pointCount; i++) {
-        const coord = expandHandle(center, {angle: i * angle, length: radius});
-        points.push({...coord, handleIn: nullHandle, handleOut: nullHandle});
-    }
-    return points;
-};
+addTitle(4, "How are blobs made?");
 
 addCanvas(
     1.3,
@@ -251,14 +263,6 @@ addCanvas(
         return `Each point is randomly moved towards, or away from the center.`;
     },
 );
-
-const centeredBlob = (options: BlobOptions, center: Coord): Point[] => {
-    return mapPoints(genFromOptions(options), ({curr}) => {
-        curr.x += center.x - options.size / 2;
-        curr.y += center.y - options.size / 2;
-        return curr;
-    });
-};
 
 addCanvas(
     1.3,
@@ -338,6 +342,8 @@ addCanvas(
     },
 );
 
+addTitle(4, "How are animated blobs interpolated?");
+
 addCanvas(2, (ctx, width, height, animate) => {
     const period = Math.PI * 1000;
     const center: Coord = {x: width * 0.5, y: height * 0.5};
@@ -392,4 +398,10 @@ addCanvas(2, (ctx, width, height, animate) => {
 
         drawClosed(ctx, interpolateBetween(percentage, blobA, blobB), true);
     });
+
+    // TODO have content about why being able to interrupt transitions with another.
+    return `Interpolating between two blobs requires transforming the x,y coordinates of each point
+        as well as its handles. However this has two important prerequisites. First, both blobs must
+        have the same number of points. Second, the points must be matched with their nearest
+        counterpart in the target shape.`;
 });
