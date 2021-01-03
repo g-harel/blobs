@@ -18,13 +18,14 @@ import {
     coordPoint,
     distance,
     mod,
+    shift,
 } from "../internal/util";
 import {timingFunctions} from "../internal/animate/timing";
 import {Coord, Point} from "../internal/types";
 import {rand} from "../internal/rand";
 import {genFromOptions} from "../internal/gen";
 import {BlobOptions} from "../public/blobs";
-import {interpolateBetween} from "../internal/animate/interpolate";
+import {interpolateBetween, interpolateBetweenSmooth} from "../internal/animate/interpolate";
 
 const makePoly = (pointCount: number, radius: number, center: Coord): Point[] => {
     const angle = (2 * Math.PI) / pointCount;
@@ -349,6 +350,7 @@ addCanvas(2, (ctx, width, height, animate) => {
     const center: Coord = {x: width * 0.5, y: height * 0.5};
     const fadeSpeed = 10;
     const fadeLead = 0.05;
+    const fadeFloor = 0.2;
 
     const blobA = centeredBlob(
         {
@@ -388,11 +390,17 @@ addCanvas(2, (ctx, width, height, animate) => {
             ctx.setLineDash([2 * pt]);
 
             if (shiftedPeriodPercentage > 0.5) {
-                ctx.globalAlpha = fadeSpeed * (1 - shiftedPercentage);
+                ctx.globalAlpha = fadeFloor + fadeSpeed * (1 - shiftedPercentage);
                 drawClosed(ctx, blobA, false);
-            } else {
-                ctx.globalAlpha = fadeSpeed * shiftedPercentage;
+
+                ctx.globalAlpha = fadeFloor;
                 drawClosed(ctx, blobB, false);
+            } else {
+                ctx.globalAlpha = fadeFloor + fadeSpeed * shiftedPercentage;
+                drawClosed(ctx, blobB, false);
+
+                ctx.globalAlpha = fadeFloor;
+                drawClosed(ctx, blobA, false);
             }
         });
 
@@ -405,3 +413,59 @@ addCanvas(2, (ctx, width, height, animate) => {
         have the same number of points. Second, the points must be matched with their nearest
         counterpart in the target shape.`;
 });
+
+addCanvas(
+    1.3,
+    (ctx, width, height, animate) => {
+        const period = Math.PI ** Math.E * 1000;
+        const center: Coord = {x: width * 0.5, y: height * 0.5};
+
+        const blob = centeredBlob(
+            {
+                extraPoints: 3,
+                randomness: 6,
+                seed: "shift",
+                size: height * 0.9,
+            },
+            center,
+        );
+
+        animate((frameTime) => {
+            const animationTime = mod(frameTime, period);
+            const totalShifts = blob.length;
+            const localPeriod = period / totalShifts;
+
+            const shiftNumber = Math.floor((animationTime / period) * totalShifts);
+            const localPercentage = timingFunctions.ease(
+                mod(animationTime, localPeriod) / localPeriod,
+            );
+
+            const prevBlob = shift(shiftNumber - 1, blob);
+            const currentBlob = shift(shiftNumber, blob);
+
+            // Draw lines points are travelling.
+            tempStyles(
+                ctx,
+                () => {
+                    ctx.fillStyle = colors.secondary;
+                    ctx.strokeStyle = colors.secondary;
+                },
+                () => {
+                    drawPoint(ctx, center, 2);
+                    forPoints(blob, ({curr, next}) => {
+                        drawLine(ctx, curr, next(), 1, 2);
+                    });
+                },
+            );
+
+            drawClosed(
+                ctx,
+                interpolateBetweenSmooth(2, localPercentage, prevBlob, currentBlob),
+                true,
+            );
+        });
+    },
+    (ctx, width, height, animate) => {
+        // TODO animate between blob and reversed points.
+    },
+);
