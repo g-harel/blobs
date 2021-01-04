@@ -466,6 +466,39 @@ addCanvas(
         });
     },
     (ctx, width, height, animate) => {
-        // TODO animate between blob and reversed points.
+        const period = Math.PI * Math.E * 1000;
+        const center: Coord = {x: width * 0.5, y: height * 0.5};
+
+        const blob = centeredBlob(
+            {
+                extraPoints: 3,
+                randomness: 6,
+                seed: "flip",
+                size: height * 0.9,
+            },
+            center,
+        );
+        const reversedBlob = mapPoints(blob, ({curr}) => {
+            const temp = curr.handleIn;
+            curr.handleIn = curr.handleOut;
+            curr.handleOut = temp;
+            return curr;
+        });
+        reversedBlob.reverse();
+
+        animate((frameTime) => {
+            const percentage = calcBouncePercentage(period, timingFunctions.ease, frameTime);
+
+            forceStyles(ctx, () => {
+                const {pt} = sizes();
+                ctx.fillStyle = "transparent";
+                ctx.lineWidth = pt;
+                ctx.strokeStyle = colors.secondary;
+                ctx.setLineDash([2 * pt]);
+                drawClosed(ctx, blob, false);
+            });
+
+            drawClosed(ctx, interpolateBetweenSmooth(2, percentage, blob, reversedBlob), true);
+        });
     },
 );
