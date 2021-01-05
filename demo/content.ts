@@ -464,6 +464,10 @@ addCanvas(
                 true,
             );
         });
+
+        return `The order of points cannot be changed without resulting in a different shape.
+            However, a likely enough optimal order can be selected by shifting the points and
+            comparing the point position deltas.`;
     },
     (ctx, width, height, animate) => {
         const period = Math.PI * Math.E * 1000;
@@ -500,5 +504,8 @@ addCanvas(
 
             drawClosed(ctx, interpolateBetweenSmooth(2, percentage, blob, reversedBlob), true);
         });
+
+        return `The only safe re-ordering is to reverse the points and again iterate through all
+            possible shifts.`;
     },
 );
