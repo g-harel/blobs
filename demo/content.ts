@@ -26,6 +26,8 @@ import {rand} from "../internal/rand";
 import {genFromOptions} from "../internal/gen";
 import {BlobOptions} from "../public/blobs";
 import {interpolateBetween, interpolateBetweenSmooth} from "../internal/animate/interpolate";
+import {divide} from "../internal/animate/prepare";
+import blobs from "../public/legacy";
 
 const makePoly = (pointCount: number, radius: number, center: Coord): Point[] => {
     const angle = (2 * Math.PI) / pointCount;
@@ -578,5 +580,42 @@ addCanvas(
             );
         });
     },
-    () => {},
+    (ctx, width, height, animate) => {
+        const period = (Math.PI + Math.E) * 1000;
+        const center: Coord = {x: width * 0.5, y: height * 0.5};
+        const maxExtraPoints = 4;
+        const {pt} = sizes();
+
+        const blob = centeredBlob(
+            {
+                extraPoints: 0,
+                randomness: 6,
+                seed: "flip",
+                size: height * 0.9,
+            },
+            center,
+        );
+
+        animate((frameTime) => {
+            const percentage = mod(frameTime, period) / period;
+            const extraPoints = Math.floor(percentage * (maxExtraPoints + 1));
+            drawClosed(ctx, divide(extraPoints + blob.length, blob), true);
+
+            forPoints(blob, ({curr}) => {
+                ctx.beginPath();
+                ctx.arc(curr.x, curr.y, pt * 6, 0, 2 * Math.PI);
+
+                tempStyles(
+                    ctx,
+                    () => {
+                        ctx.strokeStyle = colors.secondary;
+                        ctx.lineWidth = pt;
+                    },
+                    () => {
+                        ctx.stroke();
+                    },
+                );
+            });
+        });
+    },
 );
