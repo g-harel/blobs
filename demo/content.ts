@@ -520,6 +520,48 @@ addCanvas(
 addCanvas(
     1.3,
     (ctx, width, height, animate) => {
+        const period = Math.PI * 1000;
+        const center: Coord = {x: width * 0.5, y: height * 0.5};
+        const maxExtraPoints = 4;
+        const {pt} = sizes();
+
+        const blob = centeredBlob(
+            {
+                extraPoints: 0,
+                randomness: 6,
+                seed: "flip",
+                size: height * 0.9,
+            },
+            center,
+        );
+
+        animate((frameTime) => {
+            const percentage = mod(frameTime, period) / period;
+            const extraPoints = Math.floor(percentage * (maxExtraPoints + 1));
+            drawClosed(ctx, divide(extraPoints + blob.length, blob), true);
+
+            forPoints(blob, ({curr}) => {
+                ctx.beginPath();
+                ctx.arc(curr.x, curr.y, pt * 6, 0, 2 * Math.PI);
+
+                tempStyles(
+                    ctx,
+                    () => {
+                        ctx.strokeStyle = colors.secondary;
+                        ctx.lineWidth = pt;
+                    },
+                    () => {
+                        ctx.stroke();
+                    },
+                );
+            });
+        });
+
+        return `Points are added to the shape with the least until the shapes match. These new
+            points are as evenly distributed as possible. It is very rare to be able to remove
+            points from a shape without changing it.`;
+    },
+    (ctx, width, height, animate) => {
         const period = Math.PI ** Math.E * 1000;
         const start = point(width * 0.1, height * 0.6, 0, 0, -45, width * 0.5);
         const end = point(width * 0.9, height * 0.6, 160, width * 0.3, 0, 0);
@@ -579,43 +621,8 @@ addCanvas(
                 () => drawPoint(ctx, d.d0, 2),
             );
         });
-    },
-    (ctx, width, height, animate) => {
-        const period = (Math.PI + Math.E) * 1000;
-        const center: Coord = {x: width * 0.5, y: height * 0.5};
-        const maxExtraPoints = 4;
-        const {pt} = sizes();
 
-        const blob = centeredBlob(
-            {
-                extraPoints: 0,
-                randomness: 6,
-                seed: "flip",
-                size: height * 0.9,
-            },
-            center,
-        );
-
-        animate((frameTime) => {
-            const percentage = mod(frameTime, period) / period;
-            const extraPoints = Math.floor(percentage * (maxExtraPoints + 1));
-            drawClosed(ctx, divide(extraPoints + blob.length, blob), true);
-
-            forPoints(blob, ({curr}) => {
-                ctx.beginPath();
-                ctx.arc(curr.x, curr.y, pt * 6, 0, 2 * Math.PI);
-
-                tempStyles(
-                    ctx,
-                    () => {
-                        ctx.strokeStyle = colors.secondary;
-                        ctx.lineWidth = pt;
-                    },
-                    () => {
-                        ctx.stroke();
-                    },
-                );
-            });
-        });
+        return `Curve splitting uses the innermost line from the above curve drawing demo and makes
+            either side of the final point the handles.`;
     },
 );
