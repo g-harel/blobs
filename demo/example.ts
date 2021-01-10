@@ -1,4 +1,5 @@
 import {CanvasKeyframe, canvasPath} from "../public/animate";
+import {colors} from "./internal/layout";
 
 // TODO add click me prompt before clicked.
 
@@ -29,7 +30,7 @@ const ctx = canvas.getContext("2d")!;
 const animation = canvasPath();
 const renderFrame = () => {
     ctx.clearRect(0, 0, size, size);
-    ctx.fillStyle = "#ccc";
+    ctx.fillStyle = colors.highlight;
     ctx.fill(animation.renderFrame());
     requestAnimationFrame(renderFrame);
 };

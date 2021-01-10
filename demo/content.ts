@@ -27,7 +27,6 @@ import {genFromOptions} from "../internal/gen";
 import {BlobOptions} from "../public/blobs";
 import {interpolateBetween, interpolateBetweenSmooth} from "../internal/animate/interpolate";
 import {divide} from "../internal/animate/prepare";
-import blobs from "../public/legacy";
 
 const makePoly = (pointCount: number, radius: number, center: Coord): Point[] => {
     const angle = (2 * Math.PI) / pointCount;
@@ -132,6 +131,7 @@ addCanvas(2, (ctx, width, height, animate) => {
     const startPeriod = Math.E * 1000;
     const endPeriod = Math.PI * 1000;
 
+    // TODO animate handle length.
     animate((frameTime) => {
         const startPercentage = calcBouncePercentage(startPeriod, timingFunctions.ease, frameTime);
         const startAngle = split(startPercentage, -45, +45);

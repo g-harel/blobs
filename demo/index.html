@@ -24,26 +24,45 @@
                 height: 6rem;
             }
 
-            header nav a {
+            header nav a, .how-it-works {
                 color: #aaa;
                 display: inline-block;
                 font-size: 0.7rem;
                 font-weight: 700;
                 padding: 0.5rem;
                 text-decoration: none;
+                text-transform: uppercase;
+            }
+
+            main {
+                align-items: center;
+                display: flex;
+                flex-direction: column;
+            }
+
+            .example {
+                padding: 2.5rem 2rem;
+            }
+
+            .how-it-works {
+                cursor: pointer;
+                transform: rotate(-2deg) translateY(-1px);
                 user-select: none;
+            }
+
+            .how-it-works.hidden {
+                display: none;
             }
 
             .container {
                 align-items: center;
                 display: flex;
                 flex-direction: column;
-                margin: 0 0 20vh;
-                padding: 0 1rem;
+                padding: 0 1rem 20vh;
             }
 
-            .container .example {
-                padding: 2.5rem 0 8rem;
+            .container:not(.open) {
+                display: none;
             }
 
             .container .title {
@@ -117,8 +136,10 @@
                 >
             </nav>
         </header>
-        <main class="container">
+        <main>
             <div class="example"></div>
+            <div class="how-it-works">How it works</div>
+            <div class="container"></div>
         </main>
         <script src="./example.ts"></script>
         <script src="./content.ts"></script>

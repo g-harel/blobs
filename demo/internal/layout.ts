@@ -32,6 +32,17 @@ const cells: Cell[][] = [];
 const containerElement = document.querySelector(".container");
 if (!containerElement) throw "missing container";
 
+const howItWorksElement = document.querySelector(".how-it-works");
+if (!howItWorksElement) throw "missing container";
+
+const reveal = () => {
+    containerElement.classList.add("open");
+    howItWorksElement.classList.add("hidden");
+    redraw();
+};
+howItWorksElement.addEventListener("click", reveal);
+if (document.location.hash) setTimeout(reveal);
+
 export const sizes = (): {width: number; pt: number} => {
     const sectionStyle = window.getComputedStyle(
         (containerElement.lastChild as any) || document.body,
