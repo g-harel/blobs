@@ -99,7 +99,7 @@ addCanvas(
             }
         }
 
-        return `Traditional raster images are made up of pixels and have a fixed resolution.`;
+        return `Raster formats store pixel information and have a fixed resolution.`;
     },
     // Smooth circle.
     (ctx, width, height) => {
@@ -121,9 +121,8 @@ addCanvas(
             },
         );
 
-        return `Vector formats use math equations to draw the image at any scale. This makes it
-            ideal for artwork that has sharp lines and will be viewed at varying sizes like logos
-            and fonts.`;
+        return `Vector formats use formulas to draw the image at any scale. they are ideal fo
+            artwork with sharp lines that will be viewed at varying sizes.`;
     },
 );
 
@@ -144,9 +143,9 @@ addCanvas(2, (ctx, width, height, animate) => {
         drawOpen(ctx, start, end, true);
     });
 
-    return `A common way to define these vector shapes is using Bezier curves. The cubic bezier
-        below is made up of four coordinates: the start/end points and the corresponding "handles".
-        These handles can be thought of as defining the direction and momentum of the line.`;
+    return `Vector graphics are commonly defined using Bezier curves. The cubic bezier is made up of
+        four coordinates: the start/end points and their corresponding "handles". These handles can
+        be thought of as defining the direction and momentum of the line.`;
 });
 
 addCanvas(2, (ctx, width, height, animate) => {
@@ -195,8 +194,8 @@ addCanvas(2, (ctx, width, height, animate) => {
 
     return `The curve can be drawn geometrically by recursively splitting points by a percentage
         until there is only one point remaining. Note there is no constant relationship between the
-        percentage that "drew" the point and the arc lengths before/after it. Uniform motion is
-        can be approximated instead.`;
+        percentage that "drew" the point and the arc lengths before/after it. Uniform motion must be
+        approximated instead.`;
 });
 
 addTitle(4, "How are blobs made?");
@@ -226,7 +225,7 @@ addCanvas(
 
         drawClosed(ctx, shape, false);
 
-        return `Points are evenly rotated around the center.`;
+        return `Initial points are rotated evenly around the center.`;
     },
     (ctx, width, height, animate) => {
         const period = Math.PI * 1000;
@@ -268,7 +267,7 @@ addCanvas(
             drawClosed(ctx, shiftedShape, true);
         });
 
-        return `Each point is randomly moved towards, or away from the center.`;
+        return `Each point is randomly moved towards or away from the center.`;
     },
 );
 
@@ -302,7 +301,7 @@ addCanvas(
 
         drawClosed(ctx, polyBlob, false);
 
-        return `The points have handles, but they have no length and an incorrect angle.`;
+        return `In this state, the points have handles with zero length and angle.`;
     },
     (ctx, width, height, animate) => {
         const period = Math.PI * 1000;
@@ -344,7 +343,7 @@ addCanvas(
             drawClosed(ctx, animatedBlob, true);
         });
 
-        return `The shape is smoothed by making handles parallel to the line between the points
+        return `The blob is smoothed by making handles parallel to the line between the points
             immediately before and after. The length of the handles is a function of the distance to
             the nearest neighbor.`;
     },
@@ -415,10 +414,9 @@ addCanvas(2, (ctx, width, height, animate) => {
     });
 
     // TODO have content about why being able to interrupt transitions with another.
-    return `Interpolating between two blobs requires transforming the x,y coordinates of each point
-        as well as its handles. However this has two important prerequisites. First, both blobs must
-        have the same number of points. Second, the points must be matched with their nearest
-        counterpart in the target shape.`;
+    return `Interpolation requires points to be paired up from shape A to B. This means both blobs
+        must have the same number of points and that the points should be matched in a way that
+        minimizes movement.`;
 });
 
 addCanvas(
@@ -472,9 +470,9 @@ addCanvas(
             );
         });
 
-        return `The order of points cannot be changed without resulting in a different shape.
-            However, a likely enough optimal order can be selected by shifting the points and
-            comparing the point position deltas.`;
+        return `Points cannot be swapped without resulting in a different shape. However, a likely
+            enough optimal order can be selected by shifting the points and comparing the point
+            position deltas.`;
     },
     (ctx, width, height, animate) => {
         const period = Math.PI * Math.E * 1000;
@@ -557,9 +555,9 @@ addCanvas(
             });
         });
 
-        return `Points are added to the shape with the least until the shapes match. These new
-            points are as evenly distributed as possible. It is very rare to be able to remove
-            points from a shape without changing it.`;
+        return `Points are added until they both have the same count. These new points should be as
+            evenly distributed as possible. It is almost never possible to be able to remove points
+            from a shape without changing it.`;
     },
     (ctx, width, height, animate) => {
         const period = Math.PI ** Math.E * 1000;
@@ -622,7 +620,7 @@ addCanvas(
             );
         });
 
-        return `Curve splitting uses the innermost line from the above curve drawing demo and makes
-            either side of the final point the handles.`;
+        return `Curve splitting uses the innermost line from the cubic bezier curve drawing demo and
+            makes either side of the final point the handles.`;
     },
 );
