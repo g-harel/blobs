@@ -1,5 +1,5 @@
 import {tempStyles} from "./canvas";
-import {debug, onDebugStateChange} from "./debug";
+import {isDebug, onDebugStateChange} from "./debug";
 
 export const colors = {
     debug: "green",
@@ -28,7 +28,10 @@ export interface AnimationPainter {
     (timestamp: number): void;
 }
 
-const cells: Cell[][] = [];
+// Global cell state.
+const cells = ((window as any).cells as Cell[][]) || [];
+((window as any).cells as Cell[][]) = cells;
+
 const containerElement = document.querySelector(".container");
 if (!containerElement) throw "missing container";
 
@@ -41,7 +44,7 @@ const reveal = () => {
     redraw();
 };
 howItWorksElement.addEventListener("click", reveal);
-if (document.location.hash) setTimeout(reveal);
+if (document.location.hash || isDebug()) setTimeout(reveal);
 
 export const sizes = (): {width: number; pt: number} => {
     const sectionStyle = window.getComputedStyle(
@@ -132,7 +135,7 @@ const redraw = () => {
 
                 // Draw canvas debug info.
                 const drawDebug = () => {
-                    if (debug) {
+                    if (isDebug()) {
                         tempStyles(
                             cell.ctx,
                             () => (cell.ctx.strokeStyle = colors.debug),
@@ -157,7 +160,7 @@ const redraw = () => {
                         const frameTime = Date.now() - startTime;
                         cell.ctx.clearRect(0, 0, cellWidth, cellHeight);
                         drawDebug();
-                        if (debug) {
+                        if (isDebug()) {
                             tempStyles(
                                 cell.ctx,
                                 () => (cell.ctx.fillStyle = colors.debug),

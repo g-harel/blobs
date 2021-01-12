@@ -1,7 +1,7 @@
 import {TimingFunc} from "../../internal/animate/timing";
 import {Coord, Point} from "../../internal/types";
 import {expandHandle, forPoints, mod, rad} from "../../internal/util";
-import {debug} from "../internal/debug";
+import {isDebug} from "../internal/debug";
 import {sizes, colors} from "../internal/layout";
 
 export const forceStyles = (ctx: CanvasRenderingContext2D, fn: () => void) => {
@@ -35,7 +35,7 @@ export const rotateAround = (
             options.ctx.rotate(options.angle);
         },
         () => {
-            if (debug) {
+            if (isDebug()) {
                 tempStyles(
                     options.ctx,
                     () => (options.ctx.fillStyle = colors.debug),
