@@ -130,15 +130,18 @@ addCanvas(2, (ctx, width, height, animate) => {
     const startPeriod = Math.E * 1000;
     const endPeriod = Math.PI * 1000;
 
-    // TODO animate handle length.
     animate((frameTime) => {
         const startPercentage = calcBouncePercentage(startPeriod, timingFunctions.ease, frameTime);
         const startAngle = split(startPercentage, -45, +45);
-        const start = point(width * 0.2, height * 0.5, 0, 0, startAngle, width * 0.25);
+        const startLengthPercentage = mod(startPercentage * 0.8, 1);
+        const startLength = width * 0.2 + width * 0.1 * startLengthPercentage;
+        const start = point(width * 0.2, height * 0.5, 0, 0, startAngle, startLength);
 
         const endPercentage = calcBouncePercentage(endPeriod, timingFunctions.ease, frameTime);
         const endAngle = split(endPercentage, 135, 225);
-        const end = point(width * 0.8, height * 0.5, endAngle, width * 0.25, 0, 0);
+        const endLengthPercentage = mod(endPercentage * 0.8, 1);
+        const endLength = width * 0.2 + width * 0.1 * endLengthPercentage;
+        const end = point(width * 0.8, height * 0.5, endAngle, endLength, 0, 0);
 
         drawOpen(ctx, start, end, true);
     });

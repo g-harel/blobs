@@ -1,8 +1,6 @@
 // If debug is initially set to false it will not be toggleable.
 let debug = true;
-export const isDebug = () => {
-    return debug;
-};
+export const isDebug = () => debug;
 
 const debugListeners: ((debug: boolean) => void)[] = [];
 export const onDebugStateChange = (fn: (debug: boolean) => void) => {

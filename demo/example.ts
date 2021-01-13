@@ -1,8 +1,6 @@
 import {CanvasKeyframe, canvasPath} from "../public/animate";
 import {colors} from "./internal/layout";
 
-// TODO add click me prompt before clicked.
-
 // Fetch reference to example container.
 const exampleContainer = document.querySelector(".example")!;
 
