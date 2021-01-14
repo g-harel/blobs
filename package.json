@@ -14,6 +14,7 @@
     "fmt": "prettier --list-different --write --ignore-path .gitignore '**/*.{js,ts,md,html}'",
     "anim": "parcel internal/animate/testing/index.html --open",
     "demo": "parcel demo/index.html --open",
+    "demo:build": "parcel build demo/index.html -d docs",
     "test": "jest"
   },
   "devDependencies": {
@@ -21,6 +22,7 @@
     "jest": "^25.1.0",
     "jest-canvas-mock": "^2.2.0",
     "parcel": "^1.12.4",
+    "parcel-plugin-inliner": "^1.0.14",
     "prettier": "^2.0.2",
     "rollup": "^1.1.0",
     "rollup-plugin-copy": "^3.3.0",
