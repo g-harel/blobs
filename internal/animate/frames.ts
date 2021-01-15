@@ -72,6 +72,17 @@ export const renderFramesAt = (input: RenderInput): RenderOutput => {
         endKeyframe = currentFrames[i];
     }
 
+    // Return initial end points when past the end of the animation.
+    const endKeyframeIsLast = endKeyframe === currentFrames[currentFrames.length - 1];
+    const animationIsPastEndKeyframe = endKeyframe.timestamp < input.timestamp;
+    if (animationIsPastEndKeyframe && endKeyframeIsLast) {
+        return {
+            renderCache,
+            lastFrameId: endKeyframe.id,
+            points: endKeyframe.initialPoints,
+        };
+    }
+
     // Use and cache prepared points for current interpolation.
     let preparedStartPoints: Point[] | undefined =
         renderCache[startKeyframe.id]?.preparedStartPoints;
@@ -95,7 +106,7 @@ export const renderFramesAt = (input: RenderInput): RenderOutput => {
         (input.timestamp - startKeyframe.timestamp) /
         (endKeyframe.timestamp - startKeyframe.timestamp);
 
-    // Keep progress withing expected range (ex. division by 0).
+    // Keep progress within expected range (ex. division by 0).
     const clampedProgress = Math.max(0, Math.min(1, progress));
 
     // Apply timing function of end frame.
