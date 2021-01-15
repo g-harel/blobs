@@ -12,15 +12,16 @@
     "build": "npm run clean && rollup -c rollup.config.js",
     "clean": "trash '**/*.js' '**/*.js.map' '**/*.d.ts' '!**/node_modules/**/*' '!rollup.config.js'",
     "fmt": "prettier --list-different --write --ignore-path .gitignore '**/*.{js,ts,md,html}'",
-    "anim": "parcel internal/animate/testing/index.html --open",
-    "demo": "parcel demo/index.html --open",
-    "demo:build": "parcel build demo/index.html -d docs",
-    "test": "jest"
+    "demo:dev": "parcel demo/index.html --open",
+    "demo:build": "parcel build demo/index.html && move-file dist/index.html index.html",
+    "test": "jest",
+    "test:playground": "parcel internal/animate/testing/index.html --open"
   },
   "devDependencies": {
     "@types/jest": "^25.1.4",
     "jest": "^25.1.0",
     "jest-canvas-mock": "^2.2.0",
+    "move-file-cli": "^2.0.0",
     "parcel": "^1.12.4",
     "parcel-plugin-inliner": "^1.0.14",
     "prettier": "^2.0.2",
@@ -58,6 +59,8 @@
   },
   "jest": {
     "preset": "ts-jest",
-    "setupFiles": ["jest-canvas-mock"]
+    "setupFiles": [
+      "jest-canvas-mock"
+    ]
   }
 }
