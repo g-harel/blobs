@@ -27,6 +27,8 @@ import {genFromOptions} from "../internal/gen";
 import {BlobOptions} from "../public/blobs";
 import {interpolateBetween, interpolateBetweenSmooth} from "../internal/animate/interpolate";
 import {divide} from "../internal/animate/prepare";
+import {statefulAnimationGenerator} from "../internal/animate/state";
+import {CanvasKeyframe} from "../public/animate";
 
 const makePoly = (pointCount: number, radius: number, center: Coord): Point[] => {
     const angle = (2 * Math.PI) / pointCount;
@@ -127,20 +129,28 @@ addCanvas(
 );
 
 addCanvas(2, (ctx, width, height, animate) => {
-    const startPeriod = Math.E * 1000;
-    const endPeriod = Math.PI * 1000;
+    const startPeriod = (1 + Math.E) * 1000;
+    const endPeriod = (1 + Math.PI) * 1000;
 
     animate((frameTime) => {
         const startPercentage = calcBouncePercentage(startPeriod, timingFunctions.ease, frameTime);
+        const startLengthPercentage = calcBouncePercentage(
+            startPeriod * 0.8,
+            timingFunctions.ease,
+            frameTime,
+        );
         const startAngle = split(startPercentage, -45, +45);
-        const startLengthPercentage = mod(startPercentage * 0.8, 1);
-        const startLength = width * 0.2 + width * 0.1 * startLengthPercentage;
+        const startLength = width * 0.1 + width * 0.2 * startLengthPercentage;
         const start = point(width * 0.2, height * 0.5, 0, 0, startAngle, startLength);
 
         const endPercentage = calcBouncePercentage(endPeriod, timingFunctions.ease, frameTime);
+        const endLengthPercentage = calcBouncePercentage(
+            endPeriod * 0.8,
+            timingFunctions.ease,
+            frameTime,
+        );
         const endAngle = split(endPercentage, 135, 225);
-        const endLengthPercentage = mod(endPercentage * 0.8, 1);
-        const endLength = width * 0.2 + width * 0.1 * endLengthPercentage;
+        const endLength = width * 0.1 + width * 0.2 * endLengthPercentage;
         const end = point(width * 0.8, height * 0.5, endAngle, endLength, 0, 0);
 
         drawOpen(ctx, start, end, true);
@@ -416,7 +426,6 @@ addCanvas(2, (ctx, width, height, animate) => {
         drawClosed(ctx, interpolateBetween(percentage, blobA, blobB), true);
     });
 
-    // TODO have content about why being able to interrupt transitions with another.
     return `Interpolation requires points to be paired up from shape A to B. This means both blobs
         must have the same number of points and that the points should be matched in a way that
         minimizes movement.`;
@@ -627,3 +636,54 @@ addCanvas(
             makes either side of the final point the handles.`;
     },
 );
+
+addCanvas(1.6, (ctx, width, height) => {
+    const period = Math.PI * 1000;
+    const center: Coord = {x: width * 0.5, y: height * 0.5};
+    const size = Math.min(width, height) * 0.8;
+
+    const canvasBlobGenerator = (keyframe: CanvasKeyframe): Point[] => {
+        return mapPoints(genFromOptions(keyframe.blobOptions), ({curr}) => {
+            curr.x += center.x - size / 2;
+            curr.y += center.y - size / 2;
+            return curr;
+        });
+    };
+
+    const animation = statefulAnimationGenerator(
+        canvasBlobGenerator,
+        (points: Point[]) => drawClosed(ctx, points, true),
+        () => {},
+    )();
+
+    const renderFrame = () => {
+        ctx.clearRect(0, 0, width, height);
+        animation.renderFrame();
+        requestAnimationFrame(renderFrame);
+    };
+    requestAnimationFrame(renderFrame);
+
+    const loopAnimation = (): void => animation.transition(genFrame());
+
+    let frameCount = -1;
+    const genFrame = (overrides: Partial<CanvasKeyframe> = {}): CanvasKeyframe => {
+        frameCount++;
+        return {
+            duration: period,
+            timingFunction: "ease",
+            callback: loopAnimation,
+            blobOptions: {
+                extraPoints: Math.max(0, mod(frameCount, 4) - 1),
+                randomness: 4,
+                seed: Math.random(),
+                size,
+            },
+            ...overrides,
+        };
+    };
+
+    animation.transition(genFrame({duration: 0}));
+
+    // TODO have content about why being able to interrupt transitions with another.
+    return ``;
+});
