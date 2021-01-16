@@ -11,7 +11,7 @@
     "postpublish": "npm run clean",
     "build": "npm run clean && rollup -c rollup.config.js",
     "clean": "trash '**/*.js' '**/*.js.map' '**/*.d.ts' '!**/node_modules/**/*' '!rollup.config.js'",
-    "fmt": "prettier --list-different --write --ignore-path .gitignore '**/*.{js,ts,md,html}'",
+    "fmt": "prettier --list-different --write --ignore-path .gitignore '**/*.{js,ts,md,html}' '!index.html'",
     "demo:dev": "parcel demo/index.html --open",
     "demo:build": "parcel build demo/index.html && move-file dist/index.html index.html",
     "test": "jest",
