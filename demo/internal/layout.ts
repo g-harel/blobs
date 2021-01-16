@@ -38,9 +38,11 @@ if (!containerElement) throw "missing container";
 const howItWorksElement = document.querySelector(".how-it-works");
 if (!howItWorksElement) throw "missing container";
 
+let animating = false;
 const reveal = () => {
     containerElement.classList.add("open");
     howItWorksElement.classList.add("hidden");
+    animating = true;
     redraw();
 };
 howItWorksElement.addEventListener("click", reveal);
@@ -147,6 +149,8 @@ const redraw = () => {
 
                 // Cell-specific callback for providing an animation painter.
                 const animate = (painter: AnimationPainter) => {
+                    if (!animating) return;
+
                     const animationID = Math.random();
                     const startTime = Date.now();
                     cell.animationID = animationID;

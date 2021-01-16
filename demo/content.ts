@@ -65,7 +65,7 @@ const calcFullDetails = (percentage: number, a: Point, b: Point) => {
     return {a0, a1, a2, a3, b0, b1, b2, c0, c1, d0};
 };
 
-addTitle(4, "What are vector graphics?");
+addTitle(4, "Vector graphics");
 
 addCanvas(
     1.3,
@@ -211,7 +211,7 @@ addCanvas(2, (ctx, width, height, animate) => {
         approximated instead.`;
 });
 
-addTitle(4, "How are blobs made?");
+addTitle(4, "Making a blob");
 
 addCanvas(
     1.3,
@@ -362,7 +362,7 @@ addCanvas(
     },
 );
 
-addTitle(4, "How are animated blobs interpolated?");
+addTitle(4, "Interpolating between blobs");
 
 addCanvas(2, (ctx, width, height, animate) => {
     const period = Math.PI * 1000;
