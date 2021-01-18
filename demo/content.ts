@@ -434,7 +434,7 @@ addCanvas(2, (ctx, width, height, animate) => {
 addCanvas(
     1.3,
     (ctx, width, height, animate) => {
-        const period = Math.PI ** Math.E * 1000;
+        const period = (Math.E / Math.PI) * 1000;
         const center: Coord = {x: width * 0.5, y: height * 0.5};
 
         const blob = centeredBlob(
@@ -447,18 +447,20 @@ addCanvas(
             center,
         );
 
+        const shiftedBlob = shift(1, blob);
+
+        let prev = 0;
+        let count = 0;
         animate((frameTime) => {
             const animationTime = mod(frameTime, period);
-            const totalShifts = blob.length;
-            const localPeriod = period / totalShifts;
+            const percentage = timingFunctions.ease(mod(animationTime, period) / period);
 
-            const shiftNumber = Math.floor((animationTime / period) * totalShifts);
-            const localPercentage = timingFunctions.ease(
-                mod(animationTime, localPeriod) / localPeriod,
-            );
-
-            const prevBlob = shift(shiftNumber - 1, blob);
-            const currentBlob = shift(shiftNumber, blob);
+            // Count animation loops.
+            if (percentage < prev) {
+                count++;
+                console.log(count);
+            }
+            prev = percentage;
 
             // Draw lines points are travelling.
             tempStyles(
@@ -475,11 +477,12 @@ addCanvas(
                 },
             );
 
-            drawClosed(
-                ctx,
-                interpolateBetweenSmooth(2, localPercentage, prevBlob, currentBlob),
-                true,
-            );
+            // Pause in-place every other animation loop.
+            if (count % 2 === 0) {
+                drawClosed(ctx, interpolateBetweenSmooth(2, percentage, blob, shiftedBlob), true);
+            } else {
+                drawClosed(ctx, blob, true);
+            }
         });
 
         return `Points cannot be swapped without resulting in a different shape. However, a likely
