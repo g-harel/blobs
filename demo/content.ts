@@ -456,10 +456,7 @@ addCanvas(
             const percentage = timingFunctions.ease(mod(animationTime, period) / period);
 
             // Count animation loops.
-            if (percentage < prev) {
-                count++;
-                console.log(count);
-            }
+            if (percentage < prev) count++;
             prev = percentage;
 
             // Draw lines points are travelling.
@@ -640,7 +637,7 @@ addCanvas(
     },
 );
 
-addCanvas(1.6, (ctx, width, height) => {
+addCanvas(1.8, (ctx, width, height) => {
     const period = Math.PI * 1000;
     const center: Coord = {x: width * 0.5, y: height * 0.5};
     const size = Math.min(width, height) * 0.8;
@@ -687,6 +684,7 @@ addCanvas(1.6, (ctx, width, height) => {
 
     animation.transition(genFrame({duration: 0}));
 
-    // TODO have content about why being able to interrupt transitions with another.
-    return ``;
+    return `Points can be removed at the end of animations as the target shape has been reached.
+        However if the animation is interrupted during interpolation there is no opportunity to
+        clean up the extra points.`;
 });
