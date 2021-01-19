@@ -19,6 +19,7 @@
   },
   "devDependencies": {
     "@types/jest": "^25.1.4",
+    "husky": "^4.3.8",
     "jest": "^25.1.0",
     "jest-canvas-mock": "^2.2.0",
     "move-file-cli": "^2.0.0",
@@ -62,5 +63,11 @@
     "setupFiles": [
       "jest-canvas-mock"
     ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "yarn run test",
+      "pre-push": "yarn run demo:build"
+    }
   }
 }
