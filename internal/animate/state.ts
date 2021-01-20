@@ -9,6 +9,7 @@ interface CallbackStore {
     [frameId: string]: () => void;
 }
 
+// TODO play, pause, play/pause.
 export const statefulAnimationGenerator = <K extends CallbackKeyframe, T>(
     generator: (keyframe: K) => Point[],
     renderer: (points: Point[]) => T,

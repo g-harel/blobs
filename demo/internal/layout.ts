@@ -147,6 +147,18 @@ const redraw = () => {
                 };
                 drawDebug();
 
+                // Keep track of paused state.
+                let pausedAt = 0;
+                let pauseOffset = 0;
+                cell.canvas.onclick = () => {
+                    if (pausedAt === 0) {
+                        pausedAt = Date.now();
+                    } else {
+                        pauseOffset += Date.now() - pausedAt;
+                        pausedAt = 0;
+                    }
+                };
+
                 // Cell-specific callback for providing an animation painter.
                 const animate = (painter: AnimationPainter) => {
                     if (!animating) return;
@@ -157,22 +169,22 @@ const redraw = () => {
 
                     const drawFrame = () => {
                         // Stop animating if cell is redrawn.
-                        if (cell.animationID !== animationID) {
-                            return;
+                        if (cell.animationID !== animationID) return;
+
+                        if (pausedAt === 0) {
+                            const frameTime = Date.now() - startTime - pauseOffset;
+                            cell.ctx.clearRect(0, 0, cellWidth, cellHeight);
+                            drawDebug();
+                            if (isDebug()) {
+                                tempStyles(
+                                    cell.ctx,
+                                    () => (cell.ctx.fillStyle = colors.debug),
+                                    () => cell.ctx.fillText(String(frameTime), 10, 15),
+                                );
+                            }
+                            painter(frameTime);
                         }
 
-                        const frameTime = Date.now() - startTime;
-                        cell.ctx.clearRect(0, 0, cellWidth, cellHeight);
-                        drawDebug();
-                        if (isDebug()) {
-                            tempStyles(
-                                cell.ctx,
-                                () => (cell.ctx.fillStyle = colors.debug),
-                                () => cell.ctx.fillText(String(frameTime), 10, 15),
-                            );
-                        }
-
-                        painter(frameTime);
                         requestAnimationFrame(drawFrame);
                     };
                     drawFrame();
