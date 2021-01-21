@@ -684,6 +684,8 @@ addCanvas(1.8, (ctx, width, height) => {
 
     animation.transition(genFrame({duration: 0}));
 
+    ctx.canvas.onclick = animation.playPause;
+
     return `Points can be removed at the end of animations as the target shape has been reached.
         However if the animation is interrupted during interpolation there is no opportunity to
         clean up the extra points.`;

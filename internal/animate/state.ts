@@ -9,7 +9,6 @@ interface CallbackStore {
     [frameId: string]: () => void;
 }
 
-// TODO play, pause, play/pause.
 export const statefulAnimationGenerator = <K extends CallbackKeyframe, T>(
     generator: (keyframe: K) => Point[],
     renderer: (points: Point[]) => T,
@@ -19,10 +18,35 @@ export const statefulAnimationGenerator = <K extends CallbackKeyframe, T>(
     let renderCache: RenderCache = {};
     let callbackStore: CallbackStore = {};
 
+    // Keep track of paused state.
+    // TODO fix
+    let pausedAt = 0;
+    let pauseOffset = 0;
+
+    const play = () => {
+        console.log("play");
+        if (pausedAt === 0) return;
+        pauseOffset += Date.now() - pausedAt;
+        pausedAt = 0;
+    };
+
+    const pause = () => {
+        console.log("pause");
+        pausedAt = Date.now();
+    };
+
+    const playPause = () => {
+        if (pausedAt === 0) {
+            pause();
+        } else {
+            play();
+        }
+    };
+
     const renderFrame = (): T => {
         const renderOutput = renderFramesAt({
             renderCache: renderCache,
-            timestamp: Date.now(),
+            timestamp: pausedAt === 0 ? Date.now() - pauseOffset : pausedAt,
             currentFrames: internalFrames,
         });
 
@@ -46,7 +70,7 @@ export const statefulAnimationGenerator = <K extends CallbackKeyframe, T>(
 
         const transitionOutput = transitionFrames<K>({
             renderCache: renderCache,
-            timestamp: Date.now(),
+            timestamp: Date.now() - pauseOffset,
             currentFrames: internalFrames,
             newFrames: keyframes,
             shapeGenerator: generator,
@@ -65,5 +89,5 @@ export const statefulAnimationGenerator = <K extends CallbackKeyframe, T>(
         }
     };
 
-    return {renderFrame, transition};
+    return {renderFrame, transition, play, pause, playPause};
 };

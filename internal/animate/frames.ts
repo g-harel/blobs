@@ -72,7 +72,7 @@ export const renderFramesAt = (input: RenderInput): RenderOutput => {
         endKeyframe = currentFrames[i];
     }
 
-    // Return initial end points when past the end of the animation.
+    // Return original end shape when past the end of the animation.
     const endKeyframeIsLast = endKeyframe === currentFrames[currentFrames.length - 1];
     const animationIsPastEndKeyframe = endKeyframe.timestamp < input.timestamp;
     if (animationIsPastEndKeyframe && endKeyframeIsLast) {
