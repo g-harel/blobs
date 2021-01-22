@@ -638,6 +638,10 @@ addCanvas(
 );
 
 addCanvas(1.8, (ctx, width, height) => {
+    // Only animate in the most recent painter call.
+    const animationID = Math.random();
+    const wasReplaced = () => (ctx.canvas as any).animationID !== animationID;
+
     const period = Math.PI * 1000;
     const center: Coord = {x: width * 0.5, y: height * 0.5};
     const size = Math.min(width, height) * 0.8;
@@ -657,13 +661,17 @@ addCanvas(1.8, (ctx, width, height) => {
     )();
 
     const renderFrame = () => {
+        if (wasReplaced()) return;
         ctx.clearRect(0, 0, width, height);
         animation.renderFrame();
         requestAnimationFrame(renderFrame);
     };
     requestAnimationFrame(renderFrame);
 
-    const loopAnimation = (): void => animation.transition(genFrame());
+    const loopAnimation = (): void => {
+        if (wasReplaced()) return;
+        animation.transition(genFrame());
+    };
 
     let frameCount = -1;
     const genFrame = (overrides: Partial<CanvasKeyframe> = {}): CanvasKeyframe => {
@@ -684,7 +692,12 @@ addCanvas(1.8, (ctx, width, height) => {
 
     animation.transition(genFrame({duration: 0}));
 
-    ctx.canvas.onclick = animation.playPause;
+    ctx.canvas.onclick = () => {
+        if (wasReplaced()) return;
+        animation.playPause();
+    };
+
+    (ctx.canvas as any).animationID = animationID;
 
     return `Points can be removed at the end of animations as the target shape has been reached.
         However if the animation is interrupted during interpolation there is no opportunity to

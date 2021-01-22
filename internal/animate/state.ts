@@ -19,34 +19,35 @@ export const statefulAnimationGenerator = <K extends CallbackKeyframe, T>(
     let callbackStore: CallbackStore = {};
 
     // Keep track of paused state.
-    // TODO fix
     let pausedAt = 0;
     let pauseOffset = 0;
+    const getAnimationTimestamp = () => Date.now() - pauseOffset;
+    const isPaused = () => pausedAt !== 0;
 
     const play = () => {
-        console.log("play");
-        if (pausedAt === 0) return;
-        pauseOffset += Date.now() - pausedAt;
+        if (!isPaused()) return;
+        pauseOffset += getAnimationTimestamp() - pausedAt;
         pausedAt = 0;
     };
 
     const pause = () => {
-        console.log("pause");
-        pausedAt = Date.now();
+        if (isPaused()) return;
+        pausedAt = getAnimationTimestamp();
     };
 
     const playPause = () => {
-        if (pausedAt === 0) {
-            pause();
-        } else {
+        ``;
+        if (isPaused()) {
             play();
+        } else {
+            pause();
         }
     };
 
     const renderFrame = (): T => {
         const renderOutput = renderFramesAt({
             renderCache: renderCache,
-            timestamp: pausedAt === 0 ? Date.now() - pauseOffset : pausedAt,
+            timestamp: isPaused() ? pausedAt : getAnimationTimestamp(),
             currentFrames: internalFrames,
         });
 
@@ -70,7 +71,7 @@ export const statefulAnimationGenerator = <K extends CallbackKeyframe, T>(
 
         const transitionOutput = transitionFrames<K>({
             renderCache: renderCache,
-            timestamp: Date.now() - pauseOffset,
+            timestamp: getAnimationTimestamp(),
             currentFrames: internalFrames,
             newFrames: keyframes,
             shapeGenerator: generator,
