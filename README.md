@@ -122,6 +122,11 @@ animation.transition({
     callback: loopAnimation,
     blobOptions: {...},
 });
+
+// Toggle play/pause animation on canvas click.
+ctx.canvas.onclick = () => {
+    animation.playPause();
+};
 ```
 
 ## Complete API
@@ -198,6 +203,12 @@ export const canvasPath: () => {
     // Immediately begin animating through the given keyframes.
     // Non-rendered keyframes from previous transitions are cancelled.
     transition: (...keyframes: CanvasKeyframe[]) => void;
+    // Resume a paused animation. Has no effect if already playing.
+    play: () => void;
+    // Pause a playing animation. Has no effect if already paused.
+    pause: () => void;
+    // Toggle between playing and pausing the animation.
+    playPause: () => void;
 };
 ```
 

@@ -1,3 +1,8 @@
+# 2.2.0
+
+-   Remove added points from end keyframe after interpolation completes.
+-   Add play/pause/playPause API for animations.
+
 # 2.1.0
 
 -   Improved type checks on user-provided data
