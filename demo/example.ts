@@ -10,7 +10,7 @@ exampleContainer.appendChild(canvas);
 let size = 0;
 const resize = () => {
     // Set blob size relative to window, but limit to 600.
-    const rawSize = Math.min(600, Math.min(window.innerWidth - 64, window.innerHeight - 256));
+    const rawSize = Math.min(600, Math.min(window.innerWidth - 64, window.innerHeight / 2));
     canvas.style.width = `${rawSize}px`;
     canvas.style.height = `${rawSize}px`;
 
