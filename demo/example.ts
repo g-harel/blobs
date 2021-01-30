@@ -57,9 +57,29 @@ canvas.onclick = () => {
 };
 
 // Immediately show a new frame.
-const init = () => {
+window.addEventListener("load", () => {
     resize();
     animation.transition(genFrame({duration: 0}));
-};
-window.addEventListener("load", init);
-window.addEventListener("resize", init);
+});
+
+// Make blob a circle while window is being resized.
+window.addEventListener("resize", () => {
+    resize();
+    const tempSize = (size * 6) / 7;
+    animation.transition(
+        genFrame({
+            duration: 100,
+            timingFunction: "easeEnd",
+            blobOptions: {
+                extraPoints: 0,
+                randomness: 0,
+                seed: "",
+                size: tempSize,
+            },
+            canvasOptions: {
+                offsetX: (size - tempSize) / 2,
+                offsetY: (size - tempSize) / 2,
+            },
+        }),
+    );
+});
