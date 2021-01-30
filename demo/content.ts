@@ -101,7 +101,7 @@ addCanvas(
             }
         }
 
-        return `Raster formats store pixel information and have a fixed resolution.`;
+        return `Raster image formats store pixel information and have a fixed resolution.`;
     },
     // Smooth circle.
     (ctx, width, height) => {
@@ -123,8 +123,9 @@ addCanvas(
             },
         );
 
-        return `Vector formats use formulas to draw the image at any scale. they are ideal fo
-            artwork with sharp lines that will be viewed at varying sizes.`;
+        return `By contrast vector formats can scale infinitely because they are defined by
+            formulas. They are ideal for artwork with sharp lines that will be viewed at varying
+            sizes.`;
     },
 );
 
@@ -156,9 +157,9 @@ addCanvas(2, (ctx, width, height, animate) => {
         drawOpen(ctx, start, end, true);
     });
 
-    return `Vector graphics are commonly defined using Bezier curves. The cubic bezier is made up of
-        four coordinates: the start/end points and their corresponding "handles". These handles can
-        be thought of as defining the direction and momentum of the line.`;
+    return `Vector-based images are commonly defined using Bezier curves. The cubic bezier is made
+        up of four coordinates: the start/end points and their corresponding "handles". These
+        handles define the direction and "momentum" of the line.`;
 });
 
 addCanvas(2, (ctx, width, height, animate) => {
@@ -205,10 +206,10 @@ addCanvas(2, (ctx, width, height, animate) => {
         drawOpen(ctx, start, end, false);
     });
 
-    return `The curve can be drawn geometrically by recursively splitting points by a percentage
+    return `Curves can be drawn geometrically by recursively splitting points by a percentage
         until there is only one point remaining. Note there is no constant relationship between the
-        percentage that "drew" the point and the arc lengths before/after it. Uniform motion must be
-        approximated instead.`;
+        percentage that "drew" the point and the arc lengths before/after it. Uniform motion along
+        the curve can only be approximated.`;
 });
 
 addTitle(4, "Making a blob");
@@ -280,7 +281,7 @@ addCanvas(
             drawClosed(ctx, shiftedShape, true);
         });
 
-        return `Each point is randomly moved towards or away from the center.`;
+        return `Each point is randomly moved toward or away from the center.`;
     },
 );
 
@@ -314,7 +315,7 @@ addCanvas(
 
         drawClosed(ctx, polyBlob, false);
 
-        return `In this state, the points have handles with zero length and angle.`;
+        return `In this state, the points have handles of length zero.`;
     },
     (ctx, width, height, animate) => {
         const period = Math.PI * 1000;
@@ -568,8 +569,7 @@ addCanvas(
         });
 
         return `Points are added until they both have the same count. These new points should be as
-            evenly distributed as possible. It is almost never possible to be able to remove points
-            from a shape without changing it.`;
+            evenly distributed as possible.`;
     },
     (ctx, width, height, animate) => {
         const period = Math.PI ** Math.E * 1000;
