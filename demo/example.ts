@@ -34,26 +34,39 @@ const renderFrame = () => {
 };
 requestAnimationFrame(renderFrame);
 
+// Extra points that increases when blob gets clicked.
+let extraPoints = 0;
+
 // Generate a keyframe with overridable default values.
-const genFrame = (overrides: Partial<CanvasKeyframe> = {}): CanvasKeyframe => ({
-    duration: 4000,
-    timingFunction: "ease",
-    callback: loopAnimation,
-    blobOptions: {
-        extraPoints: 3,
+const genFrame = (overrides: any = {}): CanvasKeyframe => {
+    const blobOptions = {
+        extraPoints: 3 + extraPoints,
         randomness: 4,
         seed: Math.random(),
         size,
-    },
-    ...overrides,
-});
+        ...overrides.blobOptions,
+    };
+    return {
+        duration: 4000,
+        timingFunction: "ease",
+        callback: loopAnimation,
+        ...overrides,
+        blobOptions,
+    };
+};
 
 // Callback for every frame which starts transition to a new frame.
-const loopAnimation = (): void => animation.transition(genFrame());
+const loopAnimation = (): void => {
+    extraPoints = 0;
+    animation.transition(genFrame());
+};
 
 // Quickly animate to a new frame when canvas is clicked.
 canvas.onclick = () => {
-    animation.transition(genFrame({duration: 400, timingFunction: "elasticEnd0"}));
+    extraPoints++;
+    animation.transition(
+        genFrame({duration: 400, timingFunction: "elasticEnd0", blobOptions: {extraPoints}}),
+    );
 };
 
 // Immediately show a new frame.
