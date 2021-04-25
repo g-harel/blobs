@@ -5,6 +5,7 @@
   "author": "g-harel",
   "license": "MIT",
   "main": "index.js",
+  "module": "index.module.js",
   "types": "index.d.ts",
   "scripts": {
     "prepack": "npm run build",

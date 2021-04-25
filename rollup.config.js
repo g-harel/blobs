@@ -29,21 +29,23 @@ const bundles = [
     },
 ];
 
-export default bundles.map((bundle) => ({
-    input: bundle.entry,
-    output: {
-        file: bundle.output + "/index.js",
-        format: "umd",
-        name: bundle.name,
-        sourcemap: true,
-    },
-    plugins: [
-        typescript({cacheRoot: "./node_modules/.cache/rpt2"}),
-        uglify(),
-        copy({
-            hook: "writeBundle",
-            targets: [{src: bundle.types, dest: bundle.output, rename: "index.d.ts"}],
-            verbose: true,
-        }),
-    ],
-}));
+export default ["es", "umd"].flatMap((format) =>
+    bundles.map((bundle) => ({
+        input: bundle.entry,
+        output: {
+            file: bundle.output + `/index${format == "es" ? ".module" : ""}.js`,
+            format: format,
+            name: bundle.name,
+            sourcemap: true,
+        },
+        plugins: [
+            typescript({cacheRoot: "./node_modules/.cache/rpt2"}),
+            uglify(),
+            copy({
+                hook: "writeBundle",
+                targets: [{src: bundle.types, dest: bundle.output, rename: "index.d.ts"}],
+                verbose: true,
+            }),
+        ],
+    })),
+);
