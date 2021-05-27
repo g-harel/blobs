@@ -18,9 +18,11 @@ const ease: TimingFunc = (p) => {
     return 0.5 + 0.5 * Math.sin(Math.PI * (p + 1.5));
 };
 
-const elasticEnd = (s: number): TimingFunc => (p) => {
-    return Math.pow(2, -10 * p) * Math.sin(((p - s / 4) * (2 * Math.PI)) / s) + 1;
-};
+const elasticEnd =
+    (s: number): TimingFunc =>
+    (p) => {
+        return Math.pow(2, -10 * p) * Math.sin(((p - s / 4) * (2 * Math.PI)) / s) + 1;
+    };
 
 // https://www.desmos.com/calculator/fqisoq1kuw
 export const timingFunctions = {

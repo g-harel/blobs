@@ -24,25 +24,24 @@ interface TestCase<T> {
     error?: RegExp;
 }
 
-const runSuite = <T>(t: {
-    optionsGenerator: () => T;
-    functionBeingTested: (options: any) => void;
-}) => (testCases: TestCase<T>[]) => {
-    for (const testCase of testCases) {
-        it(testCase.name, () => {
-            const options = t.optionsGenerator();
-            testCase.edit(options);
+const runSuite =
+    <T>(t: {optionsGenerator: () => T; functionBeingTested: (options: any) => void}) =>
+    (testCases: TestCase<T>[]) => {
+        for (const testCase of testCases) {
+            it(testCase.name, () => {
+                const options = t.optionsGenerator();
+                testCase.edit(options);
 
-            if (testCase.error) {
-                // Copy regexp because they are stateful.
-                const pattern = new RegExp(testCase.error);
-                expect(() => t.functionBeingTested(options)).toThrow(pattern);
-            } else {
-                expect(() => t.functionBeingTested(options)).not.toThrow();
-            }
-        });
-    }
-};
+                if (testCase.error) {
+                    // Copy regexp because they are stateful.
+                    const pattern = new RegExp(testCase.error);
+                    expect(() => t.functionBeingTested(options)).toThrow(pattern);
+                } else {
+                    expect(() => t.functionBeingTested(options)).not.toThrow();
+                }
+            });
+        }
+    };
 
 const testBlobOptions = (functionBeingTested: (options: any) => void) => {
     it("should accept generated blobOptions", () => {
