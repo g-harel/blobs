@@ -1,10 +1,11 @@
 {
   "name": "blobs",
-  "version": "2.2.1-beta.0",
+  "version": "2.2.1-beta.1",
   "description": "Random blob generation and animation",
   "author": "g-harel",
   "license": "MIT",
   "main": "index.js",
+  "module": "index.module.js",
   "types": "index.d.ts",
   "scripts": {
     "prepack": "npm run build",
