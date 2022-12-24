@@ -67,7 +67,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "npm run fmt && npm run test && git add -A ."
+      "pre-commit": "npm run fmt && npm run test&& npm run demo:build && git add -A ."
     }
   }
 }

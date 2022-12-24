@@ -1,3 +1,9 @@
+# 2.2.1
+
+-   Add option to set custom timestamp provider
+-   Export `Animation` and `TimestampProvider` types from `v2/animate`
+-   Add module support, thank you to #4 and #7
+
 # 2.2.0
 
 -   Remove added points from end keyframe after interpolation completes.
