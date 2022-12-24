@@ -197,7 +197,7 @@ export interface CanvasKeyframe {
         offsetY?: number;
     };
 }
-export const canvasPath: () => {
+export interface Animation {
     // Renders the current state of the animation.
     renderFrame: () => Path2D;
     // Immediately begin animating through the given keyframes.
@@ -209,7 +209,8 @@ export const canvasPath: () => {
     pause: () => void;
     // Toggle between playing and pausing the animation.
     playPause: () => void;
-};
+}
+export const canvasPath: () => Animation;
 ```
 
 ## License

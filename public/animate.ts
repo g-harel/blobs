@@ -6,8 +6,13 @@ import {statefulAnimationGenerator} from "../internal/animate/state";
 import {checkBlobOptions, checkCanvasOptions, checkKeyframeOptions} from "../internal/check";
 
 export interface CanvasKeyframe {
-    delay?: number;
+    // Duration of the keyframe animation in milliseconds.
     duration: number;
+    // Delay before animation begins in milliseconds.
+    // Default: 0.
+    delay?: number;
+    // Controls the speed of the animation over time.
+    // Default: "linear".
     timingFunction?:
         | "linear"
         | "easeEnd"
@@ -17,17 +22,36 @@ export interface CanvasKeyframe {
         | "elasticEnd1"
         | "elasticEnd2"
         | "elasticEnd3";
+    // Called after keyframe end-state is reached or passed.
+    // Called exactly once when the keyframe end-state is rendered.
+    // Not called if the keyframe is preempted by a new transition.
     callback?: () => void;
+    // Standard options, refer to "blobs/v2" documentation.
     blobOptions: {
         seed: number | string;
         randomness: number;
         extraPoints: number;
         size: number;
     };
+    // Standard options, refer to "blobs/v2" documentation.
     canvasOptions?: {
         offsetX?: number;
         offsetY?: number;
     };
+}
+
+export interface Animation {
+    // Renders the current state of the animation.
+    renderFrame: () => Path2D;
+    // Immediately begin animating through the given keyframes.
+    // Non-rendered keyframes from previous transitions are cancelled.
+    transition: (...keyframes: CanvasKeyframe[]) => void;
+    // Resume a paused animation. Has no effect if already playing.
+    play: () => void;
+    // Pause a playing animation. Has no effect if already paused.
+    pause: () => void;
+    // Toggle between playing and pausing the animation.
+    playPause: () => void;
 }
 
 const canvasBlobGenerator = (keyframe: CanvasKeyframe): Point[] => {
@@ -48,7 +72,7 @@ const canvasKeyframeChecker = (keyframe: CanvasKeyframe, index: number) => {
     }
 };
 
-export const canvasPath = statefulAnimationGenerator(
+export const canvasPath: () => Animation = statefulAnimationGenerator(
     canvasBlobGenerator,
     renderPath2D,
     canvasKeyframeChecker,
