@@ -54,6 +54,14 @@ export interface Animation {
     playPause: () => void;
 }
 
+// Function that returns the current timestamp. This value will be used for all
+// duration/delay values and will be used to interpolate between keyframes. It
+// must produce values increasing in size.
+// Default: `Date.now`.
+export interface TimestampProvider {
+    (): number;
+}
+
 const canvasBlobGenerator = (keyframe: CanvasKeyframe): Point[] => {
     return mapPoints(genFromOptions(keyframe.blobOptions), ({curr}) => {
         curr.x += keyframe?.canvasOptions?.offsetX || 0;
@@ -72,8 +80,25 @@ const canvasKeyframeChecker = (keyframe: CanvasKeyframe, index: number) => {
     }
 };
 
-export const canvasPath: () => Animation = statefulAnimationGenerator(
-    canvasBlobGenerator,
-    renderPath2D,
-    canvasKeyframeChecker,
-);
+export const canvasPath = (timestampProvider?: () => number): Animation => {
+    let actualTimestampProvider = Date.now;
+
+    // Make sure timestamps are always increasing.
+    if (timestampProvider !== undefined) {
+        let lastTimestamp = 0;
+        actualTimestampProvider = () => {
+            const currentTimestamp = timestampProvider();
+            if (currentTimestamp < lastTimestamp) {
+                throw `timestamp provider generated decreasing value: ${lastTimestamp} then ${currentTimestamp}.`;
+            }
+            lastTimestamp = currentTimestamp;
+            return currentTimestamp;
+        };
+    }
+
+    return statefulAnimationGenerator(
+        canvasBlobGenerator,
+        renderPath2D,
+        canvasKeyframeChecker,
+    )(actualTimestampProvider);
+};

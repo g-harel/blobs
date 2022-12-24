@@ -263,8 +263,9 @@ const genAnimation = (
     speed: number,
     offset: number,
     timing: blobs2Animate.CanvasKeyframe["timingFunction"],
+    timeWarp: number,
 ) => {
-    const animation = blobs2Animate.canvasPath();
+    const animation = blobs2Animate.canvasPath(() => Date.now() * timeWarp);
 
     const loopAnimation = () => {
         animation.transition(
@@ -367,10 +368,10 @@ const genAnimation = (
     let percentage = animationStart;
 
     const animations = [
-        genAnimation(1000, 0, "elasticEnd0"),
-        genAnimation(1000, 200, "elasticEnd1"),
-        genAnimation(1000, 400, "elasticEnd2"),
-        genAnimation(1000, 600, "elasticEnd3"),
+        genAnimation(500, 0, "elasticEnd0", 1),
+        genAnimation(500, 200, "elasticEnd1", 1),
+        genAnimation(500, 400, "elasticEnd2", 1),
+        genAnimation(500, 600, "elasticEnd3", 0.1),
     ];
 
     const renderFrame = () => {

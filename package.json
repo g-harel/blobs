@@ -1,6 +1,6 @@
 {
   "name": "blobs",
-  "version": "2.2.1-beta.1",
+  "version": "2.2.1",
   "description": "Random blob generation and animation",
   "author": "g-harel",
   "license": "MIT",
@@ -24,7 +24,7 @@
     "jest": "^25.1.0",
     "jest-canvas-mock": "^2.2.0",
     "move-file-cli": "^2.0.0",
-    "parcel": "^1.12.4",
+    "parcel": "1.12.3",
     "parcel-plugin-inliner": "^1.0.14",
     "prettier": "^2.0.2",
     "rollup": "^1.1.0",

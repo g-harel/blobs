@@ -210,7 +210,14 @@ export interface Animation {
     // Toggle between playing and pausing the animation.
     playPause: () => void;
 }
-export const canvasPath: () => Animation;
+// Function that returns the current timestamp. This value will be used for all
+// duration/delay values and will be used to interpolate between keyframes. It
+// must produce values increasing in size.
+// Default: `Date.now`.
+export interface TimestampProvider {
+    (): number;
+}
+export const canvasPath: (timestampProvider?: TimestampProvider) => Animation;
 ```
 
 ## License

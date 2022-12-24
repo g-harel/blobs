@@ -15,7 +15,7 @@ export const statefulAnimationGenerator =
         renderer: (points: Point[]) => T,
         checker: (keyframe: K, index: number) => void,
     ) =>
-    () => {
+    (timestampProvider: () => number) => {
         let internalFrames: InternalKeyframe[] = [];
         let renderCache: RenderCache = {};
         let callbackStore: CallbackStore = {};
@@ -23,7 +23,7 @@ export const statefulAnimationGenerator =
         // Keep track of paused state.
         let pausedAt = 0;
         let pauseOffset = 0;
-        const getAnimationTimestamp = () => Date.now() - pauseOffset;
+        const getAnimationTimestamp = () => timestampProvider() - pauseOffset;
         const isPaused = () => pausedAt !== 0;
 
         const play = () => {
