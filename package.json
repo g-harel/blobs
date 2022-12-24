@@ -67,7 +67,7 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "yarn run fmt && yarn run test && git add -A ."
+      "pre-commit": "npm run fmt && npm run test && git add -A ."
     }
   }
 }
