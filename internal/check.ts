@@ -52,3 +52,22 @@ export const checkSvgOptions = (svgOptions: any) => {
         typeCheck(`svgOptions.strokeWidth`, strokeWidth, ["number", "undefined"]);
     }
 };
+
+export const checkPoints = (points: any) => {
+    if (!Array.isArray(points)) {
+        throw `points should be an array but was "${typeof points}".`;
+    }
+    if (points.length < 3) {
+        throw `expected more than two points but received "${points.length}".`;
+    }
+    for (const point of points) {
+        typeCheck(`point.x`, point.x, ["number"]);
+        typeCheck(`point.y`, point.y, ["number"]);
+        typeCheck(`point.handleIn`, point.handleIn, ["object"]);
+        typeCheck(`point.handleIn.angle`, point.handleIn.angle, ["number"]);
+        typeCheck(`point.handleIn.length`, point.handleIn.length, ["number"]);
+        typeCheck(`point.handleOut`, point.handleOut, ["object"]);
+        typeCheck(`point.handleOut.angle`, point.handleOut.angle, ["number"]);
+        typeCheck(`point.handleOut.length`, point.handleOut.length, ["number"]);
+    }
+};

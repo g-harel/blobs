@@ -1,8 +1,9 @@
 # 2.2.1
 
+-   Add support for custom point-based keyframes
 -   Add option to set custom timestamp provider
--   Export `Animation` and `TimestampProvider` types from `v2/animate`
 -   Add module support, thank you to #4 and #7
+-   Export `Animation` and `TimestampProvider` types from `v2/animate`
 
 # 2.2.0
 

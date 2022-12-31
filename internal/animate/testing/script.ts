@@ -367,11 +367,49 @@ const genAnimation = (
 (() => {
     let percentage = animationStart;
 
+    const noHandles = {handleIn: {angle: 0, length: 0}, handleOut: {angle: 0, length: 0}};
+    const animation = blobs2Animate.canvasPath();
+    const loopAnimation = (immediate: boolean = false) => {
+        const size = 200;
+        const offsetX = 300;
+        const offsetY = 300;
+
+        animation.transition(
+            {
+                duration: immediate ? 0 : 1000,
+                delay: 100,
+                timingFunction: "elasticEnd0",
+                blobOptions: {
+                    extraPoints: 3,
+                    randomness: 4,
+                    seed: Math.random(),
+                    size: size,
+                },
+                canvasOptions: {offsetX, offsetY},
+            },
+            {
+                duration: 1000,
+                delay: 100,
+                timingFunction: "elasticEnd0",
+                points: [
+                    {x: 0, y: 0, ...noHandles},
+                    {x: 0, y: size, ...noHandles},
+                    {x: size, y: size, ...noHandles},
+                    {x: size, y: 0, ...noHandles},
+                ],
+                canvasOptions: {offsetX, offsetY},
+                callback: loopAnimation,
+            },
+        );
+    };
+    loopAnimation(true);
+
     const animations = [
         genAnimation(500, 0, "elasticEnd0", 1),
         genAnimation(500, 200, "elasticEnd1", 1),
         genAnimation(500, 400, "elasticEnd2", 1),
         genAnimation(500, 600, "elasticEnd3", 0.1),
+        animation,
     ];
 
     const renderFrame = () => {

@@ -3,9 +3,14 @@ import {renderPath2D} from "../internal/render/canvas";
 import {genFromOptions} from "../internal/gen";
 import {mapPoints} from "../internal/util";
 import {statefulAnimationGenerator} from "../internal/animate/state";
-import {checkBlobOptions, checkCanvasOptions, checkKeyframeOptions} from "../internal/check";
+import {
+    checkBlobOptions,
+    checkCanvasOptions,
+    checkKeyframeOptions,
+    checkPoints,
+} from "../internal/check";
 
-export interface CanvasKeyframe {
+interface Keyframe {
     // Duration of the keyframe animation in milliseconds.
     duration: number;
     // Delay before animation begins in milliseconds.
@@ -27,17 +32,25 @@ export interface CanvasKeyframe {
     // Not called if the keyframe is preempted by a new transition.
     callback?: () => void;
     // Standard options, refer to "blobs/v2" documentation.
+    canvasOptions?: {
+        offsetX?: number;
+        offsetY?: number;
+    };
+}
+
+export interface CanvasKeyframe extends Keyframe {
+    // Standard options, refer to "blobs/v2" documentation.
     blobOptions: {
         seed: number | string;
         randomness: number;
         extraPoints: number;
         size: number;
     };
-    // Standard options, refer to "blobs/v2" documentation.
-    canvasOptions?: {
-        offsetX?: number;
-        offsetY?: number;
-    };
+}
+
+export interface CanvasCustomKeyframe extends Keyframe {
+    // List of point coordinates that produce a single, closed shape.
+    points: Point[];
 }
 
 export interface Animation {
@@ -45,7 +58,7 @@ export interface Animation {
     renderFrame: () => Path2D;
     // Immediately begin animating through the given keyframes.
     // Non-rendered keyframes from previous transitions are cancelled.
-    transition: (...keyframes: CanvasKeyframe[]) => void;
+    transition: (...keyframes: (CanvasKeyframe | CanvasCustomKeyframe)[]) => void;
     // Resume a paused animation. Has no effect if already playing.
     play: () => void;
     // Pause a playing animation. Has no effect if already paused.
@@ -62,16 +75,23 @@ export interface TimestampProvider {
     (): number;
 }
 
-const canvasBlobGenerator = (keyframe: CanvasKeyframe): Point[] => {
-    return mapPoints(genFromOptions(keyframe.blobOptions), ({curr}) => {
+const canvasPointGenerator = (keyframe: CanvasKeyframe | CanvasCustomKeyframe): Point[] => {
+    let points: Point[];
+    if ("points" in keyframe) {
+        points = keyframe.points;
+    } else {
+        points = genFromOptions(keyframe.blobOptions);
+    }
+    return mapPoints(points, ({curr}) => {
         curr.x += keyframe?.canvasOptions?.offsetX || 0;
         curr.y += keyframe?.canvasOptions?.offsetY || 0;
         return curr;
     });
 };
 
-const canvasKeyframeChecker = (keyframe: CanvasKeyframe, index: number) => {
+const canvasKeyframeChecker = (keyframe: CanvasKeyframe | CanvasCustomKeyframe, index: number) => {
     try {
+        if ("points" in keyframe) return checkPoints(keyframe.points);
         checkBlobOptions(keyframe.blobOptions);
         checkCanvasOptions(keyframe.canvasOptions);
         checkKeyframeOptions(keyframe);
@@ -97,7 +117,7 @@ export const canvasPath = (timestampProvider?: () => number): Animation => {
     }
 
     return statefulAnimationGenerator(
-        canvasBlobGenerator,
+        canvasPointGenerator,
         renderPath2D,
         canvasKeyframeChecker,
     )(actualTimestampProvider);
