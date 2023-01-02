@@ -4,9 +4,15 @@ import {BlobOptions} from "../public/blobs";
 import {Point} from "./types";
 import {smooth} from "./util";
 
-export const genBlob = (pointCount: number, offset: () => number): Point[] => {
-    const angle = (Math.PI * 2) / pointCount;
+export const smoothBlob = (blobygon: Point[]): Point[] => {
+    // https://math.stackexchange.com/a/873589/235756
+    const angle = (Math.PI * 2) / blobygon.length;
+    const smoothingStrength = ((4 / 3) * Math.tan(angle / 4)) / Math.sin(angle / 2) / 2;
+    return smooth(blobygon, smoothingStrength);
+};
 
+export const genBlobygon = (pointCount: number, offset: () => number): Point[] => {
+    const angle = (Math.PI * 2) / pointCount;
     const points: Point[] = [];
     for (let i = 0; i < pointCount; i++) {
         const randPointOffset = offset();
@@ -19,11 +25,11 @@ export const genBlob = (pointCount: number, offset: () => number): Point[] => {
             handleOut: {angle: 0, length: 0},
         });
     }
+    return points;
+};
 
-    // https://math.stackexchange.com/a/873589/235756
-    const smoothingStrength = ((4 / 3) * Math.tan(angle / 4)) / Math.sin(angle / 2) / 2;
-
-    return smooth(points, smoothingStrength);
+export const genBlob = (pointCount: number, offset: () => number): Point[] => {
+    return smoothBlob(genBlobygon(pointCount, offset));
 };
 
 export const genFromOptions = (blobOptions: BlobOptions): Point[] => {

@@ -3,7 +3,7 @@ import {divide, prepare} from "../prepare";
 import {Coord, Point} from "../../types";
 import {length, insertAt, insertCount, rad, mod, mapPoints, forPoints} from "../../util";
 import {clear, drawInfo, drawClosed} from "../../render/canvas";
-import {genBlob} from "../../gen";
+import {genBlob, genFromOptions} from "../../gen";
 import {rand} from "../../rand";
 import * as blobs2 from "../../../public/blobs";
 import * as blobs2Animate from "../../../public/animate";
@@ -259,7 +259,7 @@ const loopBetween = (percentage: number, a: Point[], b: Point[]): Point[] => {
     }
 };
 
-const genAnimation = (
+const genBlobAnimation = (
     speed: number,
     offset: number,
     timing: blobs2Animate.CanvasKeyframe["timingFunction"],
@@ -364,19 +364,17 @@ const genAnimation = (
     return animation;
 };
 
-(() => {
-    let percentage = animationStart;
-
+const genCustomAnimation = (
+    speed: number,
+    offset: number,
+) => {
     const noHandles = {handleIn: {angle: 0, length: 0}, handleOut: {angle: 0, length: 0}};
     const animation = blobs2Animate.canvasPath();
     const loopAnimation = (immediate: boolean = false) => {
         const size = 200;
-        const offsetX = 300;
-        const offsetY = 300;
-
         animation.transition(
             {
-                duration: immediate ? 0 : 1000,
+                duration: immediate ? 0 : speed,
                 delay: 100,
                 timingFunction: "elasticEnd0",
                 blobOptions: {
@@ -385,10 +383,10 @@ const genAnimation = (
                     seed: Math.random(),
                     size: size,
                 },
-                canvasOptions: {offsetX, offsetY},
+                canvasOptions: {offsetX: offset},
             },
             {
-                duration: 1000,
+                duration: speed,
                 delay: 100,
                 timingFunction: "elasticEnd0",
                 points: [
@@ -397,23 +395,90 @@ const genAnimation = (
                     {x: size, y: size, ...noHandles},
                     {x: size, y: 0, ...noHandles},
                 ],
-                canvasOptions: {offsetX, offsetY},
+                canvasOptions: {offsetX: offset},
                 callback: loopAnimation,
             },
         );
     };
     loopAnimation(true);
+    return animation;
+}
+
+const wigglePreset = (animation: blobs2Animate.Animation, config: {
+    blobOptions: blobs2.BlobOptions;
+    period: number;
+    delay?: number;
+    timingFunction?: blobs2Animate.CanvasKeyframe["timingFunction"];
+    canvasOptions?: {
+        offsetX?: number;
+        offsetY?: number;
+    };
+}) => {
+    const targetBlob: Point[] = genFromOptions(config.blobOptions);
+    const mutatesPerPeriod = 3 + config.blobOptions.extraPoints;
+    const mutateInterval = config.period / mutatesPerPeriod;
+    const mutateRatio = 1.5 / mutatesPerPeriod;
+
+    const loopAnimation = () => {
+        console.log("llooop");
+        const newBlob = genFromOptions(Object.assign(config.blobOptions, {seed: Math.random()}));
+        for (let i = 0; i < newBlob.length; i++) {
+            if (Math.random() < mutateRatio) {
+                targetBlob[i] = newBlob[i];
+            }
+        }
+        animation.transition({
+            duration: config.period,
+            timingFunction: config.timingFunction,
+            canvasOptions: config.canvasOptions,
+            points: targetBlob,
+        });
+    };
+    console.log(mutatesPerPeriod, mutateInterval, mutateRatio);
+    animation.transition({
+        duration: config.period,
+        delay: config.delay || 0,
+        timingFunction: config.timingFunction,
+        canvasOptions: config.canvasOptions,
+        points: genFromOptions(config.blobOptions),
+    });
+    setInterval(loopAnimation, mutateInterval);
+}
+
+const genWiggleAnimation = (
+    period: number,
+    offset: number,
+) => {
+    const animation = blobs2Animate.canvasPath();
+    wigglePreset(animation, {
+        blobOptions: {
+            extraPoints: 2,
+            randomness: 10,
+            seed: Math.random(),
+            size: 200,
+        },
+        period,
+        timingFunction: "ease",
+        canvasOptions: {offsetX: offset},
+    });
+    return animation;
+}
+
+(() => {
+    let percentage = animationStart;
 
     const animations = [
-        genAnimation(500, 0, "elasticEnd0", 1),
-        genAnimation(500, 200, "elasticEnd1", 1),
-        genAnimation(500, 400, "elasticEnd2", 1),
-        genAnimation(500, 600, "elasticEnd3", 0.1),
-        animation,
+        genBlobAnimation(500, 0, "elasticEnd0", 1),
+        genBlobAnimation(500, 200, "elasticEnd1", 1),
+        genBlobAnimation(500, 400, "elasticEnd2", 1),
+        genBlobAnimation(500, 600, "elasticEnd3", 0.1),
+        genCustomAnimation(1000, 800),
+        genWiggleAnimation(200, 1000),
     ];
 
     const renderFrame = () => {
         clear(ctx);
+        ctx.strokeStyle = "black";
 
         testGen();
         drawInfo(ctx, 0, "percentage", percentage);
@@ -428,7 +493,8 @@ const genAnimation = (
         testPrepLetters(percentage);
 
         for (const animation of animations) {
-            ctx.fill(animation.renderFrame());
+            ctx.strokeStyle = "orange";
+            ctx.stroke(animation.renderFrame());
         }
 
         percentage += animationSpeed / 1000;
