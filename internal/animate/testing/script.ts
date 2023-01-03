@@ -383,7 +383,7 @@ const genCustomAnimation = (
                     seed: Math.random(),
                     size: size,
                 },
-                canvasOptions: {offsetX: offset},
+                canvasOptions: {offsetX: offset, offsetY: 220},
             },
             {
                 duration: speed,
@@ -395,7 +395,7 @@ const genCustomAnimation = (
                     {x: size, y: size, ...noHandles},
                     {x: size, y: 0, ...noHandles},
                 ],
-                canvasOptions: {offsetX: offset},
+                canvasOptions: {offsetX: offset, offsetY: 220},
                 callback: loopAnimation,
             },
         );
@@ -415,12 +415,23 @@ const wigglePreset = (animation: blobs2Animate.Animation, config: {
     };
 }) => {
     const targetBlob: Point[] = genFromOptions(config.blobOptions);
-    const mutatesPerPeriod = 3 + config.blobOptions.extraPoints;
+    const numberOfPoints = 3 + config.blobOptions.extraPoints;
+    const mutatesPerPeriod = 1 * numberOfPoints;
     const mutateInterval = config.period / mutatesPerPeriod;
-    const mutateRatio = 1.5 / mutatesPerPeriod;
+    const mutateRatio = 1 / mutatesPerPeriod;
+
+    console.log(
+        "mutatesPerPeriod",
+        mutatesPerPeriod,
+        "mutateInterval",
+        mutateInterval,
+        "mutateRatio",
+        mutateRatio,
+        "config",
+        JSON.stringify(config),
+    );
 
     const loopAnimation = () => {
-        console.log("llooop");
         const newBlob = genFromOptions(Object.assign(config.blobOptions, {seed: Math.random()}));
         for (let i = 0; i < newBlob.length; i++) {
             if (Math.random() < mutateRatio) {
@@ -434,15 +445,14 @@ const wigglePreset = (animation: blobs2Animate.Animation, config: {
             points: targetBlob,
         });
     };
-    console.log(mutatesPerPeriod, mutateInterval, mutateRatio);
     animation.transition({
-        duration: config.period,
+        duration: 0,
         delay: config.delay || 0,
         timingFunction: config.timingFunction,
         canvasOptions: config.canvasOptions,
         points: genFromOptions(config.blobOptions),
+        callback: () => setInterval(loopAnimation, mutateInterval),
     });
-    setInterval(loopAnimation, mutateInterval);
 }
 
 const genWiggleAnimation = (
@@ -452,14 +462,14 @@ const genWiggleAnimation = (
     const animation = blobs2Animate.canvasPath();
     wigglePreset(animation, {
         blobOptions: {
-            extraPoints: 2,
-            randomness: 10,
+            extraPoints: 20,
+            randomness: 4,
             seed: Math.random(),
             size: 200,
         },
         period,
         timingFunction: "ease",
-        canvasOptions: {offsetX: offset},
+        canvasOptions: {offsetX: offset, offsetY: 220},
     });
     return animation;
 }
@@ -472,8 +482,8 @@ const genWiggleAnimation = (
         genBlobAnimation(500, 200, "elasticEnd1", 1),
         genBlobAnimation(500, 400, "elasticEnd2", 1),
         genBlobAnimation(500, 600, "elasticEnd3", 0.1),
-        genCustomAnimation(1000, 800),
-        genWiggleAnimation(200, 1000),
+        genCustomAnimation(1000, 0),
+        genWiggleAnimation(100, 200),
     ];
 
     const renderFrame = () => {
