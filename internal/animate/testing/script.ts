@@ -27,6 +27,13 @@ toggle.onclick = () => (debug = !debug);
 
 const interact = document.getElementById("interact") as any;
 if (toggle === null) throw new Error("no interact");
+const addInteraction = (newOnclick: () => void) => {
+    const oldOnclick = interact.onclick || (() => 0);
+    interact.onclick = () => {
+        oldOnclick();
+        newOnclick();
+    };
+}
 
 const point = (x: number, y: number, ia: number, il: number, oa: number, ol: number): Point => {
     return {
@@ -341,9 +348,7 @@ const genBlobAnimation = (
         },
     });
 
-    const oldOnclick = interact.onclick || (() => 0);
-    interact.onclick = () => {
-        oldOnclick();
+    addInteraction(() => {
         animation.transition({
             duration: speed,
             callback: loopAnimation,
@@ -359,7 +364,7 @@ const genBlobAnimation = (
                 offsetY: 10,
             },
         });
-    };
+    });
 
     return animation;
 };
@@ -401,6 +406,7 @@ const genCustomAnimation = (
         );
     };
     loopAnimation(true);
+    addInteraction(() => animation.playPause());
     return animation;
 }
 
@@ -453,6 +459,7 @@ const wigglePreset = (animation: blobs2Animate.Animation, config: {
         points: genFromOptions(config.blobOptions),
         callback: () => setInterval(loopAnimation, mutateInterval),
     });
+    addInteraction(() => animation.playPause());
 }
 
 const genWiggleAnimation = (
@@ -462,7 +469,7 @@ const genWiggleAnimation = (
     const animation = blobs2Animate.canvasPath();
     wigglePreset(animation, {
         blobOptions: {
-            extraPoints: 20,
+            extraPoints: 1,
             randomness: 4,
             seed: Math.random(),
             size: 200,
@@ -481,14 +488,14 @@ const genWiggleAnimation = (
         genBlobAnimation(500, 0, "elasticEnd0", 1),
         genBlobAnimation(500, 200, "elasticEnd1", 1),
         genBlobAnimation(500, 400, "elasticEnd2", 1),
-        genBlobAnimation(500, 600, "elasticEnd3", 0.1),
+        genBlobAnimation(500, 600, "elasticEnd3", 1),
+        genBlobAnimation(500, 800, "elasticEnd3", 0.1),
         genCustomAnimation(1000, 0),
-        genWiggleAnimation(100, 200),
+        genWiggleAnimation(500, 200),
     ];
 
     const renderFrame = () => {
         clear(ctx);
-        ctx.strokeStyle = "black";
 
         testGen();
         drawInfo(ctx, 0, "percentage", percentage);
@@ -503,8 +510,13 @@ const genWiggleAnimation = (
         testPrepLetters(percentage);
 
         for (const animation of animations) {
+            ctx.save();
             ctx.strokeStyle = "orange";
-            ctx.stroke(animation.renderFrame());
+            ctx.fillStyle = "rgba(255, 200, 0, 0.5)";
+            const path = animation.renderFrame();
+            ctx.stroke(path);
+            ctx.fill(path);
+            ctx.restore();
         }
 
         percentage += animationSpeed / 1000;

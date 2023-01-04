@@ -15,6 +15,9 @@ export interface InternalKeyframe {
     timingFunction: TimingFunc;
     initialPoints: Point[];
     transitionSourceFrameIndex: number;
+
+    // Synthetic keyframes are generated to represent the current state when
+    // a new transition is begun.
     isSynthetic: boolean;
 }
 
