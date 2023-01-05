@@ -5,7 +5,7 @@ interface CallbackKeyframe extends Keyframe {
     callback?: () => void;
 }
 
-interface CallbackStore {
+interface FrameCallbackStore {
     [frameId: string]: () => void;
 }
 
@@ -18,7 +18,7 @@ export const statefulAnimationGenerator =
     (timestampProvider: () => number) => {
         let internalFrames: InternalKeyframe[] = [];
         let renderCache: RenderCache = {};
-        let callbackStore: CallbackStore = {};
+        let frameCallbackStore: FrameCallbackStore = {};
 
         // Keep track of paused state.
         let pausedAt = 0;
@@ -38,7 +38,6 @@ export const statefulAnimationGenerator =
         };
 
         const playPause = () => {
-            ``;
             if (isPaused()) {
                 play();
             } else {
@@ -57,9 +56,9 @@ export const statefulAnimationGenerator =
             renderCache = renderOutput.renderCache;
 
             // Invoke callback if defined and the first time the frame is reached.
-            if (renderOutput.lastFrameId && callbackStore[renderOutput.lastFrameId]) {
-                callbackStore[renderOutput.lastFrameId]();
-                delete callbackStore[renderOutput.lastFrameId];
+            if (renderOutput.lastFrameId && frameCallbackStore[renderOutput.lastFrameId]) {
+                frameCallbackStore[renderOutput.lastFrameId]();
+                delete frameCallbackStore[renderOutput.lastFrameId];
             }
 
             return renderer(renderOutput.points);
@@ -81,14 +80,14 @@ export const statefulAnimationGenerator =
 
             // Reset internal state..
             internalFrames = transitionOutput.newFrames;
-            callbackStore = {};
+            frameCallbackStore = {};
             renderCache = {};
 
             // Populate callback store using returned frame ids.
             for (const newFrame of internalFrames) {
                 if (newFrame.isSynthetic) continue;
                 const {callback} = keyframes[newFrame.transitionSourceFrameIndex];
-                if (callback) callbackStore[newFrame.id] = callback;
+                if (callback) frameCallbackStore[newFrame.id] = callback;
             }
         };
 
