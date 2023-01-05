@@ -33,3 +33,11 @@ export const rand = (seed: string) => {
     const seedGenerator = xfnv1a(seed);
     return sfc32(seedGenerator(), seedGenerator(), seedGenerator(), seedGenerator());
 };
+
+// Simplex noise.
+// https://en.wikipedia.org/wiki/Simplex_noise
+export const noise = () => {
+    return (x: number, y: number) => {
+        Math.random();
+    }
+}
