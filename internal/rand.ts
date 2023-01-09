@@ -1,3 +1,5 @@
+import { createNoise2D } from 'simplex-noise';
+
 // Seeded random number generator.
 // https://stackoverflow.com/a/47593316/3053361
 export const rand = (seed: string) => {
@@ -35,9 +37,11 @@ export const rand = (seed: string) => {
 };
 
 // Simplex noise.
+// TODO(2023-01-08) implement to remove dep
 // https://en.wikipedia.org/wiki/Simplex_noise
 export const noise = () => {
+    const noise2D = createNoise2D();
     return (x: number, y: number) => {
-        Math.random();
+        return noise2D(x, y);
     }
 }
