@@ -11,11 +11,11 @@ export const smoothBlob = (blobygon: Point[]): Point[] => {
     return smooth(blobygon, smoothingStrength);
 };
 
-export const genBlobygon = (pointCount: number, offset: () => number): Point[] => {
+export const genBlobygon = (pointCount: number, offset: (id: number) => number): Point[] => {
     const angle = (Math.PI * 2) / pointCount;
     const points: Point[] = [];
     for (let i = 0; i < pointCount; i++) {
-        const randPointOffset = offset();
+        const randPointOffset = offset(i);
         const pointX = Math.sin(i * angle);
         const pointY = Math.cos(i * angle);
         points.push({
@@ -28,7 +28,7 @@ export const genBlobygon = (pointCount: number, offset: () => number): Point[] =
     return points;
 };
 
-export const genBlob = (pointCount: number, offset: () => number): Point[] => {
+export const genBlob = (pointCount: number, offset: (id: number) => number): Point[] => {
     return smoothBlob(genBlobygon(pointCount, offset));
 };
 
