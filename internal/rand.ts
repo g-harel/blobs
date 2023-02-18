@@ -1,4 +1,4 @@
-import { createNoise2D } from 'simplex-noise';
+import {createNoise2D} from "simplex-noise";
 
 // Seeded random number generator.
 // https://stackoverflow.com/a/47593316/3053361
@@ -40,9 +40,9 @@ export const rand = (seed: string) => {
 // TODO(2023-01-08) implement to remove dep
 // TODO(2023-02-16) https://asserttrue.blogspot.com/2011/12/perlin-noise-in-javascript_31.html
 // https://en.wikipedia.org/wiki/Simplex_noise
-export const noise = () => {
-    const noise2D = createNoise2D();
+export const noise = (seed: string) => {
+    const noise2D = createNoise2D(rand(seed));
     return (x: number, y: number) => {
         return noise2D(x, y);
-    }
-}
+    };
+};

@@ -11,7 +11,7 @@ export const smoothBlob = (blobygon: Point[]): Point[] => {
     return smooth(blobygon, smoothingStrength);
 };
 
-export const genBlobygon = (pointCount: number, offset: (id: number) => number): Point[] => {
+export const genBlobygon = (pointCount: number, offset: (index: number) => number): Point[] => {
     const angle = (Math.PI * 2) / pointCount;
     const points: Point[] = [];
     for (let i = 0; i < pointCount; i++) {
@@ -28,12 +28,15 @@ export const genBlobygon = (pointCount: number, offset: (id: number) => number):
     return points;
 };
 
-export const genBlob = (pointCount: number, offset: (id: number) => number): Point[] => {
+export const genBlob = (pointCount: number, offset: (index: number) => number): Point[] => {
     return smoothBlob(genBlobygon(pointCount, offset));
 };
 
-export const genFromOptions = (blobOptions: BlobOptions): Point[] => {
-    const rgen = rand(String(blobOptions.seed));
+export const genFromOptions = (
+    blobOptions: BlobOptions,
+    r?: (index: number) => number,
+): Point[] => {
+    const rgen = r || rand(String(blobOptions.seed));
 
     // Scale of random movement increases as randomness approaches infinity.
     // randomness = 0   -> rangeStart = 1
@@ -47,7 +50,7 @@ export const genFromOptions = (blobOptions: BlobOptions): Point[] => {
 
     const points = genBlob(
         3 + blobOptions.extraPoints,
-        () => (rangeStart + rgen() * (1 - rangeStart)) / 2,
+        (index) => (rangeStart + rgen(index) * (1 - rangeStart)) / 2,
     );
 
     const size = blobOptions.size;

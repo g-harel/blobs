@@ -271,10 +271,12 @@ addCanvas(
             );
 
             // Draw randomly shifted shape.
-            const shiftedShape = shape.map((p): Point => {
-                const randOffset = percentage * (randStrength * rgen() - randStrength / 2);
-                return coordPoint(splitLine(randOffset, p, center));
-            });
+            const shiftedShape = shape.map(
+                (p): Point => {
+                    const randOffset = percentage * (randStrength * rgen() - randStrength / 2);
+                    return coordPoint(splitLine(randOffset, p, center));
+                },
+            );
 
             drawClosed(ctx, shiftedShape, true);
         });
