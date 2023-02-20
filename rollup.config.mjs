@@ -1,6 +1,7 @@
 import typescript from "rollup-plugin-typescript2";
 import {uglify} from "rollup-plugin-uglify";
 import copy from "rollup-plugin-copy";
+import { nodeResolve } from '@rollup/plugin-node-resolve';
 
 const bundles = [
     {
@@ -39,6 +40,7 @@ export default ["es", "umd"].flatMap((format) =>
             sourcemap: true,
         },
         plugins: [
+            nodeResolve(),
             typescript({cacheRoot: "./node_modules/.cache/rpt2"}),
             uglify(),
             copy({

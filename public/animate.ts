@@ -9,8 +9,8 @@ import {
     checkKeyframeOptions,
     checkPoints,
 } from "../internal/check";
-
-export {WiggleOptions, wigglePreset} from "./wiggle";
+import {BlobOptions, CanvasOptions} from "./blobs";
+import {noise} from "../internal/rand";
 
 interface Keyframe {
     // Duration of the keyframe animation in milliseconds.
@@ -77,6 +77,11 @@ export interface TimestampProvider {
     (): number;
 }
 
+export interface WiggleOptions {
+    speed: number;
+    delay?: number;
+}
+
 const canvasPointGenerator = (keyframe: CanvasKeyframe | CanvasCustomKeyframe): Point[] => {
     let points: Point[];
     if ("points" in keyframe) {
@@ -123,4 +128,35 @@ export const canvasPath = (timestampProvider?: () => number): Animation => {
         renderPath2D,
         canvasKeyframeChecker,
     )(actualTimestampProvider);
+};
+
+export const wigglePreset = (
+    animation: Animation,
+    blobOptions: BlobOptions,
+    canvasOptions: CanvasOptions,
+    wiggleOptions: WiggleOptions,
+) => {
+    const leapSize = 0.01 * wiggleOptions.speed;
+
+    // Interval at which a new sample is taken.
+    // Multiple of 16 to do work every N frames.
+    const intervalMs = 16 * 5;
+
+    const noiseField = noise(String(blobOptions.seed));
+
+    let count = 0;
+    const loopAnimation = (first?: boolean, delay?: number) => {
+        count++;
+        animation.transition({
+            duration: first ? 0 : intervalMs,
+            delay: delay || 0,
+            timingFunction: "linear",
+            canvasOptions,
+            points: genFromOptions(blobOptions, (index) => {
+                return noiseField(leapSize * count, index);
+            }),
+            callback: loopAnimation,
+        });
+    };
+    loopAnimation(true, wiggleOptions.delay);
 };
