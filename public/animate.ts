@@ -10,6 +10,8 @@ import {
     checkPoints,
 } from "../internal/check";
 
+export {WiggleOptions, wigglePreset} from "./wiggle";
+
 interface Keyframe {
     // Duration of the keyframe animation in milliseconds.
     duration: number;
