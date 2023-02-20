@@ -498,10 +498,10 @@ const wiggle = (
     const noiseField = noise(String(blobOptions.seed));
 
     let count = 0;
-    const loopAnimation = (duration?: number, delay?: number) => {
+    const loopAnimation = (first?: boolean, delay?: number) => {
         count++;
         animation.transition({
-            duration: duration || intervalMs,
+            duration: first ? 0 :  intervalMs,
             delay: delay || 0,
             timingFunction: "linear",
             canvasOptions,
@@ -511,7 +511,7 @@ const wiggle = (
             callback: loopAnimation,
         });
     };
-    loopAnimation(0.000001, wiggleOptions.delay);
+    loopAnimation(true, wiggleOptions.delay);
 };
 
 const genWiggle = (offset: number, speed: number) => {
