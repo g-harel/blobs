@@ -72,7 +72,7 @@ const testBlobOptions = (functionBeingTested: (options: any) => void) => {
         },
         {
             name: "should reject undefined blobOptions seed",
-            edit: (blobOptions) => delete blobOptions.seed,
+            edit: (blobOptions) => delete (blobOptions as any).seed,
             error: /seed.*string.*number.*undefined/g,
         },
         {
@@ -87,7 +87,7 @@ const testBlobOptions = (functionBeingTested: (options: any) => void) => {
         },
         {
             name: "should reject undefined blobOptions extraPoints",
-            edit: (blobOptions) => delete blobOptions.extraPoints,
+            edit: (blobOptions) => delete (blobOptions as any).extraPoints,
             error: /blobOptions.*extraPoints.*number.*undefined/g,
         },
         {
@@ -107,7 +107,7 @@ const testBlobOptions = (functionBeingTested: (options: any) => void) => {
         },
         {
             name: "should reject undefined blobOptions randomness",
-            edit: (blobOptions) => delete blobOptions.randomness,
+            edit: (blobOptions) => delete (blobOptions as any).randomness,
             error: /blobOptions.*randomness.*number.*undefined/g,
         },
         {
@@ -127,7 +127,7 @@ const testBlobOptions = (functionBeingTested: (options: any) => void) => {
         },
         {
             name: "should reject undefined blobOptions size",
-            edit: (blobOptions) => delete blobOptions.size,
+            edit: (blobOptions) => delete (blobOptions as any).size,
             error: /blobOptions.*size.*number.*undefined/g,
         },
         {

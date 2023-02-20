@@ -53,7 +53,7 @@ describe("animate", () => {
                     },
                     {
                         name: "should reject undefined duration",
-                        edit: (keyframe) => delete keyframe.duration,
+                        edit: (keyframe) => delete (keyframe as any).duration,
                         error: /duration.*number.*undefined/g,
                     },
                     {
@@ -135,7 +135,7 @@ describe("animate", () => {
                     // blobOptions
                     {
                         name: "should reject undefined blobOptions",
-                        edit: (keyframe) => delete keyframe.blobOptions,
+                        edit: (keyframe) => delete (keyframe as any).blobOptions,
                         error: /blobOptions.*object.*undefined/g,
                     },
                     {
@@ -154,7 +154,7 @@ describe("animate", () => {
                     },
                     {
                         name: "should reject undefined blobOptions seed",
-                        edit: (keyframe) => delete keyframe.blobOptions.seed,
+                        edit: (keyframe) => delete (keyframe as any).blobOptions.seed,
                         error: /seed.*string.*number.*undefined/g,
                     },
                     {
@@ -169,7 +169,7 @@ describe("animate", () => {
                     },
                     {
                         name: "should reject undefined blobOptions extraPoints",
-                        edit: (keyframe) => delete keyframe.blobOptions.extraPoints,
+                        edit: (keyframe) => delete (keyframe as any).blobOptions.extraPoints,
                         error: /blobOptions.*extraPoints.*number.*undefined/g,
                     },
                     {
@@ -189,7 +189,7 @@ describe("animate", () => {
                     },
                     {
                         name: "should reject undefined blobOptions randomness",
-                        edit: (keyframe) => delete keyframe.blobOptions.randomness,
+                        edit: (keyframe) => delete (keyframe as any).blobOptions.randomness,
                         error: /blobOptions.*randomness.*number.*undefined/g,
                     },
                     {
@@ -209,7 +209,7 @@ describe("animate", () => {
                     },
                     {
                         name: "should reject undefined blobOptions size",
-                        edit: (keyframe) => delete keyframe.blobOptions.size,
+                        edit: (keyframe) => delete (keyframe as any).blobOptions.size,
                         error: /blobOptions.*size.*number.*undefined/g,
                     },
                     {

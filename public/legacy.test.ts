@@ -34,7 +34,7 @@ describe("legacy", () => {
     it("should require a size be provided", () => {
         const options = genMinimalOptions();
 
-        delete options.size;
+        delete (options as any).size;
         expect(() => blobs(options)).toThrow("size");
     });
 

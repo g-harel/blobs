@@ -658,7 +658,7 @@ addCanvas(1.8, (ctx, width, height) => {
         canvasBlobGenerator,
         (points: Point[]) => drawClosed(ctx, points, true),
         () => {},
-    )();
+    )(Date.now);
 
     const renderFrame = () => {
         if (wasReplaced()) return;
