@@ -4,9 +4,10 @@ import {Coord, Point} from "../../types";
 import {length, insertAt, insertCount, rad, mod, mapPoints, forPoints} from "../../util";
 import {clear, drawInfo, drawClosed} from "../../render/canvas";
 import {genBlob, genFromOptions} from "../../gen";
-import {noise, rand} from "../../rand";
+import {rand} from "../../rand";
 import * as blobs2 from "../../../public/blobs";
 import * as blobs2Animate from "../../../public/animate";
+import {wigglePreset} from "../../../public/wiggle";
 
 let animationSpeed = 2;
 let animationStart = 0.3;
@@ -407,7 +408,7 @@ const genCustomAnimation = (speed: number, offset: number) => {
     return animation;
 };
 
-const wigglePreset = (
+const wigglePresetBad = (
     animation: blobs2Animate.Animation,
     config: {
         blobOptions: blobs2.BlobOptions;
@@ -464,7 +465,7 @@ const wigglePreset = (
 
 const genBadWiggle = (period: number, offset: number) => {
     const animation = blobs2Animate.canvasPath();
-    wigglePreset(animation, {
+    wigglePresetBad(animation, {
         blobOptions: {
             extraPoints: 1,
             randomness: 4,
@@ -478,45 +479,9 @@ const genBadWiggle = (period: number, offset: number) => {
     return animation;
 };
 
-interface WiggleOptions {
-    speed: number;
-    delay?: number;
-}
-
-const wiggle = (
-    animation: blobs2Animate.Animation,
-    blobOptions: blobs2.BlobOptions,
-    canvasOptions: blobs2.CanvasOptions,
-    wiggleOptions: WiggleOptions,
-) => {
-    const leapSize = 0.01 * wiggleOptions.speed;
-
-    // Interval at which a new sample is taken.
-    // Multiple of 16 to do work every N frames.
-    const intervalMs = 16 * 5;
-
-    const noiseField = noise(String(blobOptions.seed));
-
-    let count = 0;
-    const loopAnimation = (first?: boolean, delay?: number) => {
-        count++;
-        animation.transition({
-            duration: first ? 0 :  intervalMs,
-            delay: delay || 0,
-            timingFunction: "linear",
-            canvasOptions,
-            points: genFromOptions(blobOptions, (index) => {
-                return noiseField(leapSize * count, index);
-            }),
-            callback: loopAnimation,
-        });
-    };
-    loopAnimation(true, wiggleOptions.delay);
-};
-
 const genWiggle = (offset: number, speed: number) => {
     const animation = blobs2Animate.canvasPath();
-    wiggle(
+    wigglePreset(
         animation,
         {
             extraPoints: 4,
