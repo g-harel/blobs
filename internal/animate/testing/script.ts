@@ -7,7 +7,6 @@ import {genBlob, genFromOptions} from "../../gen";
 import {rand} from "../../rand";
 import * as blobs2 from "../../../public/blobs";
 import * as blobs2Animate from "../../../public/animate";
-import {wigglePreset} from "../../../public/wiggle";
 
 let animationSpeed = 2;
 let animationStart = 0.3;
@@ -481,7 +480,7 @@ const genBadWiggle = (period: number, offset: number) => {
 
 const genWiggle = (offset: number, speed: number) => {
     const animation = blobs2Animate.canvasPath();
-    wigglePreset(
+    blobs2Animate.wigglePreset(
         animation,
         {
             extraPoints: 4,
