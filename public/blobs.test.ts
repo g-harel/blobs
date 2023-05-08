@@ -1,5 +1,9 @@
 import {BlobOptions, svg, svgPath, canvasPath, SvgOptions, CanvasOptions} from "./blobs";
 
+// @ts-ignore
+import {polyfillPath2D, Path2D} from "path2d-polyfill";
+global.Path2D = Path2D;
+
 const genBlobOptions = (): BlobOptions => ({
     extraPoints: Math.floor(10 * Math.random()),
     randomness: Math.floor(10 * Math.random()),
