@@ -7,7 +7,7 @@
      --><img src="https://img.shields.io/npm/v/blobs.svg"><!--
  --></a>
     <a href="https://github.com/g-harel/blobs/actions?query=workflow%3Aon-push"><!--
-     --><img src="https://img.shields.io/github/workflow/status/g-harel/blobs/on-push"><!--
+     --><img src="https://img.shields.io/github/actions/workflow/status/g-harel/blobs/push.yml?event=on-push"><!--
  --></a>
 </p>
 
