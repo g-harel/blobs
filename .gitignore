@@ -6,7 +6,6 @@ node_modules/
 *.d.ts
 .cache
 dist
-*.lock
 !rollup.config.js
 docs/*.js
 docs/*.svg
