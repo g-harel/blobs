@@ -145,17 +145,19 @@ export interface BlobOptions {
     // Size of the bounding box.
     size: number;
 }
+
 export interface CanvasOptions {
     // Coordinates of top-left corner of the blob.
     offsetX?: number;
     offsetY?: number;
 }
+export const canvasPath: (blobOptions: BlobOptions, canvasOptions?: CanvasOptions) => Path2D;
+
 export interface SvgOptions {
     fill?: string; // Default: "#ec576b".
     stroke?: string; // Default: "none".
     strokeWidth?: number; // Default: 0.
 }
-export const canvasPath: (blobOptions: BlobOptions, canvasOptions?: CanvasOptions) => Path2D;
 export const svg: (blobOptions: BlobOptions, svgOptions?: SvgOptions) => string;
 export const svgPath: (blobOptions: BlobOptions) => string;
 ```
@@ -163,7 +165,7 @@ export const svgPath: (blobOptions: BlobOptions) => string;
 ### `"blobs/v2/animate"`
 
 ```ts
-export interface CanvasKeyframe {
+interface Keyframe {
     // Duration of the keyframe animation in milliseconds.
     duration: number;
     // Delay before animation begins in milliseconds.
@@ -185,24 +187,33 @@ export interface CanvasKeyframe {
     // Not called if the keyframe is preempted by a new transition.
     callback?: () => void;
     // Standard options, refer to "blobs/v2" documentation.
+    canvasOptions?: {
+        offsetX?: number;
+        offsetY?: number;
+    };
+}
+
+export interface CanvasKeyframe extends Keyframe {
+    // Standard options, refer to "blobs/v2" documentation.
     blobOptions: {
         seed: number | string;
         randomness: number;
         extraPoints: number;
         size: number;
     };
-    // Standard options, refer to "blobs/v2" documentation.
-    canvasOptions?: {
-        offsetX?: number;
-        offsetY?: number;
-    };
 }
+
+export interface CanvasCustomKeyframe extends Keyframe {
+    // List of point coordinates that produce a single, closed shape.
+    points: Point[];
+}
+
 export interface Animation {
     // Renders the current state of the animation.
     renderFrame: () => Path2D;
     // Immediately begin animating through the given keyframes.
     // Non-rendered keyframes from previous transitions are cancelled.
-    transition: (...keyframes: CanvasKeyframe[]) => void;
+    transition: (...keyframes: (CanvasKeyframe | CanvasCustomKeyframe)[]) => void;
     // Resume a paused animation. Has no effect if already playing.
     play: () => void;
     // Pause a playing animation. Has no effect if already paused.
@@ -210,6 +221,7 @@ export interface Animation {
     // Toggle between playing and pausing the animation.
     playPause: () => void;
 }
+
 // Function that returns the current timestamp. This value will be used for all
 // duration/delay values and will be used to interpolate between keyframes. It
 // must produce values increasing in size.
@@ -218,6 +230,19 @@ export interface TimestampProvider {
     (): number;
 }
 export const canvasPath: (timestampProvider?: TimestampProvider) => Animation;
+
+export interface WiggleOptions {
+    speed: number;
+    delay?: number;
+}
+// Preset animation that produces natural-looking random movement. 
+// The wiggle animation will continue indefinitely until the next transition.
+export const wigglePreset = (
+    animation: Animation,
+    blobOptions: BlobOptions,
+    canvasOptions: CanvasOptions,
+    wiggleOptions: WiggleOptions,
+)
 ```
 
 ## License

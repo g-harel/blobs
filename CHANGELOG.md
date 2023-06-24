@@ -1,3 +1,8 @@
+# 2.3.0
+
+-   Add `CanvasCustomKeyframe` to `v2/animate`
+-   Add `wigglePreset` to `v2/animate`
+
 # 2.2.1
 
 -   Add support for custom point-based keyframes
