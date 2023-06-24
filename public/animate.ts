@@ -79,7 +79,9 @@ export interface TimestampProvider {
 
 export interface WiggleOptions {
     speed: number;
-    delay?: number;
+    initialDelay?: number;
+    initialTransition?: number;
+    initialTimingFunction?: Keyframe["timingFunction"];
 }
 
 const canvasPointGenerator = (keyframe: CanvasKeyframe | CanvasCustomKeyframe): Point[] => {
@@ -148,9 +150,9 @@ export const wigglePreset = (
     const loopAnimation = (first?: boolean, delay?: number) => {
         count++;
         animation.transition({
-            duration: first ? 0 : intervalMs,
+            duration: first ? wiggleOptions.initialTransition || 0 : intervalMs,
             delay: delay || 0,
-            timingFunction: "linear",
+            timingFunction: (first && wiggleOptions.initialTimingFunction) || "linear",
             canvasOptions,
             points: genFromOptions(blobOptions, (index) => {
                 return noiseField(leapSize * count, index);
@@ -158,5 +160,5 @@ export const wigglePreset = (
             callback: loopAnimation,
         });
     };
-    loopAnimation(true, wiggleOptions.delay);
+    loopAnimation(true, wiggleOptions.initialDelay);
 };

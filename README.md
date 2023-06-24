@@ -98,6 +98,8 @@ ctx.stroke(path);
 const ctx = /* ... */;
 const animation = blobs2Animate.canvasPath();
 
+TODO wiggle
+
 // Set up "requestAnimationFrame" rendering loop.
 const renderAnimation = () => {
     ctx.clearRect(0, 0, width, height);
@@ -233,9 +235,11 @@ export const canvasPath: (timestampProvider?: TimestampProvider) => Animation;
 
 export interface WiggleOptions {
     speed: number;
-    delay?: number;
+    initialDelay?: number;
+    initialTransition?: number;
+    initialTimingFunction?: Keyframe["timingFunction"];
 }
-// Preset animation that produces natural-looking random movement. 
+// Preset animation that produces natural-looking random movement.
 // The wiggle animation will continue indefinitely until the next transition.
 export const wigglePreset = (
     animation: Animation,

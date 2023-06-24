@@ -1,4 +1,4 @@
-import {CanvasKeyframe, canvasPath} from "../public/animate";
+import {CanvasKeyframe, canvasPath, wigglePreset} from "../public/animate";
 import {colors} from "./internal/layout";
 
 // Fetch reference to example container.
@@ -37,6 +37,20 @@ requestAnimationFrame(renderFrame);
 // Extra points that increases when blob gets clicked.
 let extraPoints = 0;
 
+const genWiggle = (transition: number) => {
+    wigglePreset(
+        animation,
+        {
+            extraPoints: 3 + extraPoints,
+            randomness: 1.5,
+            seed: Math.random(),
+            size,
+        },
+        {},
+        {speed: 1, initialTransition: transition, initialTimingFunction: "ease"},
+    );
+};
+
 // Generate a keyframe with overridable default values.
 const genFrame = (overrides: any = {}): CanvasKeyframe => {
     const blobOptions = {
@@ -58,7 +72,7 @@ const genFrame = (overrides: any = {}): CanvasKeyframe => {
 // Callback for every frame which starts transition to a new frame.
 const loopAnimation = (): void => {
     extraPoints = 0;
-    animation.transition(genFrame());
+    genWiggle(4000);
 };
 
 // Quickly animate to a new frame when canvas is clicked.
@@ -72,7 +86,7 @@ canvas.onclick = () => {
 // Immediately show a new frame.
 window.addEventListener("load", () => {
     resize();
-    animation.transition(genFrame({duration: 0}));
+    genWiggle(0);
 });
 
 // Make blob a circle while window is being resized.
