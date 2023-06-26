@@ -78,9 +78,16 @@ export interface TimestampProvider {
 }
 
 export interface WiggleOptions {
+    // Speed of the wiggle movement. Higher is faster.
     speed: number;
+    // Delay before the first wiggle frame.
+    // Default: 0
     initialDelay?: number;
+    // Length of the transition from the current state to the wiggle blob.
+    // Default: 0
     initialTransition?: number;
+    // Interpolation function.
+    // Default: linear
     initialTimingFunction?: Keyframe["timingFunction"];
 }
 
