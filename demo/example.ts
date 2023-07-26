@@ -1,4 +1,5 @@
 import {CanvasKeyframe, canvasPath, wigglePreset} from "../public/animate";
+import { drawDebugClosed, drawPoint } from "./internal/canvas";
 import {colors} from "./internal/layout";
 
 // Fetch reference to example container.
@@ -29,6 +30,20 @@ const animation = canvasPath();
 const renderFrame = () => {
     ctx.clearRect(0, 0, size, size);
     ctx.fillStyle = colors.highlight;
+    ctx.strokeStyle = colors.highlight;
+
+    // Debug
+    if (false) {
+        const p = (animation as any).renderPoints();
+
+        drawDebugClosed(ctx, p, 60);
+        if (p.length) drawPoint(ctx, p[0], 400);
+
+        const fps = 5;
+        setTimeout(() => requestAnimationFrame(renderFrame), 1000/fps);
+        return;
+    }
+
     ctx.fill(animation.renderFrame());
     requestAnimationFrame(renderFrame);
 };

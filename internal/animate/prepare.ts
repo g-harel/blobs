@@ -12,6 +12,8 @@ import {
 } from "../util";
 import {Point} from "../types";
 
+// Iterate through point ordering possibilities to find an option with the least
+// distance between points. Also reverse the list to try and optimize.
 const optimizeOrder = (a: Point[], b: Point[]): Point[] => {
     const count = a.length;
 
@@ -39,6 +41,8 @@ const optimizeOrder = (a: Point[], b: Point[]): Point[] => {
     return shift(minOffset, minOffsetBase);
 };
 
+// Modify the input shape to be the exact same path visually, but with
+// additional points so that the total number of points is "count".
 export const divide = (count: number, points: Point[]): Point[] => {
     if (points.length < 3) throw new Error("not enough points");
     if (count < points.length) throw new Error("cannot remove points");
@@ -93,6 +97,8 @@ const fixAnglesSelf = (points: Point[]): Point[] => {
     });
 };
 
+// Split the input lengths into smaller segments to add the target amount of
+// lengths while minimizing the standard deviation of the list of lengths.
 const divideLengths = (lengths: number[], add: number): number[] => {
     const divisors = lengths.map(() => 1);
     const sizes = lengths.slice();
