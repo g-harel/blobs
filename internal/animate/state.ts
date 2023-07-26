@@ -43,7 +43,7 @@ export const statefulAnimationGenerator = <K extends CallbackKeyframe, T>(
         }
     };
 
-    const renderFrame = (): T => {
+    const renderPoints = (): Point[] => {
         const renderOutput = renderFramesAt({
             renderCache: renderCache,
             timestamp: isPaused() ? pausedAt : getAnimationTimestamp(),
@@ -59,7 +59,11 @@ export const statefulAnimationGenerator = <K extends CallbackKeyframe, T>(
             delete frameCallbackStore[renderOutput.lastFrameId];
         }
 
-        return renderer(renderOutput.points);
+        return renderOutput.points;
+    }
+
+    const renderFrame = (): T => {
+        return renderer(renderPoints());
     };
 
     const transition = (...keyframes: K[]) => {
@@ -89,5 +93,5 @@ export const statefulAnimationGenerator = <K extends CallbackKeyframe, T>(
         }
     };
 
-    return {renderFrame, transition, play, pause, playPause};
+    return {renderFrame, renderPoints, transition, play, pause, playPause};
 };
