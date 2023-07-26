@@ -60,7 +60,7 @@ export const statefulAnimationGenerator = <K extends CallbackKeyframe, T>(
         }
 
         return renderOutput.points;
-    }
+    };
 
     const renderFrame = (): T => {
         return renderer(renderPoints());

@@ -1,5 +1,5 @@
 import {CanvasKeyframe, canvasPath, wigglePreset} from "../public/animate";
-import { drawDebugClosed, drawPoint } from "./internal/canvas";
+import {drawDebugClosed, drawPoint} from "./internal/canvas";
 import {colors} from "./internal/layout";
 
 // Fetch reference to example container.
@@ -40,7 +40,7 @@ const renderFrame = () => {
         if (p.length) drawPoint(ctx, p[0], 400);
 
         const fps = 5;
-        setTimeout(() => requestAnimationFrame(renderFrame), 1000/fps);
+        setTimeout(() => requestAnimationFrame(renderFrame), 1000 / fps);
         return;
     }
 

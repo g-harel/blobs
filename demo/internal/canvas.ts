@@ -121,27 +121,20 @@ export const drawDebugClosed = (ctx: CanvasRenderingContext2D, points: Point[], 
         const next = nextFn();
         const currHandle = expandHandle(curr, curr.handleOut);
         const nextHandle = expandHandle(next, next.handleIn);
-    
+
         drawLine(ctx, curr, currHandle, size);
         drawLine(ctx, next, nextHandle, size, 2);
         drawPoint(ctx, currHandle, size * 1.4);
         drawPoint(ctx, nextHandle, size * 1.4);
         const curve = new Path2D();
         curve.moveTo(curr.x, curr.y);
-        curve.bezierCurveTo(
-            currHandle.x,
-            currHandle.y,
-            nextHandle.x,
-            nextHandle.y,
-            next.x,
-            next.y,
-        );
-        ctx.lineWidth = sizes().pt * size*2;
+        curve.bezierCurveTo(currHandle.x, currHandle.y, nextHandle.x, nextHandle.y, next.x, next.y);
+        ctx.lineWidth = sizes().pt * size * 2;
         ctx.stroke(curve);
         drawPoint(ctx, curr, size * 1.1);
         drawPoint(ctx, next, size * 1.1);
     });
-}
+};
 
 export const drawOpen = (
     ctx: CanvasRenderingContext2D,
