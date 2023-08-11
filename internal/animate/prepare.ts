@@ -1,14 +1,14 @@
 import {
-    length,
-    reverse,
-    shift,
-    insertCount,
-    distance,
-    mod,
     angleOf,
     coordEqual,
-    mapPoints,
+    distance,
     forPoints,
+    insertCount,
+    length,
+    mapPoints,
+    mod,
+    reverse,
+    shift,
 } from "../util";
 import {Point} from "../types";
 

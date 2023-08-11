@@ -2,7 +2,7 @@ import {TimingFunc} from "../../internal/animate/timing";
 import {Coord, Point} from "../../internal/types";
 import {expandHandle, forPoints, mod, rad} from "../../internal/util";
 import {isDebug} from "../internal/debug";
-import {sizes, colors} from "../internal/layout";
+import {colors, sizes} from "../internal/layout";
 
 export const forceStyles = (ctx: CanvasRenderingContext2D, fn: () => void) => {
     if (!(ctx as any).forcedStyles) (ctx as any).forcedStyles = 0;
@@ -25,7 +25,12 @@ export const tempStyles = (ctx: CanvasRenderingContext2D, style: () => void, fn:
 };
 
 export const rotateAround = (
-    options: {ctx: CanvasRenderingContext2D; angle: number; cx: number; cy: number},
+    options: {
+        ctx: CanvasRenderingContext2D;
+        angle: number;
+        cx: number;
+        cy: number;
+    },
     fn: () => void,
 ) => {
     tempStyles(

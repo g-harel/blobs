@@ -1,4 +1,4 @@
-import {canvasPath, CanvasKeyframe} from "./animate";
+import {CanvasKeyframe, canvasPath} from "./animate";
 
 const genKeyframe = (): CanvasKeyframe => ({
     duration: 1000 * Math.random(),

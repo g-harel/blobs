@@ -1,5 +1,5 @@
 import {Point} from "../types";
-import {split, splitLine, mod, smooth, mapPoints} from "../util";
+import {mapPoints, mod, smooth, split, splitLine} from "../util";
 
 // Interpolates between angles a and b. Angles are normalized to avoid unnecessary rotation.
 // Direction is chosen to produce the smallest possible movement.
@@ -21,7 +21,9 @@ const interpolateAngle = (percentage: number, a: number, b: number): number => {
 // same number of points. Easing effects can be applied to the percentage given to this function.
 // Percentages outside the 0-1 range are supported.
 export const interpolateBetween = (percentage: number, a: Point[], b: Point[]): Point[] => {
-    if (a.length !== b.length) throw new Error("must have equal number of points");
+    if (a.length !== b.length) {
+        throw new Error("must have equal number of points");
+    }
 
     // Clamped range for use in values that could look incorrect otherwise.
     // ex. Handles that invert if their value goes negative (creates loops at corners).

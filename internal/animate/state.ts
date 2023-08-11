@@ -1,5 +1,5 @@
 import {Point} from "../types";
-import {RenderCache, InternalKeyframe, renderFramesAt, transitionFrames, Keyframe} from "./frames";
+import {InternalKeyframe, Keyframe, RenderCache, renderFramesAt, transitionFrames} from "./frames";
 
 interface CallbackKeyframe extends Keyframe {
     callback?: () => void;

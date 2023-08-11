@@ -39,7 +39,13 @@ const renderFrame = () => {
         drawDebugClosed(ctx, p, 60);
         if (p.length) drawPoint(ctx, p[0], 400);
 
-        const fps = 5;
+        const handleLength = p[0]?.handleIn.length;
+        if (handleLength < 100) {
+            console.log("shorty detected: ", handleLength);
+            return;
+        }
+
+        const fps = 20;
         setTimeout(() => requestAnimationFrame(renderFrame), 1000 / fps);
         return;
     }
@@ -94,7 +100,11 @@ const loopAnimation = (): void => {
 canvas.onclick = () => {
     extraPoints++;
     animation.transition(
-        genFrame({duration: 400, timingFunction: "elasticEnd0", blobOptions: {extraPoints}}),
+        genFrame({
+            duration: 400,
+            timingFunction: "elasticEnd0",
+            blobOptions: {extraPoints},
+        }),
     );
 };
 

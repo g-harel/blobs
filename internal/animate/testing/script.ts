@@ -1,8 +1,8 @@
 import {interpolateBetweenSmooth} from "../interpolate";
 import {divide, prepare} from "../prepare";
 import {Coord, Point} from "../../types";
-import {length, insertAt, insertCount, rad, mod, mapPoints, forPoints} from "../../util";
-import {clear, drawInfo, drawClosed} from "../../render/canvas";
+import {forPoints, insertAt, insertCount, length, mapPoints, mod, rad} from "../../util";
+import {clear, drawClosed, drawInfo} from "../../render/canvas";
 import {genBlob, genFromOptions} from "../../gen";
 import {rand} from "../../rand";
 import * as blobs2 from "../../../public/blobs";
@@ -370,7 +370,10 @@ const genBlobAnimation = (
 };
 
 const genCustomAnimation = (speed: number, offset: number) => {
-    const noHandles = {handleIn: {angle: 0, length: 0}, handleOut: {angle: 0, length: 0}};
+    const noHandles = {
+        handleIn: {angle: 0, length: 0},
+        handleOut: {angle: 0, length: 0},
+    };
     const animation = blobs2Animate.canvasPath();
     const loopAnimation = (immediate: boolean = false) => {
         const size = 200;

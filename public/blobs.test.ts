@@ -1,7 +1,7 @@
-import {BlobOptions, svg, svgPath, canvasPath, SvgOptions, CanvasOptions} from "./blobs";
+import {BlobOptions, CanvasOptions, canvasPath, svg, SvgOptions, svgPath} from "./blobs";
 
 // @ts-ignore
-import {polyfillPath2D, Path2D} from "path2d-polyfill";
+import {Path2D, polyfillPath2D} from "path2d-polyfill";
 global.Path2D = Path2D;
 
 const genBlobOptions = (): BlobOptions => ({

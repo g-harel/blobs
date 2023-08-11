@@ -10,7 +10,8 @@
     "moduleResolution": "node",
     "esModuleInterop": true,
     "lib": [
-      "es2018", "dom"
+      "es2018",
+      "dom"
     ],
     "sourceMap": true,
     "removeComments": true,

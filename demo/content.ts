@@ -1,24 +1,24 @@
 import {addCanvas, addTitle, colors, sizes} from "./internal/layout";
 import {
-    point,
-    drawOpen,
     calcBouncePercentage,
-    drawLine,
-    drawPoint,
-    tempStyles,
     drawClosed,
+    drawLine,
+    drawOpen,
+    drawPoint,
     forceStyles,
+    point,
+    tempStyles,
 } from "./internal/canvas";
 import {
-    split,
-    expandHandle,
-    splitLine,
-    forPoints,
-    mapPoints,
     coordPoint,
     distance,
+    expandHandle,
+    forPoints,
+    mapPoints,
     mod,
     shift,
+    split,
+    splitLine,
 } from "../internal/util";
 import {timingFunctions} from "../internal/animate/timing";
 import {Coord, Point} from "../internal/types";
@@ -83,7 +83,10 @@ addCanvas(
 
         for (let x = 0; x < gridCountX; x++) {
             for (let y = 0; y < gridCountY; y++) {
-                const curr = {x: x * gridSize + gridSize / 2, y: y * gridSize + gridSize / 2};
+                const curr = {
+                    x: x * gridSize + gridSize / 2,
+                    y: y * gridSize + gridSize / 2,
+                };
                 const d = distance(curr, center);
                 const opacity = Math.max(
                     0,

@@ -1,4 +1,9 @@
-The legacy API exists to preserve compatibility for users importing the package using a `script` tag. Because [unpkg.com](https://unpkg.com) serves the latest version of the package if no version is specified, I can't break backwards compatibility, even with a major release. This API also preserves a few features that could potentially still be useful to some users (guide rendering and editable svg).
+The legacy API exists to preserve compatibility for users importing the package
+using a `script` tag. Because [unpkg.com](https://unpkg.com) serves the latest
+version of the package if no version is specified, I can't break backwards
+compatibility, even with a major release. This API also preserves a few features
+that could potentially still be useful to some users (guide rendering and
+editable svg).
 
 ---
 
@@ -19,9 +24,13 @@ const blobs = require("blobs");
 const svg = blobs(options);
 ```
 
-![](https://svgsaur.us?t=&w=5&h=32&b=fdcc56)![](https://svgsaur.us/?t=WARNING&w=103&h=32&s=16&y=21&x=12&b=feefcd&f=arial&o=b) ![](https://svgsaur.us?t=&w=1&h=48&)
+![](https://svgsaur.us?t=&w=5&h=32&b=fdcc56)
+![](https://svgsaur.us/?t=WARNING&w=103&h=32&s=16&y=21&x=12&b=feefcd&f=arial&o=b)
+![](https://svgsaur.us?t=&w=1&h=48&)
 
-_Options are **not** [sanitized](https://en.wikipedia.org/wiki/HTML_sanitization). Never trust raw user-submitted values in the options._
+_Options are **not**
+[sanitized](https://en.wikipedia.org/wiki/HTML_sanitization). Never trust raw
+user-submitted values in the options._
 
 ## Options
 
@@ -46,7 +55,8 @@ _Options are **not** [sanitized](https://en.wikipedia.org/wiki/HTML_sanitization
 
 _Either `stroke` or `color` must be defined._
 
-_Guides will use stroke color and width if defined. Otherwise, they default to `black` stroke with width of `1`._
+_Guides will use stroke color and width if defined. Otherwise, they default to
+`black` stroke with width of `1`._
 
 ##### Example Options Object
 
@@ -67,13 +77,16 @@ const options = {
 
 ## Advanced
 
-If you need to edit the output svg for your use case, blobs also allows for _editable_ output.
+If you need to edit the output svg for your use case, blobs also allows for
+_editable_ output.
 
 ```typescript
 const editableSvg = blobs.editable(options);
 ```
 
-The output of this function is a data structure that represents a nested svg document. This structure can be changed and rendered to a string using its `render` function.
+The output of this function is a data structure that represents a nested svg
+document. This structure can be changed and rendered to a string using its
+`render` function.
 
 ```typescript
 editableSvg.attributes.width = 1000;

@@ -17,8 +17,9 @@ export const checkKeyframeOptions = (keyframe: any) => {
     typeCheck(`duration`, duration, ["number"]);
     if (duration && duration < 0) throw `duration is invalid "${duration}".`;
     typeCheck(`timingFunction`, timingFunction, ["string", "undefined"]);
-    if (timingFunction && !(timingFunctions as any)[timingFunction])
+    if (timingFunction && !(timingFunctions as any)[timingFunction]) {
         throw `".timingFunction" is not recognized "${timingFunction}".`;
+    }
     typeCheck(`callback`, callback, ["function", "undefined"]);
 };
 
@@ -27,9 +28,13 @@ export const checkBlobOptions = (blobOptions: any) => {
     const {seed, extraPoints, randomness, size} = blobOptions;
     typeCheck(`blobOptions.seed`, seed, ["string", "number"]);
     typeCheck(`blobOptions.extraPoints`, extraPoints, ["number"]);
-    if (extraPoints < 0) throw `blobOptions.extraPoints is invalid "${extraPoints}".`;
+    if (extraPoints < 0) {
+        throw `blobOptions.extraPoints is invalid "${extraPoints}".`;
+    }
     typeCheck(`blobOptions.randomness`, randomness, ["number"]);
-    if (randomness < 0) throw `blobOptions.randomness is invalid "${randomness}".`;
+    if (randomness < 0) {
+        throw `blobOptions.randomness is invalid "${randomness}".`;
+    }
     typeCheck(`blobOptions.size`, size, ["number"]);
     if (size < 0) throw `blobOptions.size is invalid "${size}".`;
 };
