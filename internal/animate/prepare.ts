@@ -61,8 +61,11 @@ export const divide = (count: number, points: Point[]): Point[] => {
         out.pop();
         out.push(...insertCount(divisors[i], curr, next));
     }
+
+    // Remove redundant last point to produce closed shape, but use its incoming \
+    // handle for the first point.
     const last = out.pop();
-    out[0].handleIn = last!.handleIn;
+    out[0] = Object.assign({}, out[0], {handleIn: last!.handleIn});
 
     return out;
 };
