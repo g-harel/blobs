@@ -199,7 +199,7 @@ const redraw = () => {
                         const labelElement = cellElement.querySelector(".label");
                         if (labelElement && labelElement.innerHTML !== label) {
                             labelElement.innerHTML = "";
-                            labelElement.appendChild(document.createTextNode(label));
+                            labelElement.innerHTML = label;
                         }
                     }
                 }

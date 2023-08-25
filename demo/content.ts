@@ -79,7 +79,7 @@ addCanvas(
         // https://www.desmos.com/calculator/psohl602g5
         const radius = width * 0.3;
         const falloff = width * 0.0015;
-        const thickness = width * 0.007;
+        const thickness = width * 0.01;
 
         for (let x = 0; x < gridCountX; x++) {
             for (let y = 0; y < gridCountY; y++) {
@@ -104,7 +104,8 @@ addCanvas(
             }
         }
 
-        return `Raster image formats store pixel information and have a fixed resolution.`;
+        return `Raster image formats encode images as a finite number of pixel values. They
+            therefore have a maximum scale which depends on the display.`;
     },
     // Smooth circle.
     (ctx, width, height) => {
@@ -126,9 +127,8 @@ addCanvas(
             },
         );
 
-        return `By contrast vector formats can scale infinitely because they are defined by
-            formulas. They are ideal for artwork with sharp lines that will be viewed at varying
-            sizes.`;
+        return `By contrast vector formats are defined by formulas and can scale infinitely. They
+            are well suited for artwork with sharp lines and are used for font glyphs.`;
     },
 );
 
@@ -160,9 +160,10 @@ addCanvas(2, (ctx, width, height, animate) => {
         drawOpen(ctx, start, end, true);
     });
 
-    return `Vector-based images are commonly defined using Bezier curves. The cubic bezier is made
-        up of four coordinates: the start/end points and their corresponding "handles". These
-        handles define the direction and "momentum" of the line.`;
+    return `Vector-based image formats often support Bezier curves. A cubic bezier curve is defined
+        by four coordinates: the start/end points and corresponding "handle" points. Visually, these
+        handles define the direction and "momentum" of the line. The curve is tangent to the handle
+        at either of the points.`;
 });
 
 addCanvas(2, (ctx, width, height, animate) => {
@@ -197,6 +198,7 @@ addCanvas(2, (ctx, width, height, animate) => {
                 drawPoint(ctx, d.b2, 1.3, "b2");
                 drawPoint(ctx, d.c0, 1.3, "c0");
                 drawPoint(ctx, d.c1, 1.3, "c1");
+                drawPoint(ctx, d.d0, 1.3, "d0");
             },
         );
 
@@ -209,10 +211,15 @@ addCanvas(2, (ctx, width, height, animate) => {
         drawOpen(ctx, start, end, false);
     });
 
-    return `Curves can be drawn geometrically by recursively splitting points by a percentage
-        until there is only one point remaining. Note there is no constant relationship between the
+    return `Curves are drawn by the rendering software using the four input points. By connecting
+        points a0-a3 with a line and then splitting each line by the same percentage, we've reduced
+        the number of points by one. Repeating the same process with the new set of points until
+        there is only one point remaining (d0) produces a single point on the line. Repeating this
+        calculation for many different percentage values will produce a curve.
+        <br><br>
+        <i>Note there is no constant relationship between the
         percentage that "drew" the point and the arc lengths before/after it. Uniform motion along
-        the curve can only be approximated.`;
+        the curve can only be approximated.`
 });
 
 addTitle(4, "Making a blob");

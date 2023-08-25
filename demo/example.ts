@@ -68,7 +68,7 @@ const genWiggle = (transition: number) => {
             size,
         },
         {},
-        {speed: 1, initialTransition: transition, initialTimingFunction: "ease"},
+        {speed: 2, initialTransition: transition, initialTimingFunction: "ease"},
     );
 };
 
