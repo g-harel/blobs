@@ -249,7 +249,7 @@ addCanvas(
 
         drawClosed(ctx, shape, false);
 
-        return `Initial points are rotated evenly around the center.`;
+        return `Distribute blob points evenly around a center.`;
     },
     (ctx, width, height, animate) => {
         const period = Math.PI * 1000;
@@ -291,7 +291,7 @@ addCanvas(
             drawClosed(ctx, shiftedShape, true);
         });
 
-        return `Each point is randomly moved toward or away from the center.`;
+        return `Move each point a random amount towards or away from the center.`;
     },
 );
 
@@ -317,15 +317,17 @@ addCanvas(
             },
             () => {
                 drawPoint(ctx, center, 2);
-                forPoints(polyBlob, ({curr}) => {
-                    drawLine(ctx, center, curr, 1, 2);
+                forPoints(polyBlob, ({prev, next}) => {
+                    drawLine(ctx, prev(), next(), 1, 2);
                 });
             },
         );
 
         drawClosed(ctx, polyBlob, false);
 
-        return `In this state, the points have handles of length zero.`;
+        return `The angle of the handles for each point is parallel with the imaginary line
+            stretching between the points before and after the point. A polygon's points have zero
+            length handles.`;
     },
     (ctx, width, height, animate) => {
         const period = Math.PI * 1000;
