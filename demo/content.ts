@@ -219,35 +219,42 @@ addCanvas(2, (ctx, width, height, animate) => {
         <br><br>
         <i>Note there is no constant relationship between the
         percentage that "drew" the point and the arc lengths before/after it. Uniform motion along
-        the curve can only be approximated.`
+        the curve can only be approximated.`;
 });
 
 addTitle(4, "Making a blob");
 
 addCanvas(
     1.3,
-    (ctx, width, height) => {
+    (ctx, width, height, animate) => {
         const center: Coord = {x: width * 0.5, y: height * 0.5};
         const radius = width * 0.3;
-        const points = 5;
-        const shape = makePoly(points, radius, center);
+        const minPoints = 3;
+        const extraPoints = 6;
+        const pointDurationMs = 2000;
 
-        // Draw lines from center to each point..
-        tempStyles(
-            ctx,
-            () => {
-                ctx.fillStyle = colors.secondary;
-                ctx.strokeStyle = colors.secondary;
-            },
-            () => {
-                drawPoint(ctx, center, 2);
-                forPoints(shape, ({curr}) => {
-                    drawLine(ctx, center, curr, 1, 2);
-                });
-            },
-        );
+        animate((frameTime) => {
+            const points =
+                minPoints + extraPoints + (extraPoints / 2) * Math.sin(frameTime / pointDurationMs);
+            const shape = makePoly(points, radius, center);
 
-        drawClosed(ctx, shape, false);
+            // Draw lines from center to each point..
+            tempStyles(
+                ctx,
+                () => {
+                    ctx.fillStyle = colors.secondary;
+                    ctx.strokeStyle = colors.secondary;
+                },
+                () => {
+                    drawPoint(ctx, center, 2);
+                    forPoints(shape, ({curr}) => {
+                        drawLine(ctx, center, curr, 1, 2);
+                    });
+                },
+            );
+
+            drawClosed(ctx, shape, false);
+        });
 
         return `Distribute blob points evenly around a center.`;
     },
