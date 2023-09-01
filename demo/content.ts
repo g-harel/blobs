@@ -166,6 +166,8 @@ addCanvas(2, (ctx, width, height, animate) => {
         at either of the points.`;
 });
 
+// TODO smooth closed shapes & sharp corners
+
 addCanvas(2, (ctx, width, height, animate) => {
     const period = Math.PI * Math.E * 1000;
     const start = point(width * 0.3, height * 0.8, 0, 0, -105, width * 0.32);
@@ -256,21 +258,23 @@ addCanvas(
             drawClosed(ctx, shape, false);
         });
 
-        return `Distribute blob points evenly around a center.`;
+        return `Points are first distributed evenly around the center. At this stage the points
+            technically have handles, but since they have a length of zero, they have no effect on
+            the shape and it looks like a polygon.`;
     },
     (ctx, width, height, animate) => {
-        const period = Math.PI * 1000;
+        const period = Math.PI * 1500;
         const center: Coord = {x: width * 0.5, y: height * 0.5};
         const radius = width * 0.3;
         const points = 5;
-        const randSeed = "abcd";
+        const randSeed = Math.random();
         const randStrength = 0.5;
 
         const shape = makePoly(points, radius, center);
 
         animate((frameTime) => {
             const percentage = calcBouncePercentage(period, timingFunctions.ease, frameTime);
-            const rgen = rand(randSeed);
+            const rgen = rand(randSeed + Math.floor(frameTime/period) + "");
 
             // Draw original shape.
             tempStyles(
@@ -298,7 +302,9 @@ addCanvas(
             drawClosed(ctx, shiftedShape, true);
         });
 
-        return `Move each point a random amount towards or away from the center.`;
+        return `Points are then randomly moved further or closer to the center. Using a seeded
+            random number generator allows repeatable "randomness" whenever the blob is generated
+            at a different time or place.`;
     },
 );
 
