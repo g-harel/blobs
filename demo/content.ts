@@ -2,6 +2,7 @@ import {addCanvas, addTitle, colors, sizes} from "./internal/layout";
 import {
     calcBouncePercentage,
     drawClosed,
+    drawHandles,
     drawLine,
     drawOpen,
     drawPoint,
@@ -274,7 +275,7 @@ addCanvas(
 
         animate((frameTime) => {
             const percentage = calcBouncePercentage(period, timingFunctions.ease, frameTime);
-            const rgen = rand(randSeed + Math.floor(frameTime/period) + "");
+            const rgen = rand(randSeed + Math.floor(frameTime / period) + "");
 
             // Draw original shape.
             tempStyles(
@@ -319,7 +320,13 @@ addCanvas(
         };
         const center: Coord = {x: width * 0.5, y: height * 0.5};
 
-        const polyBlob = centeredBlob(options, center).map(coordPoint);
+        const blob = centeredBlob(options, center);
+        const handles = mapPoints(blob, ({curr: p}) => {
+            p.handleIn.length = 50;
+            p.handleOut.length = 50;
+            return p;
+        });
+        const polyBlob = blob.map(coordPoint);
 
         // Draw polygon blob.
         tempStyles(
@@ -332,6 +339,9 @@ addCanvas(
                 drawPoint(ctx, center, 2);
                 forPoints(polyBlob, ({prev, next}) => {
                     drawLine(ctx, prev(), next(), 1, 2);
+                });
+                forPoints(handles, ({curr}) => {
+                    drawHandles(ctx, curr, 1);
                 });
             },
         );
