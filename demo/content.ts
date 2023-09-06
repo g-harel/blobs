@@ -311,7 +311,7 @@ addCanvas(
 
 addCanvas(
     1.3,
-    (ctx, width, height) => {
+    (ctx, width, height, animate) => {
         const options: BlobOptions = {
             extraPoints: 2,
             randomness: 6,
@@ -319,34 +319,41 @@ addCanvas(
             size: width * 0.7,
         };
         const center: Coord = {x: width * 0.5, y: height * 0.5};
+        const interval = 1000;
 
         const blob = centeredBlob(options, center);
         const handles = mapPoints(blob, ({curr: p}) => {
-            p.handleIn.length = 50;
-            p.handleOut.length = 50;
+            p.handleIn.length = 75;
+            p.handleOut.length = 75;
             return p;
         });
         const polyBlob = blob.map(coordPoint);
+        const pointCount = polyBlob.length;
 
-        // Draw polygon blob.
-        tempStyles(
-            ctx,
-            () => {
-                ctx.fillStyle = colors.secondary;
-                ctx.strokeStyle = colors.secondary;
-            },
-            () => {
-                drawPoint(ctx, center, 2);
-                forPoints(polyBlob, ({prev, next}) => {
-                    drawLine(ctx, prev(), next(), 1, 2);
-                });
-                forPoints(handles, ({curr}) => {
-                    drawHandles(ctx, curr, 1);
-                });
-            },
-        );
+        animate((frameTime) => {
+            const activeIndex = Math.floor(frameTime / interval) % pointCount;
 
-        drawClosed(ctx, polyBlob, false);
+            tempStyles(
+                ctx,
+                () => {
+                    ctx.fillStyle = colors.secondary;
+                    ctx.strokeStyle = colors.secondary;
+                },
+                () => {
+                    drawPoint(ctx, center, 2);
+                    forPoints(polyBlob, ({prev, next}) => {
+                        drawLine(ctx, prev(), next(), 1, 2);
+                    });
+                    forPoints(handles, ({curr}) => {
+                        drawHandles(ctx, curr, 1);
+                    });
+                    drawPoint(ctx, polyBlob[activeIndex], 10);
+                    
+                },
+            );
+
+            drawClosed(ctx, polyBlob, false);
+        });
 
         return `The angle of the handles for each point is parallel with the imaginary line
             stretching between the points before and after the point. A polygon's points have zero
