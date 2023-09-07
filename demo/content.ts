@@ -319,12 +319,12 @@ addCanvas(
             size: width * 0.7,
         };
         const center: Coord = {x: width * 0.5, y: height * 0.5};
-        const interval = 1000;
+        const interval = 2000;
 
         const blob = centeredBlob(options, center);
         const handles = mapPoints(blob, ({curr: p}) => {
-            p.handleIn.length = 75;
-            p.handleOut.length = 75;
+            p.handleIn.length = 150;
+            p.handleOut.length = 150;
             return p;
         });
         const polyBlob = blob.map(coordPoint);
@@ -332,23 +332,33 @@ addCanvas(
 
         animate((frameTime) => {
             const activeIndex = Math.floor(frameTime / interval) % pointCount;
+            const opacity = Math.abs(Math.sin(frameTime * Math.PI / interval));
+
+            tempStyles(
+                ctx,
+                () => {
+                    ctx.strokeStyle = colors.secondary;
+                    ctx.globalAlpha = opacity;
+                },
+                () => {
+                    forPoints(polyBlob, ({prev, next, index}) => {
+                        if (index !== activeIndex) return;
+                        drawLine(ctx, prev(), next(), 1, 2);
+                    });
+                    forPoints(handles, ({curr, index}) => {
+                        if (index !== activeIndex) return;
+                        drawHandles(ctx, curr, 1);
+                    });
+                },
+            );
 
             tempStyles(
                 ctx,
                 () => {
                     ctx.fillStyle = colors.secondary;
-                    ctx.strokeStyle = colors.secondary;
                 },
                 () => {
                     drawPoint(ctx, center, 2);
-                    forPoints(polyBlob, ({prev, next}) => {
-                        drawLine(ctx, prev(), next(), 1, 2);
-                    });
-                    forPoints(handles, ({curr}) => {
-                        drawHandles(ctx, curr, 1);
-                    });
-                    drawPoint(ctx, polyBlob[activeIndex], 10);
-                    
                 },
             );
 
@@ -356,8 +366,8 @@ addCanvas(
         });
 
         return `The angle of the handles for each point is parallel with the imaginary line
-            stretching between the points before and after the point. A polygon's points have zero
-            length handles.`;
+            stretching between its neighbors. Technically, a polygon's points have zero
+            length handles, but the angle can still be calculated.`;
     },
     (ctx, width, height, animate) => {
         const period = Math.PI * 1000;
