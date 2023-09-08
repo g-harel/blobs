@@ -370,7 +370,7 @@ addCanvas(
             length handles, but the angle can still be calculated.`;
     },
     (ctx, width, height, animate) => {
-        const period = Math.PI * 1000;
+        const period = Math.PI * 1500;
         const options: BlobOptions = {
             extraPoints: 2,
             randomness: 6,
@@ -409,9 +409,11 @@ addCanvas(
             drawClosed(ctx, animatedBlob, true);
         });
 
-        return `The blob is smoothed by making handles parallel to the line between the points
-            immediately before and after. The length of the handles is a function of the distance to
-            the nearest neighbor.`;
+        return `The blob is then made smooth by extending the handles. The exact
+            amount that the handle length becomes depends on the distance
+            between the given point and it's next neighbor. This value is
+            multiplied by a ratio that would roughly make a circle if the points
+            had not been randomly moved.`;
     },
 );
 
