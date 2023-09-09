@@ -133,41 +133,60 @@ addCanvas(
     },
 );
 
-addCanvas(2, (ctx, width, height, animate) => {
-    const startPeriod = (1 + Math.E) * 1000;
-    const endPeriod = (1 + Math.PI) * 1000;
+addCanvas(
+    1.3,
+    (ctx, width, height, animate) => {
+        const startPeriod = (1 + Math.E) * 1000;
+        const endPeriod = (1 + Math.PI) * 1000;
 
-    animate((frameTime) => {
-        const startPercentage = calcBouncePercentage(startPeriod, timingFunctions.ease, frameTime);
-        const startLengthPercentage = calcBouncePercentage(
-            startPeriod * 0.8,
-            timingFunctions.ease,
-            frameTime,
-        );
-        const startAngle = split(startPercentage, -45, +45);
-        const startLength = width * 0.1 + width * 0.2 * startLengthPercentage;
-        const start = point(width * 0.2, height * 0.5, 0, 0, startAngle, startLength);
+        animate((frameTime) => {
+            const startPercentage = calcBouncePercentage(
+                startPeriod,
+                timingFunctions.ease,
+                frameTime,
+            );
+            const startLengthPercentage = calcBouncePercentage(
+                startPeriod * 0.8,
+                timingFunctions.ease,
+                frameTime,
+            );
+            const startAngle = split(startPercentage, -45, +45);
+            const startLength = width * 0.1 + width * 0.2 * startLengthPercentage;
+            const start = point(width * 0.2, height * 0.5, 0, 0, startAngle, startLength);
 
-        const endPercentage = calcBouncePercentage(endPeriod, timingFunctions.ease, frameTime);
-        const endLengthPercentage = calcBouncePercentage(
-            endPeriod * 0.8,
-            timingFunctions.ease,
-            frameTime,
-        );
-        const endAngle = split(endPercentage, 135, 225);
-        const endLength = width * 0.1 + width * 0.2 * endLengthPercentage;
-        const end = point(width * 0.8, height * 0.5, endAngle, endLength, 0, 0);
+            const endPercentage = calcBouncePercentage(endPeriod, timingFunctions.ease, frameTime);
+            const endLengthPercentage = calcBouncePercentage(
+                endPeriod * 0.8,
+                timingFunctions.ease,
+                frameTime,
+            );
+            const endAngle = split(endPercentage, 135, 225);
+            const endLength = width * 0.1 + width * 0.2 * endLengthPercentage;
+            const end = point(width * 0.8, height * 0.5, endAngle, endLength, 0, 0);
 
-        drawOpen(ctx, start, end, true);
-    });
+            drawOpen(ctx, start, end, true);
+        });
 
-    return `Vector-based image formats often support Bezier curves. A cubic bezier curve is defined
+        return `Vector-based image formats often support Bezier curves. A cubic bezier curve is defined
         by four coordinates: the start/end points and corresponding "handle" points. Visually, these
         handles define the direction and "momentum" of the line. The curve is tangent to the handle
         at either of the points.`;
-});
+    },
+    (ctx, width, height, animate) => {
+        animate((frameTime) => {
+            const a = point(width * 0.5, height * 0.3, 230, 200, -50, 200);
+            const b = point(width * 0.8, height * 0.5, -90, 200, 90, 200);
+            const c = point(width * 0.5, height * 0.9, -60, 200, -120, 200);
+            const d = point(width * 0.2, height * 0.5, 90, 200, -90, 200);
 
-// TODO smooth closed shapes & sharp corners
+            drawClosed(ctx, [a, b, c, d], true);
+        });
+
+        return `Chaining curves together creates closed shapes. When the handles coming in and
+        out of a point are directly opposite the transition is smooth. Otherwise the shape will
+        have parts that look like spikes (either pointing in or out).`;
+    },
+);
 
 addCanvas(2, (ctx, width, height, animate) => {
     const period = Math.PI * Math.E * 1000;
@@ -332,7 +351,7 @@ addCanvas(
 
         animate((frameTime) => {
             const activeIndex = Math.floor(frameTime / interval) % pointCount;
-            const opacity = Math.abs(Math.sin(frameTime * Math.PI / interval));
+            const opacity = Math.abs(Math.sin((frameTime * Math.PI) / interval));
 
             tempStyles(
                 ctx,
@@ -409,11 +428,10 @@ addCanvas(
             drawClosed(ctx, animatedBlob, true);
         });
 
-        return `The blob is then made smooth by extending the handles. The exact
-            amount that the handle length becomes depends on the distance
-            between the given point and it's next neighbor. This value is
-            multiplied by a ratio that would roughly make a circle if the points
-            had not been randomly moved.`;
+        return `The blob is then made smooth by extending the handles. The exact length becomes
+            depends on the distance between the given point and it's next neighbor. This value is
+            multiplied by a ratio that would roughly produce a circle if the points had not been
+            randomly moved.`;
     },
 );
 
