@@ -12,6 +12,7 @@ import {
 } from "./internal/canvas";
 import {
     coordPoint,
+    deg,
     distance,
     expandHandle,
     forPoints,
@@ -173,11 +174,66 @@ addCanvas(
         at either of the points.`;
     },
     (ctx, width, height, animate) => {
+        const angleRange = 30;
+        const lengthRange = 40;
+        const period = 5000;
+
+        const r = rand("blobs");
+        const ra = r();
+        const rb = r();
+        const rc = r();
+        const rd = r();
+
+        const wobbleHandle = (
+            frameTime: number,
+            period: number,
+            p: Point,
+            locked: boolean,
+        ): Point => {
+            const angleIn =
+                deg(p.handleIn.angle) +
+                angleRange *
+                    (0.5 - calcBouncePercentage(period * 1.1, timingFunctions.ease, frameTime));
+            const lengthIn =
+                p.handleIn.length +
+                lengthRange *
+                    (0.5 - calcBouncePercentage(period * 0.9, timingFunctions.ease, frameTime));
+            const angleOut =
+                deg(p.handleOut.angle) +
+                angleRange *
+                    (0.5 - calcBouncePercentage(period * 0.9, timingFunctions.ease, frameTime));
+            const lengthOut =
+                p.handleOut.length +
+                lengthRange *
+                    (0.5 - calcBouncePercentage(period * 1.1, timingFunctions.ease, frameTime));
+            return point(p.x, p.y, angleIn, lengthIn, locked ? angleIn + 180 : angleOut, lengthOut);
+        };
+
         animate((frameTime) => {
-            const a = point(width * 0.5, height * 0.3, 230, 200, -50, 200);
-            const b = point(width * 0.8, height * 0.5, -90, 200, 90, 200);
-            const c = point(width * 0.5, height * 0.9, -60, 200, -120, 200);
-            const d = point(width * 0.2, height * 0.5, 90, 200, -90, 200);
+            const a = wobbleHandle(
+                frameTime,
+                period / 2 + (ra * period) / 2,
+                point(width * 0.5, height * 0.3, 230, 150, -50, 150),
+                false,
+            );
+            const b = wobbleHandle(
+                frameTime,
+                period / 2 + (rb * period) / 2,
+                point(width * 0.8, height * 0.5, -90, 100, 90, 100),
+                true,
+            );
+            const c = wobbleHandle(
+                frameTime,
+                period / 2 + (rc * period) / 2,
+                point(width * 0.5, height * 0.9, -40, 150, -140, 150),
+                false,
+            );
+            const d = wobbleHandle(
+                frameTime,
+                period / 2 + (rd * period) / 2,
+                point(width * 0.2, height * 0.5, 90, 100, -90, 100),
+                true,
+            );
 
             drawClosed(ctx, [a, b, c, d], true);
         });
