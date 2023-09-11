@@ -174,7 +174,7 @@ addCanvas(
         at either of the points.`;
     },
     (ctx, width, height, animate) => {
-        const angleRange = 30;
+        const angleRange = 20;
         const lengthRange = 40;
         const period = 5000;
 
@@ -213,34 +213,33 @@ addCanvas(
             const a = wobbleHandle(
                 frameTime,
                 period / 2 + (ra * period) / 2,
-                point(width * 0.5, height * 0.3, 230, 150, -50, 150),
+                point(width * 0.5, height * 0.3, 210, 100, -30, 100),
                 false,
             );
             const b = wobbleHandle(
                 frameTime,
                 period / 2 + (rb * period) / 2,
-                point(width * 0.8, height * 0.5, -90, 100, 90, 100),
+                point(width * 0.8, height * 0.5, -90, 150, 90, 150),
                 true,
             );
             const c = wobbleHandle(
                 frameTime,
                 period / 2 + (rc * period) / 2,
-                point(width * 0.5, height * 0.9, -40, 150, -140, 150),
+                point(width * 0.5, height * 0.9, -30, 75, -150, 75),
                 false,
             );
             const d = wobbleHandle(
                 frameTime,
                 period / 2 + (rd * period) / 2,
-                point(width * 0.2, height * 0.5, 90, 100, -90, 100),
+                point(width * 0.2, height * 0.5, 90, 150, -90, 150),
                 true,
             );
 
             drawClosed(ctx, [a, b, c, d], true);
         });
 
-        return `Chaining curves together creates closed shapes. When the handles coming in and
-        out of a point are directly opposite the transition is smooth. Otherwise the shape will
-        have parts that look like spikes (either pointing in or out).`;
+        return `Chaining curves together creates closed shapes. When the in/out handles of a point
+            form a line, the transition is smooth, and the curve is tangent to the line.`;
     },
 );
 
