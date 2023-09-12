@@ -30,7 +30,7 @@ import {BlobOptions} from "../public/blobs";
 import {interpolateBetween, interpolateBetweenSmooth} from "../internal/animate/interpolate";
 import {divide} from "../internal/animate/prepare";
 import {statefulAnimationGenerator} from "../internal/animate/state";
-import {CanvasKeyframe} from "../public/animate";
+import {CanvasCustomKeyframe, CanvasKeyframe, wigglePreset} from "../public/animate";
 
 const makePoly = (pointCount: number, radius: number, center: Coord): Point[] => {
     const angle = (2 * Math.PI) / pointCount;
@@ -829,4 +829,68 @@ addCanvas(1.8, (ctx, width, height) => {
     return `Points can be removed at the end of animations as the target shape has been reached.
         However if the animation is interrupted during interpolation there is no opportunity to
         clean up the extra points.`;
+});
+
+addCanvas(1.8, (ctx, width, height, animate) => {
+    const size = Math.min(width, height) * 0.8;
+    const center: Coord = {x: width * 0.5, y: height * 0.5};
+    const trailLength = 40;
+
+    const canvasPointGenerator = (keyframe: CanvasKeyframe | CanvasCustomKeyframe): Point[] => {
+        let points: Point[];
+        if ("points" in keyframe) {
+            points = keyframe.points;
+        } else {
+            points = genFromOptions(keyframe.blobOptions);
+        }
+        return mapPoints(points, ({curr}) => {
+            curr.x += center.x - size / 2;
+            curr.y += center.y - size / 2;
+            return curr;
+        });
+    };
+
+    const animation = statefulAnimationGenerator(
+        canvasPointGenerator,
+        (points: Point[]) => points as any ,
+        () => {},
+    )(Date.now);
+
+    wigglePreset(animation, {
+        extraPoints: 2,
+        randomness: 2,
+        seed: Math.random(),
+        size,
+    }, {}, {
+        speed: 2,
+    });
+
+    const pointHistory: Point[][] = [];
+    let renderCount = 0;
+    animate((frameTime) => {
+        renderCount++;
+        const points = animation.renderPoints();
+
+        if (renderCount % 2 === 0) {
+            pointHistory.push(points);
+        }
+        if (pointHistory.length > trailLength) {
+            pointHistory.shift();
+        }
+
+        for (let i = 0; i < pointHistory.length; i++) {
+            tempStyles(ctx, () => {
+                ctx.fillStyle = colors.secondary;
+                ctx.globalAlpha = i / pointHistory.length;
+            }, () => {
+                forPoints(pointHistory[i], ({curr}) => {
+                    drawPoint(ctx, curr, i / pointHistory.length);
+                });
+            })
+        }
+
+        drawClosed(ctx, points, true);
+    });
+
+    return `TODO`;
 });
