@@ -554,10 +554,129 @@ addCanvas(2, (ctx, width, height, animate) => {
         drawClosed(ctx, interpolateBetween(percentage, blobA, blobB), true);
     });
 
-    return `Interpolation requires points to be paired up from shape A to B. This means both blobs
-        must have the same number of points and that the points should be matched in a way that
-        minimizes movement.`;
+    return `The simplest way to interpolate between blobs would be to move the points that make up
+        the blob between the two shapes while running the smoothing pass every frame. The problem
+        with this approach is that it doesn't allow for any blob to map to any blob. Specifically it
+        would only be possible to animate between blobs that have the same number of points. This
+        means something more generic is required.`;
 });
+
+addCanvas(
+    1.3,
+    (ctx, width, height, animate) => {
+        const center: Coord = {x: width * 0.5, y: height * 0.5};
+        const maxExtraPoints = 7;
+        const period = maxExtraPoints * Math.PI * 400;
+        const {pt} = sizes();
+
+        const blob = centeredBlob(
+            {
+                extraPoints: 0,
+                randomness: 6,
+                seed: "flip",
+                size: height * 0.9,
+            },
+            center,
+        );
+
+        animate((frameTime) => {
+            const percentage = mod(frameTime, period) / period;
+            const extraPoints = Math.floor(percentage * (maxExtraPoints + 1));
+            drawClosed(ctx, divide(extraPoints + blob.length, blob), true);
+
+            forPoints(blob, ({curr}) => {
+                ctx.beginPath();
+                ctx.arc(curr.x, curr.y, pt * 6, 0, 2 * Math.PI);
+
+                tempStyles(
+                    ctx,
+                    () => {
+                        ctx.strokeStyle = colors.secondary;
+                        ctx.lineWidth = pt;
+                    },
+                    () => {
+                        ctx.stroke();
+                    },
+                );
+            });
+        });
+
+        return `The first step to prepare animation is to make the number of points between the
+            start and end shapes equal. This is done by adding points to the shape with least points
+            until they are both equal.
+            <br><br>
+            For best animation quality it is important that these points are as evenly distributed
+            as possible all around the shape so this is not a recursive algorithm.`;
+    },
+    (ctx, width, height, animate) => {
+        const period = Math.PI ** Math.E * 1000;
+        const start = point(width * 0.1, height * 0.6, 0, 0, -45, width * 0.5);
+        const end = point(width * 0.9, height * 0.6, 160, width * 0.3, 0, 0);
+
+        animate((frameTime) => {
+            const percentage = calcBouncePercentage(period, timingFunctions.ease, frameTime);
+            const d = calcFullDetails(percentage, start, end);
+
+            tempStyles(
+                ctx,
+                () => {
+                    ctx.fillStyle = colors.secondary;
+                    ctx.strokeStyle = colors.secondary;
+                },
+                () => {
+                    drawLine(ctx, d.a0, d.a1, 1);
+                    drawLine(ctx, d.a1, d.a2, 1);
+                    drawLine(ctx, d.a2, d.a3, 1);
+                    drawLine(ctx, d.b0, d.b1, 1);
+                    drawLine(ctx, d.b1, d.b2, 1);
+
+                    drawPoint(ctx, d.a0, 1.3);
+                    drawPoint(ctx, d.a1, 1.3);
+                    drawPoint(ctx, d.a2, 1.3);
+                    drawPoint(ctx, d.a3, 1.3);
+                    drawPoint(ctx, d.b0, 1.3);
+                    drawPoint(ctx, d.b1, 1.3);
+                    drawPoint(ctx, d.b2, 1.3);
+                },
+            );
+
+            forceStyles(ctx, () => {
+                const {pt} = sizes();
+                ctx.fillStyle = colors.secondary;
+                ctx.strokeStyle = colors.secondary;
+                ctx.lineWidth = pt;
+
+                drawOpen(ctx, start, end, false);
+            });
+
+            tempStyles(
+                ctx,
+                () => {
+                    ctx.fillStyle = colors.highlight;
+                    ctx.strokeStyle = colors.highlight;
+                },
+                () => {
+                    drawLine(ctx, d.c0, d.c1, 1);
+                    drawPoint(ctx, d.c0, 1.3);
+                    drawPoint(ctx, d.c1, 1.3);
+                },
+            );
+
+            tempStyles(
+                ctx,
+                () => (ctx.fillStyle = colors.highlight),
+                () => drawPoint(ctx, d.d0, 2),
+            );
+        });
+
+        return `It is only possible to reliably <i>add</i> points to a blob because attempting to
+            remove points without modifying the shape is almost never possible and is expensive to
+            compute.
+
+            Curve splitting uses the innermost line from the cubic bezier curve drawing demo and
+            makes either side of the final point the handles.`;
+    },
+);
 
 addCanvas(
     1.3,
@@ -652,115 +771,6 @@ addCanvas(
 
         return `The only safe re-ordering is to reverse the points and again iterate through all
             possible shifts.`;
-    },
-);
-
-addCanvas(
-    1.3,
-    (ctx, width, height, animate) => {
-        const period = Math.PI * 1000;
-        const center: Coord = {x: width * 0.5, y: height * 0.5};
-        const maxExtraPoints = 4;
-        const {pt} = sizes();
-
-        const blob = centeredBlob(
-            {
-                extraPoints: 0,
-                randomness: 6,
-                seed: "flip",
-                size: height * 0.9,
-            },
-            center,
-        );
-
-        animate((frameTime) => {
-            const percentage = mod(frameTime, period) / period;
-            const extraPoints = Math.floor(percentage * (maxExtraPoints + 1));
-            drawClosed(ctx, divide(extraPoints + blob.length, blob), true);
-
-            forPoints(blob, ({curr}) => {
-                ctx.beginPath();
-                ctx.arc(curr.x, curr.y, pt * 6, 0, 2 * Math.PI);
-
-                tempStyles(
-                    ctx,
-                    () => {
-                        ctx.strokeStyle = colors.secondary;
-                        ctx.lineWidth = pt;
-                    },
-                    () => {
-                        ctx.stroke();
-                    },
-                );
-            });
-        });
-
-        return `Points are added until they both have the same count. These new points should be as
-            evenly distributed as possible.`;
-    },
-    (ctx, width, height, animate) => {
-        const period = Math.PI ** Math.E * 1000;
-        const start = point(width * 0.1, height * 0.6, 0, 0, -45, width * 0.5);
-        const end = point(width * 0.9, height * 0.6, 160, width * 0.3, 0, 0);
-
-        animate((frameTime) => {
-            const percentage = calcBouncePercentage(period, timingFunctions.ease, frameTime);
-            const d = calcFullDetails(percentage, start, end);
-
-            tempStyles(
-                ctx,
-                () => {
-                    ctx.fillStyle = colors.secondary;
-                    ctx.strokeStyle = colors.secondary;
-                },
-                () => {
-                    drawLine(ctx, d.a0, d.a1, 1);
-                    drawLine(ctx, d.a1, d.a2, 1);
-                    drawLine(ctx, d.a2, d.a3, 1);
-                    drawLine(ctx, d.b0, d.b1, 1);
-                    drawLine(ctx, d.b1, d.b2, 1);
-
-                    drawPoint(ctx, d.a0, 1.3);
-                    drawPoint(ctx, d.a1, 1.3);
-                    drawPoint(ctx, d.a2, 1.3);
-                    drawPoint(ctx, d.a3, 1.3);
-                    drawPoint(ctx, d.b0, 1.3);
-                    drawPoint(ctx, d.b1, 1.3);
-                    drawPoint(ctx, d.b2, 1.3);
-                },
-            );
-
-            forceStyles(ctx, () => {
-                const {pt} = sizes();
-                ctx.fillStyle = colors.secondary;
-                ctx.strokeStyle = colors.secondary;
-                ctx.lineWidth = pt;
-
-                drawOpen(ctx, start, end, false);
-            });
-
-            tempStyles(
-                ctx,
-                () => {
-                    ctx.fillStyle = colors.highlight;
-                    ctx.strokeStyle = colors.highlight;
-                },
-                () => {
-                    drawLine(ctx, d.c0, d.c1, 1);
-                    drawPoint(ctx, d.c0, 1.3);
-                    drawPoint(ctx, d.c1, 1.3);
-                },
-            );
-
-            tempStyles(
-                ctx,
-                () => (ctx.fillStyle = colors.highlight),
-                () => drawPoint(ctx, d.d0, 2),
-            );
-        });
-
-        return `Curve splitting uses the innermost line from the cubic bezier curve drawing demo and
-            makes either side of the final point the handles.`;
     },
 );
 
