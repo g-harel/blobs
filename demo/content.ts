@@ -862,22 +862,27 @@ addCanvas(1.8, (ctx, width, height, animate) => {
 
     const animation = statefulAnimationGenerator(
         canvasPointGenerator,
-        (points: Point[]) => points as any ,
+        (points: Point[]) => points as any,
         () => {},
     )(Date.now);
 
-    wigglePreset(animation, {
-        extraPoints: 2,
-        randomness: 2,
-        seed: Math.random(),
-        size,
-    }, {}, {
-        speed: 2,
-    });
+    wigglePreset(
+        animation,
+        {
+            extraPoints: 2,
+            randomness: 2,
+            seed: Math.random(),
+            size,
+        },
+        {},
+        {
+            speed: 2,
+        },
+    );
 
     const pointHistory: Point[][] = [];
     let renderCount = 0;
-    animate((frameTime) => {
+    animate(() => {
         renderCount++;
         const points = animation.renderPoints();
 
@@ -889,14 +894,18 @@ addCanvas(1.8, (ctx, width, height, animate) => {
         }
 
         for (let i = 0; i < pointHistory.length; i++) {
-            tempStyles(ctx, () => {
-                ctx.fillStyle = colors.secondary;
-                ctx.globalAlpha = i / pointHistory.length;
-            }, () => {
-                forPoints(pointHistory[i], ({curr}) => {
-                    drawPoint(ctx, curr, i / pointHistory.length);
-                });
-            })
+            tempStyles(
+                ctx,
+                () => {
+                    ctx.fillStyle = colors.secondary;
+                    ctx.globalAlpha = i / pointHistory.length;
+                },
+                () => {
+                    forPoints(pointHistory[i], ({curr}) => {
+                        drawPoint(ctx, curr, i / pointHistory.length);
+                    });
+                },
+            );
         }
 
         drawClosed(ctx, points, true);
