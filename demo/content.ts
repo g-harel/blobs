@@ -554,11 +554,11 @@ addCanvas(2, (ctx, width, height, animate) => {
         drawClosed(ctx, interpolateBetween(percentage, blobA, blobB), true);
     });
 
-    return `The simplest way to interpolate between blobs would be to move the points that make up
-        the blob between the two shapes while running the smoothing pass every frame. The problem
-        with this approach is that it doesn't allow for any blob to map to any blob. Specifically it
-        would only be possible to animate between blobs that have the same number of points. This
-        means something more generic is required.`;
+    return `The simplest way to interpolate between blobs would be to move points 0-N from their
+        position in the start blob to their position in the end blob. The problem with this approach
+        is that it doesn't allow for all blob to map to all blobs. Specifically it would only be
+        possible to animate between blobs that have the same number of points. This means something
+        more generic is required.`;
 });
 
 addCanvas(
@@ -566,7 +566,7 @@ addCanvas(
     (ctx, width, height, animate) => {
         const center: Coord = {x: width * 0.5, y: height * 0.5};
         const maxExtraPoints = 7;
-        const period = maxExtraPoints * Math.PI * 400;
+        const period = maxExtraPoints * Math.PI * 300;
         const {pt} = sizes();
 
         const blob = centeredBlob(
@@ -625,18 +625,16 @@ addCanvas(
                 },
                 () => {
                     drawLine(ctx, d.a0, d.a1, 1);
-                    drawLine(ctx, d.a1, d.a2, 1);
+                    drawLine(ctx, d.a1, d.a2, 1, 2);
                     drawLine(ctx, d.a2, d.a3, 1);
-                    drawLine(ctx, d.b0, d.b1, 1);
-                    drawLine(ctx, d.b1, d.b2, 1);
+                    drawLine(ctx, d.b0, d.b1, 1, 2);
+                    drawLine(ctx, d.b1, d.b2, 1, 2);
 
-                    drawPoint(ctx, d.a0, 1.3);
-                    drawPoint(ctx, d.a1, 1.3);
-                    drawPoint(ctx, d.a2, 1.3);
-                    drawPoint(ctx, d.a3, 1.3);
-                    drawPoint(ctx, d.b0, 1.3);
-                    drawPoint(ctx, d.b1, 1.3);
-                    drawPoint(ctx, d.b2, 1.3);
+                    drawPoint(ctx, d.a0, 1.3, "a0");
+                    drawPoint(ctx, d.a1, 1.3, "a1");
+                    drawPoint(ctx, d.a2, 1.3, "a2");
+                    drawPoint(ctx, d.a3, 1.3, "a3");
+                    drawPoint(ctx, d.b1, 1.3, "b1");
                 },
             );
 
@@ -657,24 +655,30 @@ addCanvas(
                 },
                 () => {
                     drawLine(ctx, d.c0, d.c1, 1);
-                    drawPoint(ctx, d.c0, 1.3);
-                    drawPoint(ctx, d.c1, 1.3);
+                    drawLine(ctx, d.a0, d.b0, 1);
+                    drawLine(ctx, d.a3, d.b2, 1);
+
+                    drawPoint(ctx, d.b0, 1.3, "b0");
+                    drawPoint(ctx, d.b2, 1.3, "b2");
+                    drawPoint(ctx, d.c0, 1.3, "c0");
+                    drawPoint(ctx, d.c1, 1.3, "c1");
                 },
             );
 
             tempStyles(
                 ctx,
                 () => (ctx.fillStyle = colors.highlight),
-                () => drawPoint(ctx, d.d0, 2),
+                () => drawPoint(ctx, d.d0, 1.3, "d0"),
             );
         });
 
         return `It is only possible to reliably <i>add</i> points to a blob because attempting to
             remove points without modifying the shape is almost never possible and is expensive to
             compute.
-
-            Curve splitting uses the innermost line from the cubic bezier curve drawing demo and
-            makes either side of the final point the handles.`;
+            <br><br>
+            Adding a point is done using the line-drawing geometry. In this example "d0" is the new
+            point with its handles being "c0" and "c1". The original points get new handles "b0" and
+            "b2"`;
     },
 );
 
