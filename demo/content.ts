@@ -733,9 +733,10 @@ addCanvas(
             }
         });
 
-        return `Points cannot be swapped without resulting in a different shape. However, a likely
-            enough optimal order can be selected by shifting the points and comparing the point
-            position deltas.`;
+        return `Once both shapes have the same amount of points, an ordering of points which reduces
+            the total amount of distance traveled by the points during the transition needs to be
+            found. Because the shapes are closed, the order of the points doesn't visually affect
+            the shape and this is a safe transformation.`;
     },
     (ctx, width, height, animate) => {
         const period = Math.PI * Math.E * 1000;
