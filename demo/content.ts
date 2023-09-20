@@ -735,8 +735,8 @@ addCanvas(
 
         return `Once both shapes have the same amount of points, an ordering of points which reduces
             the total amount of distance traveled by the points during the transition needs to be
-            found. Because the shapes are closed, the order of the points doesn't visually affect
-            the shape and this is a safe transformation.`;
+            selected. Because the shapes are closed, points can be shifted by any amount without
+            visually affecting the shape.`;
     },
     (ctx, width, height, animate) => {
         const period = Math.PI * Math.E * 1000;
@@ -774,8 +774,9 @@ addCanvas(
             drawClosed(ctx, interpolateBetweenSmooth(2, percentage, blob, reversedBlob), true);
         });
 
-        return `The only safe re-ordering is to reverse the points and again iterate through all
-            possible shifts.`;
+        return `Points can also be reversed without visually affecting the shape. Then, again can
+            be shifted all around. In total there are 2 * num_points different orderings of the
+            points that can work for transition purposes.`;
     },
 );
 
