@@ -780,72 +780,81 @@ addCanvas(
     },
 );
 
-addCanvas(1.8, (ctx, width, height) => {
-    // Only animate in the most recent painter call.
-    const animationID = Math.random();
-    const wasReplaced = () => (ctx.canvas as any).animationID !== animationID;
+addCanvas(
+    1.3,
+    (ctx, width, height) => {
+        // Only animate in the most recent painter call.
+        const animationID = Math.random();
+        const wasReplaced = () => (ctx.canvas as any).animationID !== animationID;
 
-    const period = Math.PI * 1000;
-    const center: Coord = {x: width * 0.5, y: height * 0.5};
-    const size = Math.min(width, height) * 0.8;
+        const period = Math.PI * 1000;
+        const center: Coord = {x: width * 0.5, y: height * 0.5};
+        const size = Math.min(width, height) * 0.8;
 
-    const canvasBlobGenerator = (keyframe: CanvasKeyframe): Point[] => {
-        return mapPoints(genFromOptions(keyframe.blobOptions), ({curr}) => {
-            curr.x += center.x - size / 2;
-            curr.y += center.y - size / 2;
-            return curr;
-        });
-    };
-
-    const animation = statefulAnimationGenerator(
-        canvasBlobGenerator,
-        (points: Point[]) => drawClosed(ctx, points, true),
-        () => {},
-    )(Date.now);
-
-    const renderFrame = () => {
-        if (wasReplaced()) return;
-        ctx.clearRect(0, 0, width, height);
-        animation.renderFrame();
-        requestAnimationFrame(renderFrame);
-    };
-    requestAnimationFrame(renderFrame);
-
-    const loopAnimation = (): void => {
-        if (wasReplaced()) return;
-        animation.transition(genFrame());
-    };
-
-    let frameCount = -1;
-    const genFrame = (overrides: Partial<CanvasKeyframe> = {}): CanvasKeyframe => {
-        frameCount++;
-        return {
-            duration: period,
-            timingFunction: "ease",
-            callback: loopAnimation,
-            blobOptions: {
-                extraPoints: Math.max(0, mod(frameCount, 4) - 1),
-                randomness: 4,
-                seed: Math.random(),
-                size,
-            },
-            ...overrides,
+        const canvasBlobGenerator = (keyframe: CanvasKeyframe): Point[] => {
+            return mapPoints(genFromOptions(keyframe.blobOptions), ({curr}) => {
+                curr.x += center.x - size / 2;
+                curr.y += center.y - size / 2;
+                return curr;
+            });
         };
-    };
 
-    animation.transition(genFrame({duration: 0}));
+        const animation = statefulAnimationGenerator(
+            canvasBlobGenerator,
+            (points: Point[]) => drawClosed(ctx, points, true),
+            () => {},
+        )(Date.now);
 
-    ctx.canvas.onclick = () => {
-        if (wasReplaced()) return;
-        animation.playPause();
-    };
+        const renderFrame = () => {
+            if (wasReplaced()) return;
+            ctx.clearRect(0, 0, width, height);
+            animation.renderFrame();
+            requestAnimationFrame(renderFrame);
+        };
+        requestAnimationFrame(renderFrame);
 
-    (ctx.canvas as any).animationID = animationID;
+        const loopAnimation = (): void => {
+            if (wasReplaced()) return;
+            animation.transition(genFrame());
+        };
 
-    return `Points can be removed at the end of animations as the target shape has been reached.
-        However if the animation is interrupted during interpolation there is no opportunity to
-        clean up the extra points.`;
-});
+        let frameCount = -1;
+        const genFrame = (overrides: Partial<CanvasKeyframe> = {}): CanvasKeyframe => {
+            frameCount++;
+            return {
+                duration: period,
+                timingFunction: "ease",
+                callback: loopAnimation,
+                blobOptions: {
+                    extraPoints: Math.max(0, mod(frameCount, 4) - 1),
+                    randomness: 4,
+                    seed: Math.random(),
+                    size,
+                },
+                ...overrides,
+            };
+        };
+
+        animation.transition(genFrame({duration: 0}));
+
+        ctx.canvas.onclick = () => {
+            if (wasReplaced()) return;
+            animation.playPause();
+        };
+
+        (ctx.canvas as any).animationID = animationID;
+
+        return `The added points can be removed at the end of a transition when the target shape has
+        been reached. However if the animation is interrupted during interpolation there is no
+        opportunity to clean up the extra points.`;
+    },
+    (ctx, width, height) => {
+        return `Putting all these pieces together, the blob transition library can also be used to
+        tween between non-blob shapes. The more detail a shape has, the more unconvincing the
+        animation will look. In these cases, manually creating in-between frames can be a helpful
+        tool.`;
+    },
+);
 
 addCanvas(1.8, (ctx, width, height, animate) => {
     const size = Math.min(width, height) * 0.8;
