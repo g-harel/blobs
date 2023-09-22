@@ -25,7 +25,7 @@ import {
 import {timingFunctions} from "../internal/animate/timing";
 import {Coord, Point} from "../internal/types";
 import {rand} from "../internal/rand";
-import {genFromOptions} from "../internal/gen";
+import {genFromOptions, smoothBlob} from "../internal/gen";
 import {BlobOptions} from "../public/blobs";
 import {interpolateBetween, interpolateBetweenSmooth} from "../internal/animate/interpolate";
 import {divide} from "../internal/animate/prepare";
@@ -849,6 +849,29 @@ addCanvas(
         opportunity to clean up the extra points.`;
     },
     (ctx, width, height) => {
+        const center: Coord = {x: width * 0.5, y: height * 0.5};
+        const size = Math.min(width, height) * 0.8;
+
+        const drawStar = (rays: number, od: number, id: number): Point[] => {
+            const pointCount = 2 * rays;
+            const angle = (Math.PI * 2) / pointCount;
+            const points: Point[] = [];
+            for (let i = 0; i < pointCount; i++) {
+                const pointX = Math.sin(i * angle);
+                const pointY = Math.cos(i * angle);
+                const distanceMultiplier = (i % 2 === 0 ? od : id) / 2;
+                points.push({
+                    x: center.x + pointX * distanceMultiplier,
+                    y: center.y + pointY * distanceMultiplier,
+                    handleIn: {angle: 0, length: 0},
+                    handleOut: {angle: 0, length: 0},
+                });
+            }
+            return points;
+        };
+
+        drawClosed(ctx, smoothBlob(drawStar(12, size, size * 0.9)), true);
+
         return `Putting all these pieces together, the blob transition library can also be used to
         tween between non-blob shapes. The more detail a shape has, the more unconvincing the
         animation will look. In these cases, manually creating in-between frames can be a helpful
