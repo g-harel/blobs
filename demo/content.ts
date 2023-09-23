@@ -30,7 +30,7 @@ import {BlobOptions} from "../public/blobs";
 import {interpolateBetween, interpolateBetweenSmooth} from "../internal/animate/interpolate";
 import {divide} from "../internal/animate/prepare";
 import {statefulAnimationGenerator} from "../internal/animate/state";
-import {CanvasCustomKeyframe, CanvasKeyframe, wigglePreset} from "../public/animate";
+import {CanvasCustomKeyframe, CanvasKeyframe, canvasPath, wigglePreset} from "../public/animate";
 
 const makePoly = (pointCount: number, radius: number, center: Coord): Point[] => {
     const angle = (2 * Math.PI) / pointCount;
@@ -848,7 +848,7 @@ addCanvas(
         been reached. However if the animation is interrupted during interpolation there is no
         opportunity to clean up the extra points.`;
     },
-    (ctx, width, height) => {
+    (ctx, width, height, animate) => {
         const center: Coord = {x: width * 0.5, y: height * 0.5};
         const size = Math.min(width, height) * 0.8;
 
@@ -870,7 +870,23 @@ addCanvas(
             return points;
         };
 
-        drawClosed(ctx, smoothBlob(drawStar(12, size, size * 0.9)), true);
+        const pointy = drawStar(8, size, size * 0.4);
+        const wobblyGerm = smoothBlob(drawStar(12, size, size * 0.9));
+        const shapes = [pointy, wobblyGerm];
+
+        const animation = canvasPath();
+        animation.transition({
+            points: pointy,
+            duration: 1000,
+            callback: () => animation.transition({
+                points: wobblyGerm,
+                duration: 4000,
+            }),
+        });
+
+        animate(() => drawClosed(ctx, animation.renderPoints(), true));
+
+        drawClosed(ctx, pointy, true);
 
         return `Putting all these pieces together, the blob transition library can also be used to
         tween between non-blob shapes. The more detail a shape has, the more unconvincing the

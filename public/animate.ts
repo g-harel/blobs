@@ -58,6 +58,8 @@ export interface CanvasCustomKeyframe extends Keyframe {
 export interface Animation {
     // Renders the current state of the animation.
     renderFrame: () => Path2D;
+    // Renders the current state of the animation as points.
+    renderPoints: () => Point[];
     // Immediately begin animating through the given keyframes.
     // Non-rendered keyframes from previous transitions are cancelled.
     transition: (...keyframes: (CanvasKeyframe | CanvasCustomKeyframe)[]) => void;
