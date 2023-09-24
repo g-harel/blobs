@@ -11,6 +11,8 @@ import {
 } from "../internal/check";
 import {BlobOptions, CanvasOptions} from "./blobs";
 import {noise} from "../internal/rand";
+import {interpolateBetween} from "../internal/animate/interpolate";
+import {prepare} from "../internal/animate/prepare";
 
 interface Keyframe {
     // Duration of the keyframe animation in milliseconds.
@@ -82,15 +84,9 @@ export interface TimestampProvider {
 export interface WiggleOptions {
     // Speed of the wiggle movement. Higher is faster.
     speed: number;
-    // Delay before the first wiggle frame.
-    // Default: 0
-    initialDelay?: number;
     // Length of the transition from the current state to the wiggle blob.
     // Default: 0
     initialTransition?: number;
-    // Interpolation function.
-    // Default: linear
-    initialTimingFunction?: Keyframe["timingFunction"];
 }
 
 const canvasPointGenerator = (keyframe: CanvasKeyframe | CanvasCustomKeyframe): Point[] => {
@@ -147,27 +143,61 @@ export const wigglePreset = (
     canvasOptions: CanvasOptions,
     wiggleOptions: WiggleOptions,
 ) => {
-    const leapSize = 0.01 * wiggleOptions.speed;
-
     // Interval at which a new sample is taken.
     // Multiple of 16 to do work every N frames.
     const intervalMs = 16 * 5;
-
+    const leapSize = 0.01 * wiggleOptions.speed;
     const noiseField = noise(String(blobOptions.seed));
 
+    const transitionFrameCount = 1 + Math.min((wiggleOptions.initialTransition || 0) / intervalMs);
+    let transitionStartFrame = animation.renderPoints();
+
     let count = 0;
-    const loopAnimation = (first?: boolean, delay?: number) => {
+    const loopAnimation = () => {
         count++;
-        animation.transition({
-            duration: first ? wiggleOptions.initialTransition || 0 : intervalMs,
-            delay: delay || 0,
-            timingFunction: (first && wiggleOptions.initialTimingFunction) || "linear",
-            canvasOptions,
-            points: genFromOptions(blobOptions, (index) => {
-                return noiseField(leapSize * count, index);
-            }),
-            callback: loopAnimation,
+
+        // Constantly changing blob.
+        const noiseBlob = genFromOptions(blobOptions, (index) => {
+            return noiseField(leapSize * count, index);
         });
+
+        if (count < transitionFrameCount) {
+            // Create intermediate frame between the current state and the 
+            // moving noiseBlob target.
+            const [preparedStartPoints, preparedEndPoints] = prepare(
+                transitionStartFrame,
+                noiseBlob,
+                {
+                    rawAngles: true,
+                    divideRatio: 1,
+                },
+            );
+            const progress = 1 / (transitionFrameCount - count);
+            const targetPoints = interpolateBetween(
+                progress,
+                preparedStartPoints,
+                preparedEndPoints,
+            );
+            transitionStartFrame = targetPoints;
+
+            animation.transition({
+                duration: intervalMs,
+                delay: 0,
+                timingFunction: "linear",
+                canvasOptions,
+                points: targetPoints,
+                callback: loopAnimation,
+            });
+        } else {
+            animation.transition({
+                duration: intervalMs,
+                delay: 0,
+                timingFunction: "linear",
+                canvasOptions,
+                points: noiseBlob,
+                callback: loopAnimation,
+            });
+        }
     };
-    loopAnimation(true, wiggleOptions.initialDelay);
+    loopAnimation();
 };

@@ -878,10 +878,11 @@ addCanvas(
         animation.transition({
             points: pointy,
             duration: 1000,
-            callback: () => animation.transition({
-                points: wobblyGerm,
-                duration: 4000,
-            }),
+            callback: () =>
+                animation.transition({
+                    points: wobblyGerm,
+                    duration: 4000,
+                }),
         });
 
         animate(() => drawClosed(ctx, animation.renderPoints(), true));

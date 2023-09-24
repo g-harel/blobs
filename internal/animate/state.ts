@@ -55,7 +55,7 @@ export const statefulAnimationGenerator = <K extends CallbackKeyframe, T>(
 
         // Invoke callback if defined and the first time the frame is reached.
         if (renderOutput.lastFrameId && frameCallbackStore[renderOutput.lastFrameId]) {
-            frameCallbackStore[renderOutput.lastFrameId]();
+            setTimeout(frameCallbackStore[renderOutput.lastFrameId]);
             delete frameCallbackStore[renderOutput.lastFrameId];
         }
 

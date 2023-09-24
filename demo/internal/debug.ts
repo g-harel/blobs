@@ -1,5 +1,5 @@
 // If debug is initially set to false it will not be toggleable.
-let debug = true && location.hostname === "localhost";
+let debug = window.location.search.includes("debug") && location.hostname === "localhost";
 export const isDebug = () => debug;
 
 const debugListeners: ((debug: boolean) => void)[] = [];

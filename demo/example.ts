@@ -1,5 +1,6 @@
 import {CanvasKeyframe, canvasPath, wigglePreset} from "../public/animate";
-import {drawDebugClosed, drawPoint} from "./internal/canvas";
+import {drawHandles, drawPoint} from "./internal/canvas";
+import {isDebug} from "./internal/debug";
 import {colors} from "./internal/layout";
 
 // Fetch reference to example container.
@@ -32,22 +33,12 @@ const renderFrame = () => {
     ctx.fillStyle = colors.highlight;
     ctx.strokeStyle = colors.highlight;
 
-    // Debug
-    if (false) {
-        const p = (animation as any).renderPoints();
-
-        drawDebugClosed(ctx, p, 60);
-        if (p.length) drawPoint(ctx, p[0], 400);
-
-        const handleLength = p[0]?.handleIn.length;
-        if (handleLength < 100) {
-            console.log("shorty detected: ", handleLength);
-            return;
+    if (isDebug()) {
+        const points = animation.renderPoints();
+        for (const point of points) {
+            drawPoint(ctx, point, 2);
+            drawHandles(ctx, point, 1);
         }
-
-        const fps = 20;
-        setTimeout(() => requestAnimationFrame(renderFrame), 1000 / fps);
-        return;
     }
 
     ctx.fill(animation.renderFrame());
@@ -68,7 +59,7 @@ const genWiggle = (transition: number) => {
             size,
         },
         {},
-        {speed: 2, initialTransition: transition, initialTimingFunction: "ease"},
+        {speed: 2, initialTransition: transition},
     );
 };
 
@@ -93,7 +84,7 @@ const genFrame = (overrides: any = {}): CanvasKeyframe => {
 // Callback for every frame which starts transition to a new frame.
 const loopAnimation = (): void => {
     extraPoints = 0;
-    genWiggle(4000);
+    genWiggle(2000);
 };
 
 // Quickly animate to a new frame when canvas is clicked.
