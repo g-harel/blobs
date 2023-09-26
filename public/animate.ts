@@ -162,7 +162,7 @@ export const wigglePreset = (
         });
 
         if (count < transitionFrameCount) {
-            // Create intermediate frame between the current state and the 
+            // Create intermediate frame between the current state and the
             // moving noiseBlob target.
             const [preparedStartPoints, preparedEndPoints] = prepare(
                 transitionStartFrame,

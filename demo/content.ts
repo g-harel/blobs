@@ -870,24 +870,50 @@ addCanvas(
             return points;
         };
 
-        const pointy = drawStar(8, size, size * 0.4);
-        const wobblyGerm = smoothBlob(drawStar(12, size, size * 0.9));
-        const shapes = [pointy, wobblyGerm];
+        const drawPolygon = (sides: number, od: number): Point[] => {
+            const angle = (Math.PI * 2) / sides;
+            const points: Point[] = [];
+            for (let i = 0; i < sides; i++) {
+                const pointX = Math.sin(i * angle);
+                const pointY = Math.cos(i * angle);
+                const distanceMultiplier = od / 2;
+                points.push({
+                    x: center.x + pointX * distanceMultiplier,
+                    y: center.y + pointY * distanceMultiplier,
+                    handleIn: {angle: 0, length: 0},
+                    handleOut: {angle: 0, length: 0},
+                });
+            }
+            return points;
+        };
+
+        const shapes = [
+            drawStar(8, size, size * 0.7),
+            smoothBlob(drawPolygon(3, size)),
+            smoothBlob(drawStar(10, size, size * 0.9)),
+            drawPolygon(4, size),
+            smoothBlob(drawStar(3, size, size * 0.6)),
+        ];
 
         const animation = canvasPath();
+        const genFrame = (index: number) => () => {
+            animation.transition({
+                points: shapes[index % shapes.length],
+                duration: 3000,
+                delay: 1000,
+                timingFunction: "ease",
+                callback: genFrame(index + 1),
+            });
+        };
         animation.transition({
-            points: pointy,
-            duration: 1000,
-            callback: () =>
-                animation.transition({
-                    points: wobblyGerm,
-                    duration: 4000,
-                }),
+            points: shapes[0],
+            duration: 0,
+            callback: genFrame(1),
         });
 
-        animate(() => drawClosed(ctx, animation.renderPoints(), true));
-
-        drawClosed(ctx, pointy, true);
+        animate(() => {
+            drawClosed(ctx, animation.renderPoints(), true);
+        });
 
         return `Putting all these pieces together, the blob transition library can also be used to
         tween between non-blob shapes. The more detail a shape has, the more unconvincing the
