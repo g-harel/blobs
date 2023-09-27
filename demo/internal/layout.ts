@@ -89,6 +89,12 @@ export const addTitle = (heading: number, text: string) => {
     textWrapperElement.appendChild(textElement);
 };
 
+const handleIntersection = (entries: any) => {
+    entries.map((entry: any) => {
+        entry.target.setAttribute("data-visible", entry.isIntersecting);
+    });
+};
+
 // Adds a row of cells to the bottom of the layout.
 export const addCanvas = (aspectRatio: number, ...painters: CellPainter[]) => {
     const sectionElement = createSection();
@@ -115,6 +121,10 @@ export const addCanvas = (aspectRatio: number, ...painters: CellPainter[]) => {
 
         const cell = {aspectRatio, canvas, ctx, painter, animationID: -1};
         cellRow.push(cell);
+
+        new IntersectionObserver(handleIntersection, {
+            threshold: 0.1,
+        }).observe(canvas);
     }
     cells.push(cellRow);
 
@@ -171,7 +181,8 @@ const redraw = () => {
                         // Stop animating if cell is redrawn.
                         if (cell.animationID !== animationID) return;
 
-                        if (pausedAt === 0) {
+                        const visible = cell.canvas.getAttribute("data-visible") === "true";
+                        if (pausedAt === 0 && visible) {
                             const frameTime = Date.now() - startTime - pauseOffset;
                             cell.ctx.clearRect(0, 0, cellWidth, cellHeight);
                             drawDebug();

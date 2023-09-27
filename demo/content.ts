@@ -961,35 +961,8 @@ addCanvas(1.8, (ctx, width, height, animate) => {
         },
     );
 
-    const pointHistory: Point[][] = [];
-    let renderCount = 0;
     animate(() => {
-        renderCount++;
-        const points = animation.renderPoints();
-
-        if (renderCount % 2 === 0) {
-            pointHistory.push(points);
-        }
-        if (pointHistory.length > trailLength) {
-            pointHistory.shift();
-        }
-
-        for (let i = 0; i < pointHistory.length; i++) {
-            tempStyles(
-                ctx,
-                () => {
-                    ctx.fillStyle = colors.secondary;
-                    ctx.globalAlpha = i / pointHistory.length;
-                },
-                () => {
-                    forPoints(pointHistory[i], ({curr}) => {
-                        drawPoint(ctx, curr, i / pointHistory.length);
-                    });
-                },
-            );
-        }
-
-        drawClosed(ctx, points, true);
+        drawClosed(ctx, animation.renderPoints(), true);
     });
 
     return `TODO`;
