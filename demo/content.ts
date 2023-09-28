@@ -219,7 +219,7 @@ addCanvas(
             const b = wobbleHandle(
                 frameTime,
                 period / 2 + (rb * period) / 2,
-                point(width * 0.8, height * 0.5, -90, 150, 90, 150),
+                point(width * 0.8, height * 0.5, -90, 100, 90, 100),
                 true,
             );
             const c = wobbleHandle(
@@ -231,7 +231,7 @@ addCanvas(
             const d = wobbleHandle(
                 frameTime,
                 period / 2 + (rd * period) / 2,
-                point(width * 0.2, height * 0.5, 90, 150, -90, 150),
+                point(width * 0.2, height * 0.5, 90, 100, -90, 100),
                 true,
             );
 
@@ -288,7 +288,7 @@ addCanvas(2, (ctx, width, height, animate) => {
         drawOpen(ctx, start, end, false);
     });
 
-    return `Curves are drawn by the rendering software using the four input points. By connecting
+    return `Curves are rendered using the four input points (ends + handles). By connecting
         points a0-a3 with a line and then splitting each line by the same percentage, we've reduced
         the number of points by one. Repeating the same process with the new set of points until
         there is only one point remaining (d0) produces a single point on the line. Repeating this
@@ -440,8 +440,8 @@ addCanvas(
         });
 
         return `The angle of the handles for each point is parallel with the imaginary line
-            stretching between its neighbors. Technically, a polygon's points have zero
-            length handles, but the angle can still be calculated.`;
+            stretching between its neighbors. Even when they have length zero, the angle of the
+            handles can still be calculated.`;
     },
     (ctx, width, height, animate) => {
         const period = Math.PI * 1500;
@@ -483,7 +483,7 @@ addCanvas(
             drawClosed(ctx, animatedBlob, true);
         });
 
-        return `The blob is then made smooth by extending the handles. The exact length becomes
+        return `The blob is then made smooth by extending the handles. The exact length
             depends on the distance between the given point and it's next neighbor. This value is
             multiplied by a ratio that would roughly produce a circle if the points had not been
             randomly moved.`;
@@ -775,7 +775,10 @@ addCanvas(
         });
 
         return `Points can also be reversed without visually affecting the shape. Then, again can
-            be shifted all around. In total there are 2 * num_points different orderings of the
+            be shifted all around. Although reversed ordering doesn't change the shape, it has a
+            dramatic effect on the animation as it makes the loop flip over itself.
+            <br><br>
+            In total there are 2 * num_points different orderings of the
             points that can work for transition purposes.`;
     },
 );
@@ -845,8 +848,8 @@ addCanvas(
         (ctx.canvas as any).animationID = animationID;
 
         return `The added points can be removed at the end of a transition when the target shape has
-        been reached. However if the animation is interrupted during interpolation there is no
-        opportunity to clean up the extra points.`;
+            been reached. However, if the animation is interrupted during interpolation there is no
+            opportunity to clean up the extra points.`;
     },
     (ctx, width, height, animate) => {
         const center: Coord = {x: width * 0.5, y: height * 0.5};
@@ -916,38 +919,80 @@ addCanvas(
         });
 
         return `Putting all these pieces together, the blob transition library can also be used to
-        tween between non-blob shapes. The more detail a shape has, the more unconvincing the
-        animation will look. In these cases, manually creating in-between frames can be a helpful
-        tool.`;
+            tween between non-blob shapes. The more detail a shape has, the more unconvincing the
+            animation will look. In these cases, manually creating in-between frames can be a
+            helpful tool.`;
     },
 );
 
-addCanvas(1.8, (ctx, width, height, animate) => {
-    const size = Math.min(width, height) * 0.8;
-    const center: Coord = {x: width * 0.5, y: height * 0.5};
+addTitle(4, "Gooeyness");
 
-    const animation = canvasPath();
+addCanvas(
+    1.3,
+    (ctx, width, height, animate) => {
+        const size = Math.min(width, height) * 0.8;
+        const center: Coord = {x: (width - size) * 0.5, y: (height - size) * 0.5};
 
-    wigglePreset(
-        animation,
-        {
-            extraPoints: 2,
-            randomness: 2,
-            seed: Math.random(),
-            size,
-        },
-        {
-            offsetX: center.x - size / 2,
-            offsetY: center.y - size / 2,
-        },
-        {
-            speed: 2,
-        },
-    );
+        const animation = canvasPath();
 
-    animate(() => {
-        drawClosed(ctx, animation.renderPoints(), true);
-    });
+        const genFrame = (duration: number) => {
+            animation.transition({
+                duration: duration,
+                blobOptions: {
+                    extraPoints: 2,
+                    randomness: 3,
+                    seed: Math.random(),
+                    size,
+                },
+                callback: () => genFrame(3000),
+                timingFunction: "ease",
+                canvasOptions: {offsetX: center.x, offsetY: center.y},
+            });
+        };
+        genFrame(0);
 
-    return `TODO`;
-});
+        animate(() => {
+            drawClosed(ctx, animation.renderPoints(), true);
+        });
+
+        return `This library uses the keyframe model to define animations. This is a flexible
+            approach, but it does not lend itself well to the kind of gooey blob shapes invite.
+            <br><br>
+            When looking at this animation, you may be able to notice the rhythm of the
+            keyframes where the points start moving and stop moving at the same time.`;
+    },
+    (ctx, width, height, animate) => {
+        const size = Math.min(width, height) * 0.8;
+        const center: Coord = {x: width * 0.5, y: height * 0.5};
+
+        const animation = canvasPath();
+
+        wigglePreset(
+            animation,
+            {
+                extraPoints: 2,
+                randomness: 3,
+                seed: Math.random(),
+                size,
+            },
+            {
+                offsetX: center.x - size / 2,
+                offsetY: center.y - size / 2,
+            },
+            {
+                speed: 2,
+            },
+        );
+
+        animate(() => {
+            drawClosed(ctx, animation.renderPoints(), true);
+        });
+
+        return `In addition to the keyframe API, there is now also pre-built preset which produces a
+            gooey animation without much effort and much prettier results.
+            <br><br>
+            This approach uses a noise field instead of random numbers to move individual points
+            around continuously and independently. Repeated calls to a noise-field-powered random
+            number generator will produce self-similar results.`;
+    },
+);
