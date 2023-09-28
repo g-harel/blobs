@@ -30,7 +30,7 @@ import {BlobOptions} from "../public/blobs";
 import {interpolateBetween, interpolateBetweenSmooth} from "../internal/animate/interpolate";
 import {divide} from "../internal/animate/prepare";
 import {statefulAnimationGenerator} from "../internal/animate/state";
-import {CanvasCustomKeyframe, CanvasKeyframe, canvasPath, wigglePreset} from "../public/animate";
+import {CanvasKeyframe, canvasPath, wigglePreset} from "../public/animate";
 
 const makePoly = (pointCount: number, radius: number, center: Coord): Point[] => {
     const angle = (2 * Math.PI) / pointCount;

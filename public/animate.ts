@@ -13,7 +13,6 @@ import {BlobOptions, CanvasOptions} from "./blobs";
 import {noise} from "../internal/rand";
 import {interpolateBetween} from "../internal/animate/interpolate";
 import {prepare} from "../internal/animate/prepare";
-import {timingFunctions} from "../internal/animate/timing";
 
 interface Keyframe {
     // Duration of the keyframe animation in milliseconds.
