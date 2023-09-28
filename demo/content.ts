@@ -925,27 +925,8 @@ addCanvas(
 addCanvas(1.8, (ctx, width, height, animate) => {
     const size = Math.min(width, height) * 0.8;
     const center: Coord = {x: width * 0.5, y: height * 0.5};
-    const trailLength = 40;
 
-    const canvasPointGenerator = (keyframe: CanvasKeyframe | CanvasCustomKeyframe): Point[] => {
-        let points: Point[];
-        if ("points" in keyframe) {
-            points = keyframe.points;
-        } else {
-            points = genFromOptions(keyframe.blobOptions);
-        }
-        return mapPoints(points, ({curr}) => {
-            curr.x += center.x - size / 2;
-            curr.y += center.y - size / 2;
-            return curr;
-        });
-    };
-
-    const animation = statefulAnimationGenerator(
-        canvasPointGenerator,
-        (points: Point[]) => points as any,
-        () => {},
-    )(Date.now);
+    const animation = canvasPath();
 
     wigglePreset(
         animation,
@@ -955,7 +936,10 @@ addCanvas(1.8, (ctx, width, height, animate) => {
             seed: Math.random(),
             size,
         },
-        {},
+        {
+            offsetX: center.x - size / 2,
+            offsetY: center.y - size / 2,
+        },
         {
             speed: 2,
         },

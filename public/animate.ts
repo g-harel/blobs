@@ -13,6 +13,7 @@ import {BlobOptions, CanvasOptions} from "./blobs";
 import {noise} from "../internal/rand";
 import {interpolateBetween} from "../internal/animate/interpolate";
 import {prepare} from "../internal/animate/prepare";
+import {timingFunctions} from "../internal/animate/timing";
 
 interface Keyframe {
     // Duration of the keyframe animation in milliseconds.
@@ -145,11 +146,11 @@ export const wigglePreset = (
 ) => {
     // Interval at which a new sample is taken.
     // Multiple of 16 to do work every N frames.
-    const intervalMs = 16 * 5;
+    const intervalMs = 16 * 10;
     const leapSize = 0.01 * wiggleOptions.speed;
     const noiseField = noise(String(blobOptions.seed));
 
-    const transitionFrameCount = 1 + Math.min((wiggleOptions.initialTransition || 0) / intervalMs);
+    const transitionFrameCount = Math.min((wiggleOptions.initialTransition || 0) / intervalMs);
     let transitionStartFrame = animation.renderPoints();
 
     let count = 0;
@@ -172,7 +173,7 @@ export const wigglePreset = (
                     divideRatio: 1,
                 },
             );
-            const progress = 1 / (transitionFrameCount - count);
+            const progress = Math.min(1, 2 / (transitionFrameCount - count));
             const targetPoints = interpolateBetween(
                 progress,
                 preparedStartPoints,

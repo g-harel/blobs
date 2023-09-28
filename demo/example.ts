@@ -84,7 +84,7 @@ const genFrame = (overrides: any = {}): CanvasKeyframe => {
 // Callback for every frame which starts transition to a new frame.
 const loopAnimation = (): void => {
     extraPoints = 0;
-    genWiggle(2000);
+    genWiggle(5000);
 };
 
 // Quickly animate to a new frame when canvas is clicked.
