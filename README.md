@@ -98,9 +98,7 @@ ctx.stroke(path);
 const ctx = /* ... */;
 const animation = blobs2Animate.canvasPath();
 
-TODO wiggle
-
-// Set up "requestAnimationFrame" rendering loop.
+// Set up rendering loop.
 const renderAnimation = () => {
     ctx.clearRect(0, 0, width, height);
     ctx.fill(animation.renderFrame());
@@ -108,8 +106,8 @@ const renderAnimation = () => {
 };
 requestAnimationFrame(renderAnimation);
 
-// Keyframe loop.
-const loopAnimation = () => {
+// Transition to new blob on canvas click.
+ctx.canvas.onclick = () => {
     animation.transition({
         duration: 4000,
         timingFunction: "ease",
@@ -117,18 +115,29 @@ const loopAnimation = () => {
         blobOptions: {...},
     });
 };
+```
 
-// Initial frame.
-animation.transition({
-    duration: 0, // Render immediately.
-    callback: loopAnimation,
-    blobOptions: {...},
-});
+## Canvas Wiggle
 
-// Toggle play/pause animation on canvas click.
-ctx.canvas.onclick = () => {
-    animation.playPause();
+```js
+const ctx = /* ... */;
+const animation = blobs2Animate.canvasPath();
+
+// Set up rendering loop.
+const renderAnimation = () => {
+    ctx.clearRect(0, 0, width, height);
+    ctx.fill(animation.renderFrame());
+    requestAnimationFrame(renderAnimation);
 };
+requestAnimationFrame(renderAnimation);
+
+// Begin wiggle animation.
+blobs2Animate.wigglePreset(
+    animation
+    /* blobOptions= */ {...},
+    /* canvasOptions= */ {},
+    /* wiggleOptions= */ {speed: 2},
+)
 ```
 
 ## Complete API
